@@ -26,6 +26,6 @@ A tool that uses AI to convert text into speech.
 ## [Vision AI App](./Vision%20AI%20App)
 An application that uses AI to analyze and interpret images.
 
-Feel free to explore each folder for more details about each application.
-
+<br>
+**Feel free to explore each folder for more details about each application.**
 <br>
