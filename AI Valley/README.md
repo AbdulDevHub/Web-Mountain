@@ -27,5 +27,5 @@ A tool that uses AI to convert text into speech.
 An application that uses AI to analyze and interpret images.
 
 <br>
-**Feel free to explore each folder for more details about each application.**
+Feel free to explore each folder for more details about each application.
 <br>
