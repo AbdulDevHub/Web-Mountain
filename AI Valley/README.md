@@ -36,7 +36,7 @@ An application that uses AI (`Hugging Face`) to colorize black and white images.
 
 ## [Movie Focus Chatbot](./Movie%20Focus%20Chatbot)
 
-A (`Hugging Face`) chatbot that provides information and recommendations about movies.
+A (`ChatGPT`) chatbot that provides information and recommendations about movies.
 
 <a href="https://github.com/AbdulDevHub/Simple-AI-Projects/" target="_blank" rel="noreferrer"> 
   <img height="400" src="Screenshots/Screenshot5.png">
@@ -44,7 +44,7 @@ A (`Hugging Face`) chatbot that provides information and recommendations about m
 
 ## [ReAct AI Agent With Chat UI](./ReAct%20AI%20Agent%20With%20Chat%20UI)
 
-An (`Hugging Face`) AI agent that can interact with users through a chat interface.
+An (`ChatGPT`) AI agent that can interact with users through a chat interface.
 
 <a href="https://github.com/AbdulDevHub/Simple-AI-Projects/" target="_blank" rel="noreferrer"> 
   <img height="400" src="Screenshots/Screenshot6.png">
