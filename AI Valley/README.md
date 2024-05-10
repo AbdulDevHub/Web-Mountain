@@ -44,7 +44,7 @@ A (`ChatGPT`) chatbot that provides information and recommendations about movies
 
 ## [ReAct AI Agent With Chat UI](./ReAct%20AI%20Agent%20With%20Chat%20UI)
 
-An (`ChatGPT`) AI agent that can interact with users through a chat interface.
+An (`ChatGPT`) AI agent that can interact with users through a chat interface, and execute commands like checking the weather for your location Basically, it can execute pre-defined functions all by itself based on user prompt.
 
 <a href="https://github.com/AbdulDevHub/Simple-AI-Projects/" target="_blank" rel="noreferrer"> 
   <img height="400" src="Screenshots/Screenshot6.png">
