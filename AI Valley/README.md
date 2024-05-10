@@ -1,4 +1,4 @@
-# My AI Apps
+# Simple AI Projects
 
 This repository serves as a collection of various AI projects. Each project resides in its own dedicated folder. Here's a brief overview of each project:
 
