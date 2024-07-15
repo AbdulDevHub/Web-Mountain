@@ -14,7 +14,7 @@ A tool that uses AI (`DALL-E`) to generate unique pieces of art.
 
 An application that uses AI (`ChatGPT`) to predict stock market trends.
 
-<a href="https://github.com/AbdulDevHub/Simple-AI-Projects/" target="_blank" rel="noreferrer"> 
+<a href="https://stock-predictions-ai-app.pages.dev/" target="_blank" rel="noreferrer"> 
   <img height="400" src="Screenshots/Screenshot2.png">
 </a>
 
