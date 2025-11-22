@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Redownloader</title>
+    <title>File Redownloader</title>
     <style>
         * {
             margin: 0;
@@ -94,6 +94,11 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
+        .file-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        
         .download-btn {
             width: 100%;
             padding: 15px;
@@ -124,19 +129,20 @@
 </head>
 <body>
     <div class="container">
-        <h1>Image Redownloader</h1>
-        <p class="subtitle">Upload an image to set it as your folder thumbnail</p>
+        <h1>File Redownloader</h1>
+        <p class="subtitle">Upload any file to redownload it</p>
         
         <div class="upload-area" id="uploadArea">
             <div class="upload-icon">📁</div>
-            <p class="upload-text">Click to upload or drag & drop an image</p>
-            <input type="file" id="fileInput" accept="image/*">
+            <p class="upload-text">Click to upload or drag & drop any file</p>
+            <input type="file" id="fileInput">
         </div>
         
         <div class="preview" id="preview">
-            <img id="previewImage" class="preview-image" alt="Preview">
+            <div class="file-icon" id="fileIcon"></div>
+            <img id="previewImage" class="preview-image" alt="Preview" style="display:none;">
             <div class="file-info" id="fileInfo"></div>
-            <button class="download-btn" id="downloadBtn">Download Image</button>
+            <button class="download-btn" id="downloadBtn">Download File</button>
         </div>
     </div>
 
@@ -145,6 +151,7 @@
         const fileInput = document.getElementById('fileInput');
         const preview = document.getElementById('preview');
         const previewImage = document.getElementById('previewImage');
+        const fileIcon = document.getElementById('fileIcon');
         const fileInfo = document.getElementById('fileInfo');
         const downloadBtn = document.getElementById('downloadBtn');
         
@@ -169,24 +176,46 @@
             e.preventDefault();
             uploadArea.classList.remove('dragover');
             const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
+            if (file) {
                 handleFile(file);
             }
         });
         
         function handleFile(file) {
-            if (!file || !file.type.startsWith('image/')) return;
+            if (!file) return;
             
             currentFile = file;
-            const reader = new FileReader();
             
-            reader.onload = (e) => {
-                previewImage.src = e.target.result;
-                fileInfo.textContent = `${file.name} (${formatFileSize(file.size)})`;
-                preview.classList.add('active');
-            };
+            // Check if it's an image to show preview
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImage.src = e.target.result;
+                    previewImage.style.display = 'block';
+                    fileIcon.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // Show file icon for non-images
+                previewImage.style.display = 'none';
+                fileIcon.style.display = 'block';
+                fileIcon.textContent = getFileIcon(file.type, file.name);
+            }
             
-            reader.readAsDataURL(file);
+            fileInfo.textContent = `${file.name} (${formatFileSize(file.size)})`;
+            preview.classList.add('active');
+        }
+        
+        function getFileIcon(mimeType, fileName) {
+            if (mimeType.startsWith('video/')) return '🎥';
+            if (mimeType.startsWith('audio/')) return '🎵';
+            if (mimeType.includes('pdf')) return '📄';
+            if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('7z')) return '📦';
+            if (mimeType.includes('word') || fileName.endsWith('.doc') || fileName.endsWith('.docx')) return '📝';
+            if (mimeType.includes('sheet') || fileName.endsWith('.xls') || fileName.endsWith('.xlsx')) return '📊';
+            if (mimeType.includes('presentation') || fileName.endsWith('.ppt') || fileName.endsWith('.pptx')) return '📽️';
+            if (mimeType.startsWith('text/')) return '📃';
+            return '📄';
         }
         
         downloadBtn.addEventListener('click', () => {
