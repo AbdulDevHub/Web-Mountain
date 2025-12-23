@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Web Mountain – Project Showcase</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --accent: #38bdf8;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #020617, var(--bg));
+      color: var(--text);
+      padding: 3rem 1.5rem;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 3rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    details {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+
+    summary {
+      cursor: pointer;
+      font-size: 1.25rem;
+      font-weight: 600;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: "▾";
+      color: var(--accent);
+      transition: transform 0.3s ease;
+    }
+
+    details[open] summary::after {
+      transform: rotate(180deg);
+    }
+
+    .projects {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.75rem;
+    }
+
+    a.project {
+      display: block;
+      text-decoration: none;
+      background: #020617;
+      padding: 0.9rem 1rem;
+      border-radius: 10px;
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: all 0.2s ease;
+    }
+
+    a.project:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(56,189,248,0.2);
+    }
+
+    footer {
+      margin-top: 4rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🏔 Web Mountain</h1>
+  <p class="subtitle">A personal collection of frontend experiments, UI concepts, and mini apps</p>
+
+  <div class="container">
+
+    <details open>
+      <summary>Accessibility Projects</summary>
+      <div class="projects">
+        <a class="project" href="Projects/Accessibility/Accessibility 1/index.html">Accessibility 1</a>
+        <a class="project" href="Projects/Accessibility/Accessibility 2/index.html">Accessibility 2</a>
+        <a class="project" href="Projects/Accessibility/Accessibility 4.6/index.html">Accessibility 3</a>
+        <a class="project" href="Projects/Accessibility/Accessibility 5/index.html">Accessibility 4</a>
+        <a class="project" href="Projects/Accessibility/Accessibility 7/index.html">Accessibility 5</a>
+      </div>
+    </details>
+
+    <details>
+      <summary>CSS Challenges</summary>
+      <div class="projects">
+        <a class="project" href="Projects/CSS Chalenges/Bullesye/index.html">Bullseye</a>
+        <a class="project" href="Projects/CSS Chalenges/Cards/index.html">Cards</a>
+        <a class="project" href="Projects/CSS Chalenges/Code Pen Tile/index.html">Code Pen Tile</a>
+        <a class="project" href="Projects/CSS Chalenges/Expanding Search Bar/index.html">Expanding Search</a>
+        <a class="project" href="Projects/CSS Chalenges/Github Contribution Graph/index.html">GitHub Graph</a>
+        <a class="project" href="Projects/CSS Chalenges/Github Profile/index.html">GitHub Profile</a>
+        <a class="project" href="Projects/CSS Chalenges/Instagram Stories/index.html">Instagram Stories</a>
+        <a class="project" href="Projects/CSS Chalenges/Loading Animation/index.html">Loading Animation</a>
+        <a class="project" href="Projects/CSS Chalenges/Spinning Loader/index.html">Spinning Loader</a>
+      </div>
+    </details>
+
+    <details>
+      <summary>Apps & Interactive Projects</summary>
+      <div class="projects">
+        <a class="project" href="Projects/Add To Cart App/index.html">Add To Cart App</a>
+        <a class="project" href="Projects/BoredBot/index.html">BoredBot</a>
+        <a class="project" href="Projects/Drum Kit/index.html">Drum Kit</a>
+        <a class="project" href="Projects/Face Bomp/index.html">Face Bomp</a>
+        <a class="project" href="Projects/QR Code Generator/index.html">QR Code Generator</a>
+        <a class="project" href="Projects/Relaxer App/index.html">Relaxer App</a>
+      </div>
+    </details>
+
+    <details>
+      <summary>Visual / Animation Experiments</summary>
+      <div class="projects">
+        <a class="project" href="Projects/Anime.js 4 Jumping Boxes/index.html">Anime.js Boxes</a>
+        <a class="project" href="Projects/Anime.js Sphere/index.html">Anime.js Sphere</a>
+        <a class="project" href="Projects/Fluid Flame Effect/index.html">Fluid Flame</a>
+        <a class="project" href="Projects/Ink Fluid/index.html">Ink Fluid</a>
+        <a class="project" href="Projects/Particles/index.html">Particles</a>
+        <a class="project" href="Projects/Spotlight Effect/index.html">Spotlight Effect</a>
+      </div>
+    </details>
+
+    <details>
+      <summary>UI Designs / Figma to Code</summary>
+      <div class="projects">
+        <a class="project" href="Projects/UI Designs/Figma To Code 1/index.html">Figma → Code 1</a>
+        <a class="project" href="Projects/UI Designs/Figma To Code 2/index.html">Figma → Code 2</a>
+        <a class="project" href="Projects/UI Designs/Figma To Code 3/index.html">Figma → Code 3</a>
+        <a class="project" href="Projects/UI Designs/Figma To Code 4/index.html">Figma → Code 4</a>
+        <a class="project" href="Projects/UI Designs/Figma To Code 5/index.html">Figma → Code 5</a>
+        <a class="project" href="Projects/UI Designs/Figma To Code 6/index.html">Figma → Code 6</a>
+        <a class="project" href="Projects/UI Designs/Figma To Code 7/index.html">Figma → Code 7</a>
+      </div>
+    </details>
+
+  </div>
+
+  <footer>
+    Built as a living archive of frontend learning & experiments.
+  </footer>
+
+</body>
+</html>

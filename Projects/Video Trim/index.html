@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Trimmer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Video Trimmer</h1>
+
+      <input type="file" id="videoUpload" accept="video/*" /><br /><br />
+
+      <!-- Video player and timestamp controls -->
+      <video id="videoPlayer" width="600" controls></video>
+
+      <!-- Timestamp display -->
+      <div id="timestampDisplay">Current Time: 00:00:00:000</div>
+
+      <!-- Buttons to copy the current timestamp to the start or end time inputs -->
+      <button id="copyStartTime" onclick="copyToStart()">
+        Copy to Start Time
+      </button>
+      <button id="copyEndTime" onclick="copyToEnd()">Copy to End Time</button>
+
+      <br /><br />
+
+      Start Time:
+      <input type="text" id="startTime" placeholder="HH:MM:SS:MS" />
+      End Time:
+      <input type="text" id="endTime" placeholder="HH:MM:SS:MS" />
+      <button onclick="trimVideo()">Trim</button>
+
+      <!-- Loader -->
+      <div id="loader">Processing...</div>
+
+      <!-- Download link -->
+      <a
+        id="downloadLink"
+        href="#"
+        style="display: none"
+        download="trimmed-video.mp4"
+        >Download Trimmed Video</a
+      >
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.0/dist/ffmpeg.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

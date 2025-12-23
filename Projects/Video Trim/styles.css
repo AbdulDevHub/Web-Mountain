@@ -1,0 +1,60 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  padding: 20px;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  background-color: white;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+video {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.trim-controls {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.trim-controls label {
+  margin-right: 10px;
+}
+
+.trim-controls input {
+  width: 100px;
+  margin-right: 10px;
+}
+
+#trimButton {
+  margin-top: 10px;
+}
+
+#timestampDisplay {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #333;
+}
+
+#loader {
+  display: none; /* Initially hidden */
+  margin-top: 20px;
+  font-size: 18px;
+  color: #007bff;
+}
+
+#downloadLink {
+  display: block;
+  margin-top: 20px;
+  text-decoration: none;
+  color: white;
+  background-color: #28a745;
+  padding: 10px;
+  border-radius: 5px;
+}

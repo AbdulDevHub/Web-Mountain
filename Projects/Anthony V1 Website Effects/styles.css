@@ -1,0 +1,173 @@
+:root {
+  --main-bg-color: #191919;
+  --second-bg-color: #202020;
+  --heading-color: #b0c4de;
+  --main-text-color: #d4d4d4;
+  --selection-color: #fff;
+  --scroll-color: #8cc8ff;
+  --arrow-color: #f58f70;
+  --bg-shade: soft-light;
+  --link-color: #8cc8ff;
+  --logo-filter: invert(80%);
+  --logo-transform: rotate(180deg);
+  --logo-transform-hover: rotate(200deg) scale(1.2);
+  --border-color: #282828;
+  --name-hover: #f58f70;
+  --name-shadow: #6d7989;
+  --border-outline: #b0c4de;
+  --toast-bg: rgba(28, 28, 28, 0.95);
+  --toast-border: rgba(255, 255, 255, 0.1);
+  --toast-border2: rgba(255, 255, 255, 0.05);
+  --toast-close: invert(100%);
+  --navbar-box: rgba(255, 255, 255, 0.03);
+  --hello-img-filter: invert(80%);
+  --click-img-filter: invert(90%);
+}
+
+[anthonytedja-data-theme="light"] {
+  --main-bg-color: #fff;
+  --second-bg-color: #f8f9fa;
+  --heading-color: black;
+  --main-text-color: #212529;
+  --selection-color: #212121;
+  --scroll-color: #fff;
+  --arrow-color: #212529;
+  --bg-shade: normal;
+  --link-color: #212529;
+  --logo-filter: invert(12%);
+  --logo-transform: rotate(0deg);
+  --logo-transform-hover: rotate(-20deg) scale(1.2);
+  --border-color: #dee2e6;
+  --name-hover: #ff6db6;
+  --name-shadow: #6d7989;
+  --border-outline: #b0c4de;
+  --toast-bg: rgba(255, 255, 255, .95);
+  --toast-border: rgba(0, 0, 0, 0.1);
+  --toast-border2: rgba(0, 0, 0, 0.05);
+  --toast-close: none;
+  --navbar-box: rgba(0, 0, 0, 0.03);
+  --hello-img-filter: invert(15%);
+  --click-img-filter: none;
+}
+
+html, body {
+  /*scroll-snap-type: y mandatory;*/
+}
+
+body {
+  font-family: "Poppins" !important;
+  background-color: var(--main-bg-color) !important;
+  transition: all ease 0.2s;
+  cursor: url("../../assets/img/cursor/cursor.svg"), auto;
+}
+
+#fullname {
+  color: var(--heading-color);
+  white-space: normal;
+  perspective: 50px;
+  transition: all ease 0.5s;
+  font-weight: 600;
+  font-size: 2.5rem;
+  text-align: left;
+}
+
+@media (min-width: 300px) {
+  #fullname {
+    font-size: clamp(2.5rem, 17vw, 10rem);
+  }
+}
+
+@media (min-width: 576px) {
+  #fullname {
+    font-size: clamp(6.5rem, 14vw - 0.25rem, 10rem);
+  }
+}
+
+@media (min-width: 768px) {
+  #fullname {
+    font-size: clamp(8.5rem, 15vw - 0.5rem, 10rem);
+  }
+}
+
+@media (min-width: 992px) {
+  #fullname {
+    font-size: 7rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  #fullname {
+    font-size: clamp(8.5rem, 10vw, 10rem);
+  }
+}
+
+@media (min-width: 1400px) {
+  #fullname {
+    font-size: 10rem;
+  }
+}
+
+@media (hover: hover) {
+  #fullname:has(span > span:hover) > span > span:not(:hover) {
+    opacity: 0.1;
+    transform: scale(0.9);
+  }
+}
+
+.name {
+  display: inline-block;
+}
+
+.name > span {
+  display: inline-block;
+  transition: all ease 0.2s;
+}
+
+@media (hover: hover) {
+  .name > span:hover {
+    animation: bounce 1s infinite;
+    color: var(--name-hover);
+  }
+}
+
+#frontpage-chevron {
+  display: inline-flex;
+  animation: bounce 2s infinite 2s;
+  padding: 0.5rem;
+  margin-top: 1rem;
+}
+
+#frontpage-chevron svg {
+  font-size: 3rem;
+  color: var(--arrow-color) !important;
+}
+
+@keyframes bounce {
+  0% {
+    transform: scale(1, 1) translateY(0);
+  }
+  10% {
+    transform: scale(1.1, .9) translateY(0);
+  }
+  30% {
+    transform: scale(.9, 1.1) translateY(-10px);
+  }
+  50% {
+    transform: scale(1.05, .95) translateY(0);
+  }
+  65% {
+    transform: scale(1, 1) translateY(-7px);
+  }
+  80% {
+    transform: scale(1, 1) translateY(0);
+  }
+  100% {
+    transform: scale(1, 1) translateY(0);
+  }
+}
+
+.bounce {
+  animation-name: bounce;
+  animation-timing-function: ease;
+}
+
