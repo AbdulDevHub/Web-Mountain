@@ -33,6 +33,7 @@ A comprehensive repository showcasing frontend experiments, UI concepts, and int
 
 ### Apps & Interactive Projects
 
+- **[Pokedex](./Projects/Pokeddex)** - A website version of the Pokedex
 - **[Add To Cart App](./Projects/Add%20To%20Cart%20App)** - Shopping cart functionality implementation
 - **[BlogSpace](./Projects/BlogSpace)** - Simple blogging platform
 - **[BoredBot](./Projects/BoredBot)** - Activity suggestion generator
