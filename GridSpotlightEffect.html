@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grid Spotlight Effect</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0a0a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1400px;
+      padding: 40px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1px;
+      background: #1a1a1a;
+      padding: 1px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .grid-item {
+      aspect-ratio: 1;
+      background: #0a0a0a;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .grid-item::before {
+      content: '';
+      position: absolute;
+      inset: -100%;
+      background: radial-gradient(
+        circle at var(--x, 50%) var(--y, 50%),
+        rgba(34, 197, 94, 0.4) 0%,
+        rgba(34, 197, 94, 0.2) 20%,
+        transparent 50%
+      );
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .grid-item.active::before {
+      opacity: 1;
+    }
+
+    .grid-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom right,
+        rgba(34, 197, 94, 0.1),
+        transparent
+      );
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .grid-item.active::after {
+      opacity: 1;
+    }
+
+    /* Edge glow effect */
+    .grid-item {
+      border: 1px solid transparent;
+      transition: border-color 0.3s ease;
+    }
+
+    .grid-item.active {
+      border-color: rgba(34, 197, 94, 0.5);
+      box-shadow: 
+        inset 0 0 20px rgba(34, 197, 94, 0.1),
+        0 0 20px rgba(34, 197, 94, 0.1);
+    }
+
+    .title {
+      text-align: center;
+      color: #fff;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 3rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">Grid Spotlight Effect</h1>
+    <p class="subtitle">Move your cursor across the grid</p>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <script>
+    const grid = document.getElementById('grid');
+    const itemCount = 24;
+    const items = [];
+
+    // Create grid items
+    for (let i = 0; i < itemCount; i++) {
+      const item = document.createElement('div');
+      item.className = 'grid-item';
+      grid.appendChild(item);
+      items.push(item);
+    }
+
+    // Track mouse position
+    let mouseX = 0;
+    let mouseY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      updateSpotlight();
+    });
+
+    function updateSpotlight() {
+      items.forEach(item => {
+        const rect = item.getBoundingClientRect();
+        const itemCenterX = rect.left + rect.width / 2;
+        const itemCenterY = rect.top + rect.height / 2;
+        
+        // Calculate distance from mouse to item center
+        const distance = Math.sqrt(
+          Math.pow(mouseX - itemCenterX, 2) + 
+          Math.pow(mouseY - itemCenterY, 2)
+        );
+        
+        // Activate items within radius
+        const radius = 250;
+        if (distance < radius) {
+          item.classList.add('active');
+          
+          // Calculate position relative to the item
+          const x = ((mouseX - rect.left) / rect.width) * 100;
+          const y = ((mouseY - rect.top) / rect.height) * 100;
+          
+          item.style.setProperty('--x', `${x}%`);
+          item.style.setProperty('--y', `${y}%`);
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    }
+
+    // Initial update
+    updateSpotlight();
+  </script>
+</body>
+</html>
