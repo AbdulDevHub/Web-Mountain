@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Fiery Passages",
+  "version": "1.0",
+  "description": "Audio player with visualizer",
+  "permissions": [
+    "activeTab"
+  ],
+  "action": {
+    "default_icon": {
+      "16": "Favicon.png",
+      "48": "Favicon.png",
+      "128": "Favicon.png"
+    },
+    "default_title": "Open Fiery Passages"
+  },
+  "background": {
+    "service_worker": "scripts/background.js"
+  },
+  "commands": {
+    "open-extension": {
+      "suggested_key": {
+        "default": "Alt+E"
+      },
+      "description": "Open Fiery Passages"
+    }
+  },
+  "icons": {
+    "16": "Favicon.png",
+    "48": "Favicon.png",
+    "128": "Favicon.png"
+  }
+}
