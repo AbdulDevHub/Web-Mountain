@@ -1,0 +1,355 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--body-bg);
+  font-family: var(--font-family);
+}
+
+:root {
+  --font-family: "Karla", sans-serif;
+  --body-bg: #1e1f25;
+  --btn-bg: #000;
+  --btn-color: #cbcbcb;
+  --btn-color-hover: #fff;
+  --grad-color1: #eeaf61;
+  --grad-color2: #fb9062;
+  --grad-color3: #ee5d6c;
+  --grad-color4: #ce4993;
+  --grad-color5: #6a0d83;
+}
+
+.gallery-container {
+  padding: 3em 2em;
+  min-height: 100vh;
+}
+
+.gallery-title {
+  text-align: center;
+  color: var(--btn-color-hover);
+  font-size: 2.5em;
+  margin-bottom: 1.5em;
+  letter-spacing: 0.05em;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 3em;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.button-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1em;
+}
+
+.button-label {
+  color: var(--btn-color);
+  font-size: 0.9em;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+.button {
+  border: none;
+  background: var(--btn-bg);
+  color: var(--btn-color);
+  padding: 1em 1.5em;
+  font-family: inherit;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Original Gradient Border Button */
+.button-border {
+  background: linear-gradient(
+    115deg,
+    #eeaf61,
+    #fb9062,
+    #ee5d6c,
+    #ce4993,
+    #6a0d83
+  );
+  padding: 2px;
+}
+
+.button-border:hover {
+  background: linear-gradient(
+    230deg,
+    #eeaf61,
+    #fb9062,
+    #ee5d6c,
+    #ce4993,
+    #6a0d83
+  );
+}
+
+.button-border:hover .button {
+  color: var(--btn-color-hover);
+  padding: 1.1em 1.6em;
+}
+
+/* Neon Glow Button */
+.neon-button {
+  background: transparent;
+  border: 2px solid #00ffff;
+  color: #00ffff;
+  text-shadow: 0 0 5px #00ffff;
+  box-shadow: 0 0 10px #00ffff;
+  transition: all 0.3s ease;
+}
+
+.neon-button:hover {
+  background: #00ffff;
+  color: #000;
+  text-shadow: none;
+  box-shadow:
+    0 0 20px #00ffff,
+    0 0 40px #00ffff,
+    0 0 60px #00ffff;
+}
+
+/* 3D Push Button */
+.push-button {
+  background: linear-gradient(145deg, #ff6b6b, #ee5a6f);
+  color: white;
+  border: none;
+  box-shadow:
+    0 8px 0 #c92a49,
+    0 10px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(0);
+  transition: all 0.1s ease;
+}
+
+.push-button:hover {
+  transform: translateY(4px);
+  box-shadow:
+    0 4px 0 #c92a49,
+    0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.push-button:active {
+  transform: translateY(8px);
+  box-shadow:
+    0 0 0 #c92a49,
+    0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Liquid Fill Button */
+.liquid-button {
+  background: transparent;
+  border: 2px solid #4ecdc4;
+  color: #4ecdc4;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.liquid-button span {
+  position: relative;
+  z-index: 2;
+}
+
+.liquid-button::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+  background: #4ecdc4;
+  transition: height 0.4s ease;
+  z-index: 1;
+}
+
+.liquid-button:hover {
+  color: #000;
+}
+
+.liquid-button:hover::before {
+  height: 100%;
+}
+
+/* Glitch Button */
+.glitch-button {
+  background: #8b00ff;
+  color: white;
+  position: relative;
+  font-weight: 800;
+}
+
+.glitch-button::before,
+.glitch-button::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+}
+
+.glitch-button:hover::before {
+  animation: glitch1 0.3s infinite;
+  color: #00ffff;
+  opacity: 0.8;
+}
+
+.glitch-button:hover::after {
+  animation: glitch2 0.3s infinite;
+  color: #ff00ff;
+  opacity: 0.8;
+}
+
+@keyframes glitch1 {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+  33% {
+    transform: translate(-2px, 2px);
+  }
+  66% {
+    transform: translate(2px, -2px);
+  }
+}
+
+@keyframes glitch2 {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+  33% {
+    transform: translate(2px, -2px);
+  }
+  66% {
+    transform: translate(-2px, 2px);
+  }
+}
+
+/* Shimmer Button */
+.shimmer-button {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+  background-size: 200% auto;
+  color: white;
+  animation: shimmer 3s linear infinite;
+}
+
+.shimmer-button:hover {
+  animation: shimmer 1s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/* Pulse Border Button */
+.pulse-button {
+  background: #000;
+  color: #fff;
+  border: 2px solid #ff6b6b;
+  animation: pulse 2s infinite;
+}
+
+.pulse-button:hover {
+  animation: pulse 0.5s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 15px rgba(255, 107, 107, 0);
+  }
+}
+
+/* Flip Button */
+.flip-button {
+  position: relative;
+  width: 200px;
+  height: 60px;
+  perspective: 1000px;
+}
+
+.flip-front,
+.flip-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  transition: transform 0.6s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flip-front {
+  background: #f093fb;
+  color: white;
+  z-index: 2;
+}
+
+.flip-back {
+  background: #4facfe;
+  color: white;
+  transform: rotateY(180deg);
+}
+
+.flip-button:hover .flip-front {
+  transform: rotateY(180deg);
+}
+
+.flip-button:hover .flip-back {
+  transform: rotateY(360deg);
+}
+
+/* Slide Button */
+.slide-button {
+  background: transparent;
+  border: 2px solid #f39c12;
+  color: #f39c12;
+  position: relative;
+  overflow: hidden;
+}
+
+.slide-button span {
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.slide-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: #f39c12;
+  transition: left 0.3s ease;
+}
+
+.slide-button:hover {
+  color: #000;
+}
+
+.slide-button:hover::before {
+  left: 0;
+}
+
+.slide-button:hover span {
+  transform: translateX(5px);
+}

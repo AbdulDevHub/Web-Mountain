@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fiery Passages</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="icon" type="image/png" href="Favicon.png" />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/effects.css" />
+
+    <script src="scripts/materialize.js"></script>
+  </head>
+
+  <body>
+    <header>
+      <div class="header-left">
+        <img src="Favicon.png" alt="Logo" />
+        <h1>Fiery Passages</h1>
+      </div>
+
+      <select id="storySelect">
+        <option value="Awakened">Awakened</option>
+        <option value="Night Light">Night Light</option>
+      </select>
+    </header>
+
+    <main>
+      <section class="panel">
+        <div class="story-header">
+          <h2 id="storyTitle" class="panel-title">Loading…</h2>
+          <div class="font-controls">
+            <button id="font-dec" class="waves-effect waves-light">A−</button>
+            <button id="font-inc" class="waves-effect waves-light">A+</button>
+          </div>
+        </div>
+
+        <div id="storyText" class="text-container">Loading story…</div>
+      </section>
+
+      <div class="right-column">
+        <section class="panel audio-panel">
+          <h2 class="panel-title">Audio</h2>
+          <canvas id="visualizer"></canvas>
+
+          <div class="player-controls">
+            <button id="playPause" class="waves-effect waves-light">▶</button>
+            <button id="rewind" class="waves-effect waves-light">⏪</button>
+            <div id="timeDisplay">0:00 / 0:00</div>
+            <input type="range" id="seekBar" min="0" value="0" step="0.01" />
+            <button id="mute" class="waves-effect waves-light">🔊</button>
+
+            <div class="speed-control-container">
+              <button class="speed-btn waves-effect waves-light" id="decrease-speed-btn">−</button>
+              <div class="speed-display">
+                <span id="speed-value">1.00</span>x
+              </div>
+              <button class="speed-btn waves-effect waves-light" id="increase-speed-btn">+</button>
+            </div>
+          </div>
+
+          <audio id="audio" preload="auto"></audio>
+        </section>
+
+        <section class="panel gradient-panel">
+          <div class="gradient-section"></div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      Lightweight canvas visualizer • Fine-grained playback speed • Audio-only
+    </footer>
+
+    <script src="scripts/main.js"></script>
+  </body>
+</html>

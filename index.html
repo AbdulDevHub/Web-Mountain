@@ -8,7 +8,7 @@
   <style>
     :root {
       --bg: #0f172a;
-      --card: #111827;
+      --card: #1e293b;
       --accent: #38bdf8;
       --text: #e5e7eb;
       --muted: #94a3b8;
@@ -24,6 +24,7 @@
       background: linear-gradient(180deg, #020617, var(--bg));
       color: var(--text);
       padding: 3rem 1.5rem;
+      min-height: 100vh;
     }
 
     h1 {
@@ -35,69 +36,99 @@
     p.subtitle {
       text-align: center;
       color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .filter-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
       margin-bottom: 3rem;
+      padding: 0 1rem;
+    }
+
+    .filter-btn {
+      background: var(--card);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      color: var(--text);
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      color: #020617;
+      border-color: var(--accent);
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
+    }
+
+    .bento-grid {
       display: grid;
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
     }
 
-    details {
+    .project-card {
+      display: block;
+      text-decoration: none;
       background: var(--card);
-      border-radius: 14px;
-      padding: 1rem 1.25rem;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      border-radius: 12px;
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: all 0.3s ease;
+      overflow: hidden;
+      position: relative;
     }
 
-    summary {
-      cursor: pointer;
-      font-size: 1.25rem;
-      font-weight: 600;
-      list-style: none;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .project-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(56,189,248,0.25);
     }
 
-    summary::-webkit-details-marker {
+    .project-card.hidden {
       display: none;
     }
 
-    summary::after {
-      content: "▾";
-      color: var(--accent);
-      transition: transform 0.3s ease;
-    }
-
-    details[open] summary::after {
-      transform: rotate(180deg);
-    }
-
-    .projects {
-      margin-top: 1rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 0.75rem;
-    }
-
-    a.project {
+    .project-image {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
       display: block;
-      text-decoration: none;
-      background: #020617;
-      padding: 0.9rem 1rem;
-      border-radius: 10px;
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,0.05);
-      transition: all 0.2s ease;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
     }
 
-    a.project:hover {
-      border-color: var(--accent);
-      transform: translateY(-3px);
-      box-shadow: 0 10px 25px rgba(56,189,248,0.2);
+    .project-info {
+      padding: 1rem 1.25rem;
+    }
+
+    .project-name {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .project-category {
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     footer {
@@ -106,6 +137,26 @@
       color: var(--muted);
       font-size: 0.9rem;
     }
+
+    /* Featured project styles - make some stand out */
+    .project-card.featured {
+      grid-column: span 2;
+    }
+
+    @media (max-width: 768px) {
+      .project-card.featured {
+        grid-column: span 1;
+      }
+      
+      .filter-tabs {
+        gap: 0.5rem;
+      }
+      
+      .filter-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -113,117 +164,402 @@
   <h1>🏔️ Web Mountain</h1>
   <p class="subtitle">A personal collection of frontend experiments, UI concepts, and mini apps</p>
 
+  <div class="filter-tabs">
+    <button class="filter-btn active" data-category="all">All Projects</button>
+    <button class="filter-btn" data-category="websites">Awesome Websites</button>
+    <button class="filter-btn" data-category="ui">UI Experiments</button>
+    <button class="filter-btn" data-category="effects">Awesome Effects</button>
+    <button class="filter-btn" data-category="extensions">Chrome Extensions</button>
+  </div>
+
   <div class="container">
+    <div class="bento-grid" id="projectGrid">
+      <!-- Awesome Websites -->
+      <a class="project-card" data-category="websites" href="Awesome Websites/Pokedex/index.html">
+        <img class="project-image" src="Awesome Websites/Pokedex/Screenshot.png" alt="Pokedex preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Pokedex</div>
+          <div class="project-category">Awesome Websites</div>
+        </div>
+      </a>
 
-    <details open>
-      <summary>Accessibility Projects</summary>
-      <div class="projects">
-        <a class="project" href="Projects/Accessibility/Accessibility 1/index.html">Accessibility 1</a>
-        <a class="project" href="Projects/Accessibility/Accessibility 2/index.html">Accessibility 2</a>
-        <a class="project" href="Projects/Accessibility/Accessibility 3/index.html">Accessibility 3</a>
-        <a class="project" href="Projects/Accessibility/Accessibility 4/index.html">Accessibility 4</a>
-        <a class="project" href="Projects/Accessibility/Accessibility 5/index.html">Accessibility 5</a>
-      </div>
-    </details>
+      <a class="project-card" data-category="websites" href="Awesome Websites/Pastel/index.html">
+        <img class="project-image" src="Awesome Websites/Pastel/Screenshot.png" alt="Pastel preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Pastel</div>
+          <div class="project-category">Awesome Websites</div>
+        </div>
+      </a>
 
-    <details>
-      <summary>CSS Challenges</summary>
-      <div class="projects">
-        <a class="project" href="Projects/CSS Chalenges/Bullesye/index.html">Bullseye</a>
-        <a class="project" href="Projects/CSS Chalenges/Cards/index.html">Cards</a>
-        <a class="project" href="Projects/CSS Chalenges/Code Pen Tile/index.html">Code Pen Tile</a>
-        <a class="project" href="Projects/CSS Chalenges/Expanding Search Bar/index.html">Expanding Search</a>
-        <a class="project" href="Projects/CSS Chalenges/Github Contribution Graph/index.html">GitHub Graph</a>
-        <a class="project" href="Projects/CSS Chalenges/Github Profile/index.html">GitHub Profile</a>
-        <a class="project" href="Projects/CSS Chalenges/Gradient Button/index.html">Gradient Button</a>
-        <a class="project" href="Projects/CSS Chalenges/Instagram Stories/index.html">Instagram Stories</a>
-        <a class="project" href="Projects/CSS Chalenges/Jeopardy Card/index.html">Jeopardy Card</a>
-        <a class="project" href="Projects/CSS Chalenges/Loading Animation/index.html">Loading Animation</a>
-        <a class="project" href="Projects/CSS Chalenges/Loading Animation 2/index.html">Loading Animation 2</a>
-        <a class="project" href="Projects/CSS Chalenges/Moving Squrares Animation/index.html">Moving Squares</a>
-        <a class="project" href="Projects/CSS Chalenges/Pogress Bar/index.html">Progress Bar</a>
-        <a class="project" href="Projects/CSS Chalenges/Pogress Bar Smooth/index.html">Progress Bar Smooth</a>
-        <a class="project" href="Projects/CSS Chalenges/Spinning Loader/index.html">Spinning Loader</a>
-        <a class="project" href="Projects/CSS Chalenges/Word Carousel/index.html">Word Carousel</a>
-      </div>
-    </details>
+      <a class="project-card" data-category="websites" href="Awesome Websites/Firey Pasages/index.html">
+        <img class="project-image" src="Awesome Websites/Firey Pasages/Screenshot.png" alt="Firey Passages preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Firey Passages</div>
+          <div class="project-category">Awesome Websites</div>
+        </div>
+      </a>
 
-    <details>
-      <summary>Apps & Interactive Projects</summary>
-      <div class="projects">
-        <a class="project" href="Projects/Pokedex/index.html">Pokedex</a>
-        <a class="project" href="Projects/Add To Cart App/index.html">Add To Cart App</a>
-        <a class="project" href="Projects/BlogSpace/index.html">BlogSpace</a>
-        <a class="project" href="Projects/BoredBot/index.html">BoredBot</a>
-        <a class="project" href="Projects/CSS Theme Switcher/index.html">CSS Theme Switcher</a>
-        <a class="project" href="Projects/Drum Kit/index.html">Drum Kit</a>
-        <a class="project" href="Projects/Face Bomp/index.html">Face Bomp</a>
-        <a class="project" href="Projects/Fire Alarm Simulation/index.html">Fire Alarm Simulation</a>
-        <a class="project" href="Projects/File Redownloader/index.html">File Redownloader</a>
-        <a class="project" href="Projects/Jasmine Testing/index.html">Jasmine Testing</a>
-        <a class="project" href="Projects/LinkedIn Header Generator/index.html">LinkedIn Header Generator</a>
-        <a class="project" href="Projects/Momentum/index.html">Momentum</a>
-        <a class="project" href="Projects/Moody - Social Media App/index.html">Moody - Social Media</a>
-        <a class="project" href="Projects/QR Code Generator/index.html">QR Code Generator</a>
-        <a class="project" href="Projects/Relaxer App/index.html">Relaxer App</a>
-        <a class="project" href="Projects/Rename Files/index.html">Rename Files</a>
-        <a class="project" href="Projects/Snap Stash/popup.html">Snap Stash</a>
-        <a class="project" href="Projects/Temp Control UI/index.html">Temp Control UI</a>
-        <a class="project" href="Projects/Twitter Clone/index.html">Twitter Clone</a>
-        <a class="project" href="Projects/Video Gallery/index.html">Video Gallery</a>
-        <a class="project" href="Projects/Video Trim/index.html">Video Trim</a>
-        <a class="project" href="Projects/Video.js/index.html">Video.js</a>
-        <a class="project" href="Projects/War/index.html">War</a>
-      </div>
-    </details>
+      <a class="project-card" data-category="websites" href="Awesome Websites/File Redownloader/index.html">
+        <img class="project-image" src="Awesome Websites/File Redownloader/Screenshot.png" alt="File Redownloader preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">File Redownloader</div>
+          <div class="project-category">Awesome Websites</div>
+        </div>
+      </a>
 
-    <details>
-      <summary>Visual / Animation Experiments</summary>
-      <div class="projects">
-        <a class="project" href="Projects/Anime.js 4 Jumping Boxes/index.html">Anime.js Boxes</a>
-        <a class="project" href="Projects/Anime.js Sphere/index.html">Anime.js Sphere</a>
-        <a class="project" href="Projects/Anthony V1 Website Effects/index.html">Anthony V1 Effects</a>
-        <a class="project" href="Projects/Blue Techno Fluid/index.html">Blue Techno Fluid</a>
-        <a class="project" href="Projects/Diamond Photo Gallery/index.html">Diamond Photo Gallery</a>
-        <a class="project" href="Projects/Fluid Flame Effect/index.html">Fluid Flame</a>
-        <a class="project" href="Projects/Ink Fluid/index.html">Ink Fluid</a>
-        <a class="project" href="Projects/Particles/index.html">Particles</a>
-        <a class="project" href="Projects/Pastel/index.html">Pastel</a>
-        <a class="project" href="Projects/Product Splash Page/index.html">Product Splash Page</a>
-        <a class="project" href="Projects/Split Screen Slider/index.html">Split Screen Slider</a>
-        <a class="project" href="Projects/Spotlight Effect/index.html">Spotlight Effect</a>
-        <a class="project" href="Projects/SVGs Projects/index.html">SVGs Projects</a>
-        <a class="project" href="Projects/Touch Slider/index.html">Touch Slider</a>
-        <a class="project" href="Projects/Website With Video Background 1/index.html">Video Background 1</a>
-        <a class="project" href="Projects/Website With Video Background 2/index.html">Video Background 2</a>
-      </div>
-    </details>
+      <a class="project-card" data-category="websites" href="Awesome Websites/QR Code Generator/index.html">
+        <img class="project-image" src="Awesome Websites/QR Code Generator/Screenshot.png" alt="QR Code Generator preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">QR Code Generator</div>
+          <div class="project-category">Awesome Websites</div>
+        </div>
+      </a>
 
-    <details>
-      <summary>UI Designs / Figma to Code</summary>
-      <div class="projects">
-        <a class="project" href="Projects/UI Designs/Figma To Code 1/index.html">Figma → Code 1</a>
-        <a class="project" href="Projects/UI Designs/Figma To Code 2/index.html">Figma → Code 2</a>
-        <a class="project" href="Projects/UI Designs/Figma To Code 3/index.html">Figma → Code 3</a>
-        <a class="project" href="Projects/UI Designs/Figma To Code 4/index.html">Figma → Code 4</a>
-        <a class="project" href="Projects/UI Designs/Figma To Code 5/index.html">Figma → Code 5</a>
-        <a class="project" href="Projects/UI Designs/Figma To Code 6/index.html">Figma → Code 6</a>
-        <a class="project" href="Projects/UI Designs/Figma To Code 7/index.html">Figma → Code 7</a>
-        <a class="project" href="Projects/UI Designs/Figma To Code 8/index.html">Figma → Code 8</a>
-        <a class="project" href="Projects/UI Designs/Figma To Code 9/index.html">Figma → Code 9</a>
-        <a class="project" href="Projects/UI Designs/Figma To Code 10/index.html">Figma → Code 10</a>
-        <a class="project" href="Projects/UI Designs/UI Design 1/index.html">UI Design 1</a>
-        <a class="project" href="Projects/UI Designs/UI Design 2/index.html">UI Design 2</a>
-        <a class="project" href="Projects/UI Designs/UI Design 3/index.html">UI Design 3</a>
-        <a class="project" href="Projects/UI Designs/UI Design 4/index.html">UI Design 4</a>
-      </div>
-    </details>
+      <a class="project-card" data-category="websites" href="Awesome Websites/Rename Files/index.html">
+        <img class="project-image" src="Awesome Websites/Rename Files/Screenshot.png" alt="Rename Files preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Rename Files</div>
+          <div class="project-category">Awesome Websites</div>
+        </div>
+      </a>
 
+      <a class="project-card" data-category="websites" href="Awesome Websites/Face Bomp/index.html">
+        <img class="project-image" src="Awesome Websites/Face Bomp/Screenshot.png" alt="Face Bomp preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Face Bomp</div>
+          <div class="project-category">Awesome Websites</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="websites" href="Awesome Websites/War/index.html">
+        <img class="project-image" src="Awesome Websites/War/Screenshot.png" alt="War preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">War</div>
+          <div class="project-category">Awesome Websites</div>
+        </div>
+      </a>
+
+      <!-- UI Experiments -->
+      <a class="project-card featured" data-category="ui" href="UI Experiments/Skynet Eats/index.html">
+        <img class="project-image" src="UI Experiments/Skynet Eats/Screenshot.png" alt="Skynet Eats preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Skynet Eats</div>
+          <div class="project-category">UI Experiments</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="ui" href="UI Experiments/Drone Series/index.html">
+        <img class="project-image" src="UI Experiments/Drone Series/Screenshot.png" alt="Drone Series preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Drone Series</div>
+          <div class="project-category">UI Experiments</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="ui" href="UI Experiments/Scenic Forests/index.html">
+        <img class="project-image" src="UI Experiments/Scenic Forests/Screenshot.png" alt="Scenic Forests preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Scenic Forests</div>
+          <div class="project-category">UI Experiments</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="ui" href="UI Experiments/Momentum/index.html">
+        <img class="project-image" src="UI Experiments/Momentum/Screenshot.png" alt="Momentum preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Momentum</div>
+          <div class="project-category">UI Experiments</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="ui" href="UI Experiments/Video Background Website/index.html">
+        <img class="project-image" src="UI Experiments/Video Background Website/Screenshot.png" alt="Video Background Website preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Video Background Website</div>
+          <div class="project-category">UI Experiments</div>
+        </div>
+      </a>
+
+      <!-- Awesome Effects -->
+      <a class="project-card" data-category="effects" href="Awesome Effects/Ghost Eyes.html">
+        <img class="project-image" src="Awesome Effects/GhostEyes.png" alt="Ghost Eyes preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Ghost Eyes</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/GridSpotlightEffect.html">
+        <img class="project-image" src="Awesome Effects/GridSpotlightEffect.png" alt="Grid Spotlight Effect preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Grid Spotlight Effect</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Anime.js Sphere/index.html">
+        <img class="project-image" src="Awesome Effects/Anime.js Sphere/Animation.gif" alt="Anime.js Sphere preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Anime.js Sphere</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Anthony V1 Website Effects/index.html">
+        <img class="project-image" src="Awesome Effects/Anthony V1 Website Effects/Screenshot.png" alt="Anthony V1 Website Effects preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Anthony V1 Website Effects</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card featured" data-category="effects" href="Awesome Effects/Blue Techno Fluid/index.html">
+        <img class="project-image" src="Awesome Effects/Blue Techno Fluid/Screenshot.png" alt="Blue Techno Fluid preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Blue Techno Fluid</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Diamond Photo Gallery/index.html">
+        <img class="project-image" src="Awesome Effects/Diamond Photo Gallery/Screenshot.png" alt="Diamond Photo Gallery preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Diamond Photo Gallery</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Fluid Flame Effect/index.html">
+        <img class="project-image" src="Awesome Effects/Fluid Flame Effect/Screenshot.png" alt="Fluid Flame Effect preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Fluid Flame Effect</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Button Gallery/index.html">
+        <img class="project-image" src="Awesome Effects/Button Gallery/Screenshot.png" alt="Button Gallery preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Button Gallery</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Ink Fluid/index.html">
+        <img class="project-image" src="Awesome Effects/Ink Fluid/Screenshot.png" alt="Ink Fluid preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Ink Fluid</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Loading Animation 2/index.html">
+        <img class="project-image" src="Awesome Effects/Loading Animation 2/Screenshot.png" alt="Loading Animation 2 preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Loading Animation 2</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Moving Squrares Animation/index.html">
+        <img class="project-image" src="Awesome Effects/Moving Squrares Animation/Screenshot.png" alt="Moving Squares Animation preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Moving Squares Animation</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Particles/index.html">
+        <img class="project-image" src="Awesome Effects/Particles/Screenshot.png" alt="Particles preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Particles</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Split Screen Slider/index.html">
+        <img class="project-image" src="Awesome Effects/Split Screen Slider/Screenshot.png" alt="Split Screen Slider preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Split Screen Slider</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Spotlight Effect/index.html">
+        <img class="project-image" src="Awesome Effects/Spotlight Effect/Screenshot.png" alt="Spotlight Effect preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Spotlight Effect</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Touch Slider/index.html">
+        <img class="project-image" src="Awesome Effects/Touch Slider/Screenshot.png" alt="Touch Slider preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Touch Slider</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Video.js/index.html">
+        <img class="project-image" src="Awesome Effects/Video.js/Screenshot.png" alt="Video.js preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Video.js</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/3D Cube Loader.html">
+        <img class="project-image" src="Awesome Effects/3D Cube Loader.png" alt="3D Cube Loader preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">3D Cube Loader</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/3D Image Transition.html">
+        <img class="project-image" src="Awesome Effects/3D Image Transition.png" alt="3D Image Transition preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">3D Image Transition</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Animated Input Border.html">
+        <img class="project-image" src="Awesome Effects/Animated Input Border.png" alt="Animated Input Border preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Animated Input Border</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Escalade Loader.html">
+        <img class="project-image" src="Awesome Effects/Escalade Loader.png" alt="Escalade Loader preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Escalade Loader</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Fire Cursor.html">
+        <img class="project-image" src="Awesome Effects/Fire Cursor.png" alt="Fire Cursor preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Fire Cursor</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Gemini Loader.html">
+        <img class="project-image" src="Awesome Effects/Gemini Loader.png" alt="Gemini Loader preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Gemini Loader</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Hover Shine Effect.html">
+        <img class="project-image" src="Awesome Effects/Hover Shine Effect.png" alt="Hover Shine Effect preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Hover Shine Effect</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Jump And Slide.html">
+        <img class="project-image" src="Awesome Effects/Jump And Slide.png" alt="Jump And Slide preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Jump And Slide</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Magic Card.html">
+        <img class="project-image" src="Awesome Effects/Magic Card.png" alt="Magic Card preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Magic Card</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/MagicalHoverEffect.html">
+        <img class="project-image" src="Awesome Effects/MagicalHoverEffect.png" alt="MagicalHoverEffect preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">MagicalHoverEffect</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Navigation Bar.html">
+        <img class="project-image" src="Awesome Effects/Navigation Bar.png" alt="Navigation Bar preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Navigation Bar</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Redirecting Loader.html">
+        <img class="project-image" src="Awesome Effects/Redirecting Loader.png" alt="Redirecting Loader preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Redirecting Loader</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Shine Animation.html">
+        <img class="project-image" src="Awesome Effects/Shine Animation.png" alt="Shine Animation preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Shine Animation</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <a class="project-card" data-category="effects" href="Awesome Effects/Shine Effect.html">
+        <img class="project-image" src="Awesome Effects/Shine Effect.png" alt="Shine Effect preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Shine Effect</div>
+          <div class="project-category">Awesome Effects</div>
+        </div>
+      </a>
+
+      <!-- Chrome Extensions -->
+      <a class="project-card" data-category="extensions" href="#">
+        <img class="project-image" src="Chrome Extensions/Gallery Bookmark Viewer/images/Screenshot%201.png" alt="Gallery Bookmark Viewer preview" loading="lazy">
+        <div class="project-info">
+          <div class="project-name">Gallery Bookmark Viewer</div>
+          <div class="project-category">Chrome Extensions</div>
+        </div>
+      </a>
+    </div>
   </div>
 
   <footer>
     Built as a living archive of frontend learning & experiments.
   </footer>
+
+  <script>
+    // Filter functionality
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const projectCards = document.querySelectorAll('.project-card');
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const category = button.dataset.category;
+
+        // Update active button
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+
+        // Filter projects
+        projectCards.forEach(card => {
+          if (category === 'all' || card.dataset.category === category) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+      });
+    });
+  </script>
 
 </body>
 </html>

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hover Shine Effect</title>
+    <style>
+      .shine-overlay {
+        position: relative;
+        overflow: hidden;
+
+        &:hover .shine {
+          display: block;
+        }
+      }
+
+      .shine {
+        display: none;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        background: -webkit-gradient(
+          linear,
+          left top,
+          right top,
+          from(rgba(255, 255, 255, 0)),
+          color-stop(50%, rgba(255, 255, 255, 0.8)),
+          to(rgba(255, 255, 255, 0))
+        );
+        background: linear-gradient(
+          to right,
+          rgba(255, 255, 255, 0) 0,
+          rgba(255, 255, 255, 0.8) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        pointer-events: none;
+        z-index: 3;
+        opacity: 0;
+        transform: skew(30deg);
+        animation: shine 0.75s linear 1;
+      }
+
+      @keyframes shine {
+        0% {
+          left: -50%;
+          opacity: 0;
+        }
+        50% {
+          left: 25%;
+          opacity: 0.5;
+        }
+        100% {
+          left: 100%;
+          opacity: 0;
+        }
+      }
+
+      body {
+        font-family: "Raleway";
+        font-size: 14px;
+        font-weight: 500;
+        background-color: #bcaaa4;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+
+      .title {
+        font-family: "Raleway";
+        font-size: 24px;
+        font-weight: 700;
+        color: #5d4037;
+        text-align: center;
+      }
+
+      .row {
+        --bs-gutter-x: 6rem;
+      }
+
+      .card {
+        border: 0 none;
+        background-color: #333;
+        overflow: hidden;
+        border-radius: 10px;
+        box-shadow: rgb(0 0 0 / 66%) 0 30px 60px 0;
+        margin: 0 auto;
+        max-width: 260px;
+        cursor: pointer;
+
+        &:before {
+          display: block;
+          padding-top: 133%;
+          content: "";
+        }
+
+        &:after {
+          display: block;
+          content: "";
+          position: absolute;
+          top: 5px;
+          bottom: 5px;
+          left: 5px;
+          right: 5px;
+          border: 1px solid rgba(#fff, 0.25);
+          z-index: 1;
+          border-radius: 10px;
+        }
+      }
+
+      .card-bg {
+        opacity: 0.8;
+        position: absolute;
+        top: -20px;
+        bottom: -20px;
+        left: -20px;
+        right: -20px;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
+        pointer-events: none;
+
+        &--alt {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="title mt-5 mb-5">Hover Shine Effect</h1>
+
+    <div class="container">
+      <div class="row">
+        <div
+          class="col-sm-6 col-md-5 offset-md-1 col-lg-4 offset-lg-0 col-xl-3 offset-xl-0 mb-5"
+        >
+          <div class="card shine-overlay">
+            <div
+              class="card-bg"
+              style="
+                background-image: url(&quot;https://images.unsplash.com/photo-1479660656269-197ebb83b540?dpr=2&amp;auto=compress,format&amp;fit=crop&amp;w=1199&amp;h=799&amp;q=80&amp;cs=tinysrgb&amp;crop=&quot;);
+              "
+            ></div>
+            <div class="shine"></div>
+          </div>
+        </div>
+
+        <div
+          class="col-sm-6 col-md-5 offset-md-1 col-lg-4 offset-lg-0 col-xl-3 offset-xl-0 mb-5"
+        >
+          <div class="card shine-overlay">
+            <div
+              class="card-bg"
+              style="
+                background-image: url(&quot;https://images.unsplash.com/photo-1479659929431-4342107adfc1?dpr=2&amp;auto=compress,format&amp;fit=crop&amp;w=1199&amp;h=799&amp;q=80&amp;cs=tinysrgb&amp;crop=&quot;);
+              "
+            ></div>
+            <div class="shine"></div>
+          </div>
+        </div>
+
+        <div
+          class="col-sm-6 col-md-5 offset-md-1 col-lg-4 offset-lg-0 col-xl-3 offset-xl-0 mb-5"
+        >
+          <div class="card shine-overlay">
+            <div
+              class="card-bg"
+              style="
+                background-image: url(&quot;https://images.unsplash.com/photo-1479644025832-60dabb8be2a1?dpr=2&amp;auto=compress,format&amp;fit=crop&amp;w=1199&amp;h=799&amp;q=80&amp;cs=tinysrgb&amp;crop=&quot;);
+              "
+            ></div>
+            <div class="shine"></div>
+          </div>
+        </div>
+
+        <div
+          class="col-sm-6 col-md-5 offset-md-1 col-lg-4 offset-lg-0 col-xl-3 offset-xl-0 mb-5"
+        >
+          <div class="card shine-overlay">
+            <div
+              class="card-bg card-bg--alt"
+              style="
+                background-image: url(&quot;https://images.unsplash.com/photo-1517021897933-0e0319cfbc28?dpr=2&auto=compress,format&fit=crop&w=1199&h=799&q=80&cs=tinysrgb&crop=&quot;);
+              "
+            ></div>
+            <div class="shine"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script></script>
+  </body>
+</html>
