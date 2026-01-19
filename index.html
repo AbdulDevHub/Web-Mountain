@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Web Mountain – Project Showcase</title>
+  <title>Web Mountain</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="Favicon.png" />
 
   <style>
     :root {
@@ -156,6 +157,56 @@
         padding: 0.5rem 1rem;
         font-size: 0.85rem;
       }
+    }
+
+    /*----------------Text Selection----------*/
+    ::selection {
+      background: #38bdf8; /* WebKit/Blink Browsers */
+      color: #ffffff;
+    }
+
+    ::-moz-selection {
+      background: #38bdf8; /* Gecko Browsers */
+      color: #ffffff;
+    }
+
+    ::-ms-selection {
+      background: #38bdf8; /* IE 10+ */
+      color: #ffffff;
+    }
+
+    /*----------------Scrollbar----------*/
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+      transition: 1s;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #38bdf8;
+      background-clip: padding-box;
+      border: 2px solid transparent;
+      border-radius: 5px;
+      transition: 1s;
+    }
+
+    ::-webkit-scrollbar-thumb:vertical:hover,
+    ::-webkit-scrollbar-thumb:horizontal:hover {
+      background-color: #38bdf8;
+      transition: 0.3s;
+    }
+
+    ::-webkit-scrollbar-track {
+      background-color: #020617;
+    }
+
+    ::-webkit-scrollbar-thumb:vertical:active,
+    ::-webkit-scrollbar-thumb:horizontal:active {
+      background: #38bdf8;
+    }
+
+    ::-webkit-scrollbar-corner {
+      background: none;
     }
   </style>
 </head>
