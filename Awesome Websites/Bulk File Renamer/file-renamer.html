@@ -294,27 +294,6 @@
             cursor: not-allowed;
         }
         
-        .download-btn {
-            height: 32px;
-            padding: 0 0.75rem;
-            border: 1px solid var(--border);
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            font-size: 1.1rem;
-        }
-        
-        .download-btn:hover {
-            background: var(--accent);
-            color: var(--bg-primary);
-            border-color: var(--accent);
-        }
-        
         .rename-section {
             position: fixed;
             bottom: 0;
@@ -664,21 +643,15 @@
                 setFiles(updatedFiles);
             };
             
-            // Download individual file
-            const downloadFile = (file) => {
-                const url = URL.createObjectURL(file.originalFile);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = file.currentName;
-                a.click();
-                URL.revokeObjectURL(url);
-            };
-            
-            // Download all as ZIP
-            const downloadAll = async () => {
+            // Download selected files as ZIP
+            const downloadSelected = async () => {
+                const selectedFiles = files.filter(f => selectedIds.has(f.id));
+                
+                if (selectedFiles.length === 0) return;
+                
                 const zip = new JSZip();
                 
-                files.forEach(file => {
+                selectedFiles.forEach(file => {
                     zip.file(file.currentName, file.originalFile);
                 });
                 
@@ -857,14 +830,6 @@
                                                         →
                                                     </button>
                                                 </div>
-                                                
-                                                <button 
-                                                    className="download-btn"
-                                                    onClick={() => downloadFile(file)}
-                                                    title="Download"
-                                                >
-                                                    ⬇
-                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -919,10 +884,11 @@
                                     
                                     <button 
                                         className="btn btn-primary"
-                                        onClick={downloadAll}
+                                        onClick={downloadSelected}
+                                        disabled={selectedIds.size === 0}
                                         style={{padding: '0.5rem 1rem', whiteSpace: 'nowrap'}}
                                     >
-                                        📦 Download ZIP
+                                        📦 Download Selected ({selectedIds.size})
                                     </button>
                                 </div>
                             </div>
