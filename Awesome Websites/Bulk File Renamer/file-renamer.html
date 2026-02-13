@@ -361,6 +361,17 @@
             box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
         }
         
+        /* Hide number input spinners */
+        .rename-input[type="number"]::-webkit-inner-spin-button,
+        .rename-input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        .rename-input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        
         .preview-text {
             padding: 0.5rem 0.75rem;
             background: var(--bg-tertiary);
@@ -643,6 +654,35 @@
                 setFiles(updatedFiles);
             };
             
+            // Move selected files to specific index
+            const moveToIndex = (targetIndex) => {
+                if (selectedIds.size === 0) return;
+                if (sortMode !== 'custom') {
+                    setSortMode('custom');
+                }
+                
+                const currentFiles = getSortedFiles();
+                const selectedFiles = currentFiles.filter(f => selectedIds.has(f.id));
+                const unselectedFiles = currentFiles.filter(f => !selectedIds.has(f.id));
+                
+                // Clamp target index
+                const clampedIndex = Math.max(0, Math.min(targetIndex - 1, currentFiles.length - selectedFiles.length));
+                
+                // Insert selected files at target index
+                const reordered = [
+                    ...unselectedFiles.slice(0, clampedIndex),
+                    ...selectedFiles,
+                    ...unselectedFiles.slice(clampedIndex)
+                ];
+                
+                const updatedFiles = reordered.map((file, idx) => ({
+                    ...file,
+                    order: idx
+                }));
+                
+                setFiles(updatedFiles);
+            };
+            
             // Download selected files as ZIP
             const downloadSelected = async () => {
                 const selectedFiles = files.filter(f => selectedIds.has(f.id));
@@ -783,9 +823,21 @@
                                     <button className="btn btn-secondary" onClick={deselectAll}>
                                         Deselect All
                                     </button>
-                                    <span style={{color: 'var(--accent)'}}>
-                                        {selectedIds.size} selected
-                                    </span>
+                                </div>
+                                
+                                <div className="stats">
+                                    <div className="stat">
+                                        <div className="stat-label">Total:</div>
+                                        <div className="stat-value">{files.length}</div>
+                                    </div>
+                                    <div className="stat">
+                                        <div className="stat-label">Selected:</div>
+                                        <div className="stat-value">{selectedIds.size}</div>
+                                    </div>
+                                    <div className="stat">
+                                        <div className="stat-label">Renamed:</div>
+                                        <div className="stat-value">{files.filter(f => f.isRenamed).length}</div>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -842,21 +894,6 @@
                                 <div className="rename-section-inner">
                                     <h3>Rename</h3>
                                     
-                                    <div className="stats">
-                                        <div className="stat">
-                                            <div className="stat-label">Total:</div>
-                                            <div className="stat-value">{files.length}</div>
-                                        </div>
-                                        <div className="stat">
-                                            <div className="stat-label">Selected:</div>
-                                            <div className="stat-value">{selectedIds.size}</div>
-                                        </div>
-                                        <div className="stat">
-                                            <div className="stat-label">Renamed:</div>
-                                            <div className="stat-value">{files.filter(f => f.isRenamed).length}</div>
-                                        </div>
-                                    </div>
-                                    
                                     <div className="rename-input-group">
                                         <input 
                                             type="text"
@@ -880,6 +917,38 @@
                                     
                                     <div className="preview-text">
                                         <strong>Preview:</strong> {getPreview()}
+                                    </div>
+                                    
+                                    <div className="rename-input-group" style={{minWidth: '200px', maxWidth: '200px'}}>
+                                        <input 
+                                            type="number"
+                                            className="rename-input"
+                                            placeholder="Move to index..."
+                                            min="1"
+                                            max={files.length}
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter' && e.target.value) {
+                                                    moveToIndex(parseInt(e.target.value));
+                                                    e.target.value = '';
+                                                }
+                                            }}
+                                            disabled={selectedIds.size === 0}
+                                        />
+                                        <button 
+                                            className="btn btn-primary"
+                                            onClick={(e) => {
+                                                const input = e.target.previousElementSibling;
+                                                if (input.value) {
+                                                    moveToIndex(parseInt(input.value));
+                                                    input.value = '';
+                                                }
+                                            }}
+                                            disabled={selectedIds.size === 0}
+                                            style={{padding: '0.5rem 1rem'}}
+                                            title="Move selected files to this position"
+                                        >
+                                            Move
+                                        </button>
                                     </div>
                                     
                                     <button 
