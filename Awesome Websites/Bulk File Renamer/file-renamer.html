@@ -531,6 +531,7 @@
             
             const fileInputRef = useRef(null);
             const folderInputRef = useRef(null);
+            const previewCache = useRef({});
             
             // Handle file upload
             const handleFileUpload = (fileList) => {
@@ -715,17 +716,28 @@
                 return previews.join(', ');
             };
             
-            // Create image preview with memo to prevent re-rendering
-            const FilePreview = memo(({ file }) => {
-                const [preview, setPreview] = useState(null);
+            // Create image preview with caching to prevent re-loading
+            const FilePreview = ({ file }) => {
+                const [preview, setPreview] = useState(previewCache.current[file.id] || null);
                 
                 useEffect(() => {
+                    // If already cached, use it
+                    if (previewCache.current[file.id]) {
+                        setPreview(previewCache.current[file.id]);
+                        return;
+                    }
+                    
+                    // Otherwise, load the image
                     if (file.originalFile.type.startsWith('image/')) {
                         const reader = new FileReader();
-                        reader.onload = (e) => setPreview(e.target.result);
+                        reader.onload = (e) => {
+                            const url = e.target.result;
+                            previewCache.current[file.id] = url;
+                            setPreview(url);
+                        };
                         reader.readAsDataURL(file.originalFile);
                     }
-                }, [file.id]); // Only re-run if file.id changes
+                }, [file.id]);
                 
                 if (preview) {
                     return <img src={preview} alt={file.currentName} />;
@@ -733,10 +745,7 @@
                 
                 const ext = file.extension.toUpperCase().replace('.', '') || '?';
                 return <div className="file-icon-large">{ext}</div>;
-            }, (prevProps, nextProps) => {
-                // Custom comparison: only re-render if file id changes
-                return prevProps.file.id === nextProps.file.id;
-            });
+            };
             
             const sortedFiles = getSortedFiles();
             
