@@ -589,12 +589,26 @@
                     newSelected.delete(id);
                 } else {
                     newSelected.add(id);
+                    
+                    // Auto-populate rename input with first selected file's name (if input is empty)
+                    if (newSelected.size === 1 && !renameInput.trim()) {
+                        const file = files.find(f => f.id === id);
+                        if (file) {
+                            setRenameInput(file.nameWithoutExt);
+                        }
+                    }
                 }
                 setSelectedIds(newSelected);
             };
             
             const selectAll = () => {
-                setSelectedIds(new Set(files.map(f => f.id)));
+                const allIds = new Set(files.map(f => f.id));
+                setSelectedIds(allIds);
+                
+                // Auto-populate rename input with first file's name (if input is empty)
+                if (files.length > 0 && !renameInput.trim()) {
+                    setRenameInput(files[0].nameWithoutExt);
+                }
             };
             
             const deselectAll = () => {
