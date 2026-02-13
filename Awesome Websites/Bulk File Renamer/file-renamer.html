@@ -224,6 +224,10 @@
             padding: 1rem;
         }
         
+        .file-card.compact .file-card-info {
+            padding: 0.5rem;
+        }
+        
         .file-card-name {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.85rem;
@@ -231,6 +235,12 @@
             word-break: break-word;
             min-height: 2.4em;
             line-height: 1.2;
+        }
+        
+        .file-card.compact .file-card-name {
+            font-size: 0.7rem;
+            margin-bottom: 0.5rem;
+            min-height: 2em;
         }
         
         .file-card-name.renamed {
@@ -241,6 +251,25 @@
             display: flex;
             gap: 0.5rem;
             align-items: center;
+        }
+        
+        .file-card.compact .file-card-actions {
+            gap: 0.25rem;
+        }
+        
+        .file-card.compact .arrow-btn {
+            height: 24px;
+            font-size: 0.85rem;
+        }
+        
+        .file-card.compact .file-card-index {
+            font-size: 0.65rem;
+            padding: 0.2rem 0.4rem;
+        }
+        
+        .file-card.compact .checkbox {
+            width: 16px;
+            height: 16px;
         }
         
         .file-icon-large {
@@ -463,7 +492,11 @@
         
         @media (max-width: 1200px) {
             .file-list {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+            }
+            
+            .file-list.compact-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
             }
         }
         
@@ -482,8 +515,12 @@
             }
             
             .file-list {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
                 gap: 1rem;
+            }
+            
+            .file-list.compact-grid {
+                grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important;
             }
             
             .rename-section {
@@ -518,6 +555,7 @@
             const [sortMode, setSortMode] = useState('date');
             const [sortDirection, setSortDirection] = useState('desc');
             const [renameInput, setRenameInput] = useState('');
+            const [compactView, setCompactView] = useState(false);
             
             const fileInputRef = useRef(null);
             const folderInputRef = useRef(null);
@@ -837,6 +875,12 @@
                                     <button className="btn btn-secondary" onClick={deselectAll}>
                                         Deselect All
                                     </button>
+                                    <button 
+                                        className="btn btn-secondary"
+                                        onClick={() => setCompactView(!compactView)}
+                                    >
+                                        {compactView ? '⊟ Compact' : '⊞ Normal'} View
+                                    </button>
                                 </div>
                                 
                                 <div className="stats">
@@ -855,11 +899,15 @@
                                 </div>
                             </div>
                             
-                            <div className="file-list">
+                            <div className="file-list" style={{
+                                gridTemplateColumns: compactView 
+                                    ? 'repeat(auto-fill, minmax(120px, 1fr))' 
+                                    : 'repeat(auto-fill, minmax(200px, 1fr))'
+                            }}>
                                 {sortedFiles.map((file, index) => (
                                     <div 
                                         key={file.id}
-                                        className={`file-card ${selectedIds.has(file.id) ? 'selected' : ''}`}
+                                        className={`file-card ${selectedIds.has(file.id) ? 'selected' : ''} ${compactView ? 'compact' : ''}`}
                                     >
                                         <div className="file-card-preview">
                                             <input 
