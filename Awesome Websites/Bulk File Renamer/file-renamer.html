@@ -644,9 +644,10 @@
                     sorted.sort((a, b) => {
                         const nameA = a.currentName.toLowerCase();
                         const nameB = b.currentName.toLowerCase();
+                        // Use natural sorting (alphanumeric) like file explorer
                         return sortDirection === 'asc' 
-                            ? nameA.localeCompare(nameB)
-                            : nameB.localeCompare(nameA);
+                            ? nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' })
+                            : nameB.localeCompare(nameA, undefined, { numeric: true, sensitivity: 'base' });
                     });
                 } else if (sortMode === 'date') {
                     sorted.sort((a, b) => {
