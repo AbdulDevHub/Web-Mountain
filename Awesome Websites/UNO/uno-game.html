@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { overflow: hidden; }
+    ::-webkit-scrollbar { width: 6px; background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+    @keyframes unoPop {
+      0%   { transform: translate(-50%,-50%) scale(0.5); opacity: 0; }
+      60%  { transform: translate(-50%,-50%) scale(1.15); opacity: 1; }
+      100% { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+    }
+    @keyframes pulse {
+      from { box-shadow: 0 0 40px rgba(229,62,62,0.6); }
+      to   { box-shadow: 0 0 80px rgba(229,62,62,1); }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useCallback, useRef } = React;
+
+    // ─── Constants ───────────────────────────────────────────────
+    const COLORS = ["red", "green", "blue", "yellow"];
+    const COLOR_HEX = { red: "#e53e3e", green: "#38a169", blue: "#3182ce", yellow: "#d69e2e", wild: "#2d3748" };
+    const SYM = { Skip: "⊘", Reverse: "↺", "+2": "+2", Wild: "★", "+4": "+4" };
+    const SPECIAL = ["Skip", "Reverse", "+2"];
+    let _id = 0;
+
+    function mkCard(color, value) { return { id: _id++, color, value }; }
+
+    function createDeck(wildMode) {
+      _id = 0;
+      const deck = [];
+      for (const c of COLORS) {
+        deck.push(mkCard(c, "0"));
+        for (let n = 1; n <= 9; n++) { deck.push(mkCard(c, String(n))); deck.push(mkCard(c, String(n))); }
+        for (const v of SPECIAL) { deck.push(mkCard(c, v)); deck.push(mkCard(c, v)); }
+      }
+      const wc = wildMode ? 8 : 4;
+      for (let i = 0; i < wc; i++) { deck.push(mkCard("wild", "Wild")); deck.push(mkCard("wild", "+4")); }
+      return deck;
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function canPlay(card, top, activeColor) {
+      if (card.color === "wild") return true;
+      const color = activeColor || top.color;
+      return card.color === color || card.value === top.value;
+    }
+
+    function bestColor(hand) {
+      const cnt = { red: 0, green: 0, blue: 0, yellow: 0 };
+      hand.forEach(c => { if (cnt[c.color] !== undefined) cnt[c.color]++; });
+      return COLORS.reduce((a, b) => cnt[b] > cnt[a] ? b : a);
+    }
+
+    function computerPick(hand, top, activeColor) {
+      const valid = hand.filter(c => canPlay(c, top, activeColor));
+      if (!valid.length) return null;
+      const nonWild = valid.filter(c => c.color !== "wild");
+      const action = nonWild.filter(c => SPECIAL.includes(c.value));
+      if (action.length) return action[0];
+      return nonWild.length ? nonWild[0] : valid[0];
+    }
+
+    // ─── Card Component ──────────────────────────────────────────
+    function UNOCard({ card, faceDown, onClick, lifted, playable, small }) {
+      const w = small ? 42 : 64;
+      const h = small ? 62 : 96;
+      const fontSize = small ? 13 : 22;
+
+      if (faceDown) {
+        return (
+          <div onClick={onClick} style={{
+            width: w, height: h,
+            background: "linear-gradient(135deg,#7f1d1d,#991b1b)",
+            border: "3px solid #450a0a", borderRadius: 10,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: onClick ? "pointer" : "default",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.5)", flexShrink: 0,
+            transition: "transform 0.15s", userSelect: "none",
+          }}>
+            <div style={{
+              width: "70%", height: "70%", border: "2px solid #fbbf24",
+              borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center"
+            }}>
+              <span style={{ color: "#fbbf24", fontWeight: 900, fontSize: small ? 9 : 13, fontFamily: "'Fredoka One',cursive" }}>UNO</span>
+            </div>
+          </div>
+        );
+      }
+
+      const bg = COLOR_HEX[card.color] || "#2d3748";
+      const label = SYM[card.value] || card.value;
+      const isWild = card.color === "wild";
+
+      return (
+        <div
+          onClick={onClick}
+          onMouseEnter={e => { if (onClick) e.currentTarget.style.filter = "brightness(1.1)"; }}
+          onMouseLeave={e => { e.currentTarget.style.filter = "none"; }}
+          style={{
+            width: w, height: h, borderRadius: 10, flexShrink: 0,
+            background: isWild
+              ? "linear-gradient(135deg,#e53e3e 25%,#d69e2e 25% 50%,#38a169 50% 75%,#3182ce 75%)"
+              : `linear-gradient(160deg,${bg}ee,${bg})`,
+            border: "3px solid rgba(255,255,255,0.25)",
+            boxShadow: lifted
+              ? "0 0 0 3px white, 0 10px 25px rgba(0,0,0,0.5)"
+              : playable
+                ? "0 0 0 2px rgba(255,255,255,0.5), 0 6px 16px rgba(0,0,0,0.4)"
+                : "0 4px 12px rgba(0,0,0,0.4)",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            cursor: onClick ? "pointer" : "default", position: "relative",
+            transform: lifted ? "translateY(-16px) scale(1.06)" : playable ? "translateY(-5px)" : "none",
+            transition: "transform 0.15s, box-shadow 0.15s, filter 0.1s",
+            userSelect: "none",
+          }}
+        >
+          <div style={{
+            position: "absolute", width: "65%", height: "72%", borderRadius: "50%",
+            background: "rgba(255,255,255,0.18)", border: "2px solid rgba(255,255,255,0.3)", zIndex: 0
+          }} />
+          <span style={{
+            color: "white", fontWeight: 900, fontSize,
+            fontFamily: "'Fredoka One',cursive",
+            textShadow: "0 2px 4px rgba(0,0,0,0.4)", zIndex: 1, position: "relative"
+          }}>{label}</span>
+          <span style={{ position: "absolute", top: 4, left: 6, fontSize: small ? 7 : 10, color: "rgba(255,255,255,0.85)", fontWeight: 700 }}>{label}</span>
+          <span style={{ position: "absolute", bottom: 4, right: 6, fontSize: small ? 7 : 10, color: "rgba(255,255,255,0.85)", fontWeight: 700, transform: "rotate(180deg)" }}>{label}</span>
+        </div>
+      );
+    }
+
+    // ─── Color Picker ────────────────────────────────────────────
+    function ColorPicker({ onPick }) {
+      return (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)",
+          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100
+        }}>
+          <div style={{
+            background: "#1a202c", borderRadius: 24, padding: 40, textAlign: "center",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.9)", border: "2px solid rgba(255,255,255,0.1)"
+          }}>
+            <div style={{ color: "white", fontSize: 24, fontWeight: 800, marginBottom: 8, fontFamily: "'Fredoka One',cursive" }}>
+              Choose a Color
+            </div>
+            <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginBottom: 28 }}>
+              Pick the color for your wild card
+            </div>
+            <div style={{ display: "flex", gap: 18 }}>
+              {COLORS.map(c => (
+                <button
+                  key={c}
+                  onClick={() => onPick(c)}
+                  onMouseEnter={e => e.target.style.transform = "scale(1.2)"}
+                  onMouseLeave={e => e.target.style.transform = "scale(1)"}
+                  title={c}
+                  style={{
+                    width: 68, height: 68, borderRadius: "50%", background: COLOR_HEX[c],
+                    border: "3px solid rgba(255,255,255,0.35)", cursor: "pointer",
+                    boxShadow: `0 4px 20px ${COLOR_HEX[c]}88`,
+                    transition: "transform 0.15s, box-shadow 0.15s",
+                    fontSize: 0,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ─── Main App ────────────────────────────────────────────────
+    function App() {
+      const [screen, setScreen] = useState("menu");
+      const [gameMode, setGameMode] = useState("pvc");
+      const [wildMode, setWildMode] = useState(false);
+
+      const [drawPile, setDrawPile] = useState([]);
+      const [discard, setDiscard] = useState([]);
+      const [hands, setHands] = useState([[], []]);
+      const [current, setCurrent] = useState(0);
+      const [activeColor, setActiveColor] = useState(null);
+      const [messages, setMessages] = useState([]);
+      const [winner, setWinner] = useState(null);
+      const [drawnThis, setDrawnThis] = useState(null);
+      const [showUno, setShowUno] = useState(null);
+      const [colorPickFor, setColorPickFor] = useState(null);
+      const computerThinking = useRef(false);
+
+      const log = useCallback((msg) => setMessages(prev => [msg, ...prev].slice(0, 5)), []);
+
+      function startGame() {
+        const deck = shuffle(createDeck(wildMode));
+        const h0 = deck.splice(0, 7);
+        const h1 = deck.splice(0, 7);
+        let startIdx = deck.findIndex(c => c.color !== "wild");
+        const startCard = deck.splice(startIdx, 1)[0];
+        setDrawPile(deck);
+        setDiscard([startCard]);
+        setHands([h0, h1]);
+        setCurrent(0);
+        setActiveColor(null);
+        setMessages([`Game started! Top card: ${startCard.color} ${startCard.value}`]);
+        setWinner(null);
+        setDrawnThis(null);
+        setShowUno(null);
+        setColorPickFor(null);
+        computerThinking.current = false;
+        setScreen("game");
+      }
+
+      function drawCards(count, pile, discardPile) {
+        let dp = [...pile];
+        const drawn = [];
+        for (let i = 0; i < count; i++) {
+          if (dp.length === 0) {
+            const top = discardPile[discardPile.length - 1];
+            dp = shuffle(discardPile.slice(0, -1));
+            discardPile = [top];
+          }
+          if (dp.length === 0) break;
+          drawn.push(dp.shift());
+        }
+        return { drawn, newDeck: dp, newDiscard: discardPile };
+      }
+
+      function playerName(idx) {
+        if (gameMode === "pvc") return idx === 0 ? "You" : "Computer";
+        return idx === 0 ? "Player 1" : "Player 2";
+      }
+
+      function applyAndAdvance(card, newHands, newDiscard, currentDeck, currentActiveColor, playerIdx) {
+        const opponent = 1 - playerIdx;
+        let nextPlayer = opponent;
+        let finalDeck = [...currentDeck];
+        let finalDiscard = [...newDiscard];
+        let finalHands = newHands.map(h => [...h]);
+        let finalColor = currentActiveColor;
+
+        if (card.value === "Skip" || card.value === "Reverse") {
+          nextPlayer = playerIdx;
+          log(`${playerName(playerIdx)} played ${card.value}! ${playerName(opponent)}'s turn skipped.`);
+        } else if (card.value === "+2") {
+          const { drawn, newDeck, newDiscard: nd } = drawCards(2, finalDeck, finalDiscard);
+          finalDeck = newDeck; finalDiscard = nd;
+          finalHands[opponent] = [...finalHands[opponent], ...drawn];
+          nextPlayer = playerIdx;
+          log(`${playerName(playerIdx)} played +2! ${playerName(opponent)} draws 2.`);
+        } else if (card.value === "+4") {
+          const { drawn, newDeck, newDiscard: nd } = drawCards(4, finalDeck, finalDiscard);
+          finalDeck = newDeck; finalDiscard = nd;
+          finalHands[opponent] = [...finalHands[opponent], ...drawn];
+          nextPlayer = playerIdx;
+          log(`${playerName(playerIdx)} played Wild +4! ${playerName(opponent)} draws 4.`);
+        } else {
+          log(`${playerName(playerIdx)} played ${card.color} ${card.value}.`);
+        }
+
+        if (finalHands[playerIdx].length === 0) {
+          setDrawPile(finalDeck); setDiscard(finalDiscard); setHands(finalHands);
+          setActiveColor(finalColor); setWinner(playerIdx); setDrawnThis(null);
+          return;
+        }
+        if (finalHands[playerIdx].length === 1) {
+          setShowUno(playerIdx);
+          setTimeout(() => setShowUno(null), 2200);
+        }
+        setDrawPile(finalDeck); setDiscard(finalDiscard); setHands(finalHands);
+        setActiveColor(finalColor); setCurrent(nextPlayer); setDrawnThis(null);
+      }
+
+      function playCard(cardId) {
+        if (current !== 0) return;
+        const top = discard[discard.length - 1];
+        const card = hands[0].find(c => c.id === cardId);
+        if (!card || !canPlay(card, top, activeColor)) return;
+        const newHands = [hands[0].filter(c => c.id !== cardId), [...hands[1]]];
+        const newDiscard = [...discard, card];
+        if (card.color === "wild") {
+          setHands(newHands); setDiscard(newDiscard); setDrawnThis(null);
+          setColorPickFor({ card, playerIdx: 0, newHands, newDiscard });
+        } else {
+          applyAndAdvance(card, newHands, newDiscard, drawPile, null, 0);
+        }
+      }
+
+      function onColorPick(color) {
+        const { card, playerIdx, newHands, newDiscard } = colorPickFor;
+        setColorPickFor(null);
+        setActiveColor(color);
+        log(`${playerName(playerIdx)} chose ${color}!`);
+        applyAndAdvance(card, newHands, newDiscard, drawPile, color, playerIdx);
+      }
+
+      function playerDraw() {
+        if (current !== 0) return;
+        if (drawnThis) {
+          log("You passed.");
+          setDrawnThis(null); setCurrent(1);
+          return;
+        }
+        const { drawn, newDeck, newDiscard: nd } = drawCards(1, drawPile, discard);
+        if (!drawn.length) return;
+        const card = drawn[0];
+        const newHand = [...hands[0], card];
+        setDrawPile(newDeck); setDiscard(nd); setHands([newHand, hands[1]]);
+        const top = nd[nd.length - 1];
+        if (canPlay(card, top, activeColor)) {
+          setDrawnThis(card);
+          log(`You drew ${card.color} ${card.value} — you can play it!`);
+        } else {
+          log(`You drew ${card.color} ${card.value} — no play, passing.`);
+          setCurrent(1);
+        }
+      }
+
+      // ── Computer AI turn ──
+      useEffect(() => {
+        if (current !== 1 || gameMode !== "pvc" || winner || colorPickFor) return;
+        if (computerThinking.current) return;
+        computerThinking.current = true;
+        const delay = 1100 + Math.random() * 700;
+
+        const timer = setTimeout(() => {
+          computerThinking.current = false;
+          setHands(currHands => {
+            setDiscard(currDiscard => {
+              setDrawPile(currDraw => {
+                setActiveColor(currColor => {
+                  const top = currDiscard[currDiscard.length - 1];
+                  const pick = computerPick(currHands[1], top, currColor);
+
+                  if (pick) {
+                    const newHands = [currHands[0], currHands[1].filter(c => c.id !== pick.id)];
+                    const newDiscard = [...currDiscard, pick];
+                    if (pick.color === "wild") {
+                      const chosen = bestColor(currHands[1]);
+                      log(`Computer played Wild — chose ${chosen}!`);
+                      setTimeout(() => {
+                        setActiveColor(chosen);
+                        applyEffectComputer(pick, newHands, newDiscard, currDraw, chosen);
+                      }, 50);
+                    } else {
+                      setTimeout(() => applyEffectComputer(pick, newHands, newDiscard, currDraw, null), 50);
+                    }
+                  } else {
+                    const { drawn, newDeck, newDiscard: nd } = drawCards(1, currDraw, currDiscard);
+                    if (drawn.length) {
+                      const card = drawn[0];
+                      const newHands2 = [currHands[0], [...currHands[1], card]];
+                      if (canPlay(card, top, currColor)) {
+                        const nh3 = [newHands2[0], newHands2[1].filter(c => c.id !== card.id)];
+                        const nd2 = [...nd, card];
+                        log(`Computer drew and played ${card.color} ${card.value}!`);
+                        setTimeout(() => applyEffectComputer(card, nh3, nd2, newDeck, card.color === "wild" ? bestColor(newHands2[1]) : null), 50);
+                      } else {
+                        log("Computer drew a card and passed.");
+                        setTimeout(() => {
+                          setHands(newHands2); setDrawPile(newDeck); setDiscard(nd); setCurrent(0);
+                        }, 50);
+                      }
+                    }
+                  }
+                  return currColor;
+                });
+                return currDraw;
+              });
+              return currDiscard;
+            });
+            return currHands;
+          });
+        }, delay);
+
+        return () => { clearTimeout(timer); computerThinking.current = false; };
+      }, [current, gameMode, winner, colorPickFor]);
+
+      function applyEffectComputer(card, newHands, newDiscard, currentDeck, colorOverride) {
+        const playerIdx = 1, opponent = 0;
+        let finalDeck = [...currentDeck], finalDiscard = [...newDiscard];
+        let finalHands = newHands.map(h => [...h]);
+        let nextPlayer = opponent;
+        let finalColor = colorOverride;
+
+        if (card.value === "Skip" || card.value === "Reverse") {
+          nextPlayer = playerIdx;
+          log(`Computer played ${card.value}! Your turn is skipped.`);
+        } else if (card.value === "+2") {
+          const { drawn, newDeck, newDiscard: nd } = drawCards(2, finalDeck, finalDiscard);
+          finalDeck = newDeck; finalDiscard = nd;
+          finalHands[opponent] = [...finalHands[opponent], ...drawn];
+          nextPlayer = playerIdx;
+          log("Computer played +2! You draw 2 cards.");
+        } else if (card.value === "+4") {
+          const { drawn, newDeck, newDiscard: nd } = drawCards(4, finalDeck, finalDiscard);
+          finalDeck = newDeck; finalDiscard = nd;
+          finalHands[opponent] = [...finalHands[opponent], ...drawn];
+          nextPlayer = playerIdx;
+          log("Computer played Wild +4! You draw 4 cards.");
+        } else if (!colorOverride) {
+          log(`Computer played ${card.color} ${card.value}.`);
+        }
+
+        if (finalHands[playerIdx].length === 0) {
+          setDrawPile(finalDeck); setDiscard(finalDiscard); setHands(finalHands);
+          setActiveColor(finalColor); setWinner(playerIdx); setDrawnThis(null);
+          return;
+        }
+        if (finalHands[playerIdx].length === 1) { setShowUno(playerIdx); setTimeout(() => setShowUno(null), 2200); }
+        setDrawPile(finalDeck); setDiscard(finalDiscard); setHands(finalHands);
+        setActiveColor(finalColor); setCurrent(nextPlayer); setDrawnThis(null);
+      }
+
+      // ── PvP ──
+      function p2PlayCard(cardId) {
+        if (current !== 1 || gameMode !== "pvp" || winner || colorPickFor) return;
+        const top = discard[discard.length - 1];
+        const card = hands[1].find(c => c.id === cardId);
+        if (!card || !canPlay(card, top, activeColor)) return;
+        const newHands = [[...hands[0]], hands[1].filter(c => c.id !== cardId)];
+        const newDiscard = [...discard, card];
+        if (card.color === "wild") {
+          setHands(newHands); setDiscard(newDiscard); setDrawnThis(null);
+          setColorPickFor({ card, playerIdx: 1, newHands, newDiscard });
+        } else {
+          applyAndAdvance(card, newHands, newDiscard, drawPile, null, 1);
+        }
+      }
+
+      function p2Draw() {
+        if (current !== 1 || gameMode !== "pvp") return;
+        const { drawn, newDeck, newDiscard: nd } = drawCards(1, drawPile, discard);
+        if (!drawn.length) return;
+        const card = drawn[0];
+        const newHand = [...hands[1], card];
+        setDrawPile(newDeck); setDiscard(nd); setHands([hands[0], newHand]);
+        const top = nd[nd.length - 1];
+        if (canPlay(card, top, activeColor)) {
+          setDrawnThis(card);
+          log(`Player 2 drew ${card.color} ${card.value} — can play it!`);
+        } else {
+          log("Player 2 drew and passed.");
+          setCurrent(0);
+        }
+      }
+
+      const top = discard.length ? discard[discard.length - 1] : null;
+      const displayColor = activeColor || (top && top.color !== "wild" ? top.color : null);
+      const colorBg = displayColor ? COLOR_HEX[displayColor] : "#4a5568";
+      const isP1Turn = current === 0;
+      const isP2Turn = current === 1;
+      const p1Hand = hands[0];
+      const p2Hand = hands[1];
+
+      // ──────────────────────────────────────────────
+      // MENU
+      // ──────────────────────────────────────────────
+      if (screen === "menu") {
+        return (
+          <div style={{
+            minHeight: "100vh", minWidth: "100vw",
+            background: "linear-gradient(135deg,#0f172a 0%,#1e3a2f 50%,#0f172a 100%)",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            fontFamily: "'Fredoka One',cursive", padding: 20, overflowY: "auto",
+          }}>
+            {/* Big logo */}
+            <div style={{ position: "relative", marginBottom: 8 }}>
+              <div style={{
+                fontSize: 96, fontWeight: 900, letterSpacing: -4, lineHeight: 1,
+                background: "linear-gradient(135deg,#e53e3e,#d69e2e,#38a169,#3182ce)",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                filter: "drop-shadow(0 4px 24px rgba(229,62,62,0.45))",
+              }}>UNO</div>
+              <div style={{
+                position: "absolute", top: -10, right: -20, background: "#e53e3e",
+                color: "white", borderRadius: 20, padding: "2px 12px", fontSize: 13, fontWeight: 700,
+                transform: "rotate(15deg)", boxShadow: "0 2px 10px rgba(229,62,62,0.6)",
+                fontFamily: "'Nunito',sans-serif",
+              }}>ONLINE</div>
+            </div>
+            <div style={{
+              color: "rgba(255,255,255,0.45)", fontFamily: "'Nunito',sans-serif",
+              fontSize: 13, marginBottom: 52, letterSpacing: 3, textTransform: "uppercase",
+            }}>Classic Card Game</div>
+
+            {/* Mode buttons */}
+            <div style={{ display: "flex", gap: 16, marginBottom: 36, flexWrap: "wrap", justifyContent: "center" }}>
+              {[
+                { key: "pvc", label: "🤖  vs Computer", desc: "1 Player" },
+                { key: "pvp", label: "👥  vs Player", desc: "2 Players (Pass & Play)" },
+              ].map(opt => (
+                <button
+                  key={opt.key}
+                  onClick={() => setGameMode(opt.key)}
+                  style={{
+                    padding: "20px 36px", borderRadius: 18, border: "3px solid",
+                    borderColor: gameMode === opt.key ? "#fbbf24" : "rgba(255,255,255,0.1)",
+                    background: gameMode === opt.key ? "rgba(251,191,36,0.12)" : "rgba(255,255,255,0.04)",
+                    cursor: "pointer", transition: "all 0.2s", textAlign: "center", minWidth: 180,
+                    boxShadow: gameMode === opt.key ? "0 0 24px rgba(251,191,36,0.25)" : "none",
+                  }}
+                >
+                  <div style={{ color: "white", fontSize: 20, fontFamily: "'Fredoka One',cursive" }}>{opt.label}</div>
+                  <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, fontFamily: "'Nunito',sans-serif", marginTop: 4 }}>{opt.desc}</div>
+                </button>
+              ))}
+            </div>
+
+            {/* Wild Mode toggle */}
+            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 44 }}>
+              <div
+                onClick={() => setWildMode(w => !w)}
+                style={{
+                  width: 54, height: 30, borderRadius: 15,
+                  background: wildMode ? "#7c3aed" : "rgba(255,255,255,0.12)",
+                  position: "relative", cursor: "pointer", transition: "background 0.25s",
+                  border: "2px solid rgba(255,255,255,0.12)", flexShrink: 0,
+                }}
+              >
+                <div style={{
+                  width: 22, height: 22, borderRadius: "50%", background: "white",
+                  position: "absolute", top: 2, left: wildMode ? 28 : 2,
+                  transition: "left 0.25s", boxShadow: "0 2px 6px rgba(0,0,0,0.35)",
+                }} />
+              </div>
+              <div>
+                <div style={{ color: "white", fontSize: 17, fontFamily: "'Fredoka One',cursive" }}>🌟 Wild Card Mode</div>
+                <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, fontFamily: "'Nunito',sans-serif" }}>
+                  2× wild cards in the deck — {wildMode ? "✓ Enabled" : "Disabled"}
+                </div>
+              </div>
+            </div>
+
+            {/* Play button */}
+            <button
+              onClick={startGame}
+              onMouseEnter={e => { e.target.style.transform = "scale(1.06)"; e.target.style.boxShadow = "0 14px 44px rgba(229,62,62,0.65)"; }}
+              onMouseLeave={e => { e.target.style.transform = "scale(1)"; e.target.style.boxShadow = "0 8px 30px rgba(229,62,62,0.5)"; }}
+              style={{
+                padding: "18px 72px", borderRadius: 50, fontSize: 26,
+                background: "linear-gradient(135deg,#e53e3e,#c53030)",
+                color: "white", border: "none", cursor: "pointer",
+                fontFamily: "'Fredoka One',cursive",
+                boxShadow: "0 8px 30px rgba(229,62,62,0.5)",
+                transition: "transform 0.15s, box-shadow 0.15s", letterSpacing: 1,
+              }}
+            >PLAY NOW</button>
+
+            {/* Card legend */}
+            <div style={{ marginTop: 52, display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", maxWidth: 480 }}>
+              {["Skip ⊘", "Reverse ↺", "Draw Two +2", "Wild ★", "Wild Draw 4 +4"].map(t => (
+                <div key={t} style={{
+                  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 8, padding: "5px 12px", color: "rgba(255,255,255,0.45)",
+                  fontSize: 12, fontFamily: "'Nunito',sans-serif"
+                }}>{t}</div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      // ──────────────────────────────────────────────
+      // WIN SCREEN
+      // ──────────────────────────────────────────────
+      if (winner !== null) {
+        const youWon = winner === 0;
+        const winName = playerName(winner);
+        return (
+          <div style={{
+            minHeight: "100vh", minWidth: "100vw",
+            background: youWon
+              ? "linear-gradient(135deg,#1a3a28,#0f172a)"
+              : "linear-gradient(135deg,#1a0a0a,#0f172a)",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            fontFamily: "'Fredoka One',cursive",
+          }}>
+            <div style={{ fontSize: 86, marginBottom: 14 }}>
+              {youWon ? "🎉" : gameMode === "pvp" ? "🎉" : "😞"}
+            </div>
+            <div style={{ fontSize: 54, color: "white", marginBottom: 10 }}>
+              {gameMode === "pvp" ? `${winName} Wins!` : youWon ? "You Win!" : "Computer Wins!"}
+            </div>
+            <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 18, fontFamily: "'Nunito',sans-serif", marginBottom: 52 }}>
+              {gameMode === "pvp"
+                ? `${winName} played all their cards!`
+                : youWon ? "Fantastic — you beat the computer! 🃏"
+                : "Better luck next time!"}
+            </div>
+            <div style={{ display: "flex", gap: 16 }}>
+              <button
+                onClick={startGame}
+                onMouseEnter={e => e.target.style.transform = "scale(1.05)"}
+                onMouseLeave={e => e.target.style.transform = "scale(1)"}
+                style={{
+                  padding: "15px 44px", borderRadius: 50, fontSize: 20,
+                  background: "linear-gradient(135deg,#38a169,#276749)",
+                  color: "white", border: "none", cursor: "pointer",
+                  fontFamily: "'Fredoka One',cursive", transition: "transform 0.1s",
+                  boxShadow: "0 6px 20px rgba(56,161,105,0.45)",
+                }}>Play Again</button>
+              <button
+                onClick={() => { setWinner(null); setScreen("menu"); computerThinking.current = false; }}
+                style={{
+                  padding: "15px 44px", borderRadius: 50, fontSize: 20,
+                  background: "rgba(255,255,255,0.1)", color: "white",
+                  border: "2px solid rgba(255,255,255,0.2)", cursor: "pointer",
+                  fontFamily: "'Fredoka One',cursive",
+                }}>Menu</button>
+            </div>
+          </div>
+        );
+      }
+
+      // ──────────────────────────────────────────────
+      // GAME SCREEN
+      // ──────────────────────────────────────────────
+      return (
+        <div style={{
+          height: "100vh", width: "100vw", overflow: "hidden",
+          background: "linear-gradient(160deg,#0f2027,#203a43,#0f2027)",
+          display: "flex", flexDirection: "column",
+          fontFamily: "'Nunito',sans-serif",
+        }}>
+          {colorPickFor && <ColorPicker onPick={onColorPick} />}
+
+          {showUno !== null && (
+            <div style={{
+              position: "fixed", top: "50%", left: "50%",
+              transform: "translate(-50%,-50%)",
+              background: "#e53e3e", color: "white",
+              fontSize: 60, fontWeight: 900, padding: "16px 44px",
+              borderRadius: 22, zIndex: 200, fontFamily: "'Fredoka One',cursive",
+              animation: "unoPop 0.4s ease-out forwards, pulse 0.6s ease-in-out 0.4s infinite alternate",
+              pointerEvents: "none", letterSpacing: 2,
+            }}>UNO! 🃏</div>
+          )}
+
+          {/* Header bar */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "10px 20px", borderBottom: "1px solid rgba(255,255,255,0.07)",
+            background: "rgba(0,0,0,0.35)", flexShrink: 0,
+          }}>
+            <button
+              onClick={() => { setScreen("menu"); setWinner(null); computerThinking.current = false; }}
+              style={{
+                color: "rgba(255,255,255,0.55)", background: "none", border: "none",
+                cursor: "pointer", fontSize: 14, fontFamily: "'Nunito',sans-serif",
+              }}>← Menu</button>
+            <span style={{ color: "white", fontFamily: "'Fredoka One',cursive", fontSize: 22, letterSpacing: 1 }}>UNO</span>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              {wildMode && <span style={{ background: "#7c3aed", color: "white", borderRadius: 10, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>WILD MODE</span>}
+              <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 12 }}>
+                {gameMode === "pvc" ? "vs Computer" : "2 Players"}
+              </span>
+            </div>
+          </div>
+
+          {/* Opponent zone */}
+          <div style={{ padding: "10px 20px 6px", display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+              <div style={{
+                color: "white", fontWeight: 800, fontSize: 14,
+                background: isP2Turn ? "rgba(255,255,255,0.13)" : "transparent",
+                border: `2px solid ${isP2Turn ? "rgba(255,255,255,0.4)" : "transparent"}`,
+                borderRadius: 20, padding: "4px 14px", transition: "all 0.3s",
+              }}>
+                {gameMode === "pvc" ? "🤖 Computer" : "👤 Player 2"}
+                <span style={{ marginLeft: 8, background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: "2px 8px", fontSize: 12 }}>
+                  {p2Hand.length} cards
+                </span>
+              </div>
+              {isP2Turn && gameMode === "pvc" && (
+                <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>thinking…</span>
+              )}
+            </div>
+            {/* Opponent hand */}
+            <div style={{ display: "flex", overflowX: "auto", maxWidth: "100%", paddingBottom: 4, justifyContent: "center" }}>
+              {p2Hand.map((card, i) => (
+                <div key={card.id} style={{
+                  marginLeft: i === 0 ? 0 : -14, zIndex: i,
+                  transform: `rotate(${(i - p2Hand.length / 2) * 2.5}deg)`,
+                }}>
+                  {gameMode === "pvp" && isP2Turn ? (
+                    <UNOCard card={card} onClick={() => p2PlayCard(card.id)}
+                      playable={canPlay(card, top, activeColor)} small />
+                  ) : (
+                    <UNOCard card={card} faceDown small />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Center play area */}
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 36, padding: "8px 20px", minHeight: 0 }}>
+
+            {/* Draw pile */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+              <div
+                onClick={isP1Turn ? playerDraw : (isP2Turn && gameMode === "pvp") ? p2Draw : undefined}
+                onMouseEnter={e => { if (isP1Turn || (isP2Turn && gameMode === "pvp")) e.currentTarget.style.transform = "scale(1.07)"; }}
+                onMouseLeave={e => e.currentTarget.style.transform = "none"}
+                style={{ cursor: (isP1Turn || (isP2Turn && gameMode === "pvp")) ? "pointer" : "default", transition: "transform 0.12s" }}
+              >
+                <UNOCard card={{ color: "red", value: "back" }} faceDown />
+              </div>
+              <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 11, textAlign: "center" }}>
+                Draw<br />{drawPile.length} left
+              </div>
+              {drawnThis && (
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ color: "#fbbf24", fontSize: 11, fontWeight: 700, marginBottom: 4 }}>Can play or pass</div>
+                  <button
+                    onClick={() => { setDrawnThis(null); setCurrent(1); }}
+                    style={{
+                      background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)",
+                      color: "white", borderRadius: 8, padding: "3px 12px", cursor: "pointer", fontSize: 11,
+                    }}>Pass turn</button>
+                </div>
+              )}
+            </div>
+
+            {/* Discard pile */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+              {top && <UNOCard card={top} />}
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{
+                  width: 14, height: 14, borderRadius: "50%", background: colorBg,
+                  boxShadow: `0 0 10px ${colorBg}`, border: "2px solid rgba(255,255,255,0.3)",
+                }} />
+                <span style={{ color: "rgba(255,255,255,0.55)", fontSize: 11, textTransform: "capitalize" }}>
+                  {displayColor || "—"}
+                </span>
+              </div>
+            </div>
+
+            {/* Turn arrow */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+              <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 10, textTransform: "uppercase", letterSpacing: 1 }}>Turn</div>
+              <div style={{ fontSize: 38 }}>{isP1Turn ? "⬇️" : "⬆️"}</div>
+              <div style={{ color: "white", fontWeight: 800, fontSize: 13, textAlign: "center" }}>
+                {isP1Turn
+                  ? (gameMode === "pvc" ? "Your turn" : "Player 1")
+                  : (gameMode === "pvc" ? "Computer" : "Player 2")}
+              </div>
+            </div>
+          </div>
+
+          {/* Message log */}
+          <div style={{ padding: "4px 20px", flexShrink: 0, minHeight: 28 }}>
+            {messages[0] && (
+              <div style={{
+                color: "rgba(255,255,255,0.5)", fontSize: 12, textAlign: "center",
+                background: "rgba(0,0,0,0.25)", borderRadius: 8, padding: "4px 14px",
+              }}>{messages[0]}</div>
+            )}
+          </div>
+
+          {/* Player hand */}
+          <div style={{
+            padding: "8px 20px 18px", borderTop: "1px solid rgba(255,255,255,0.07)",
+            background: "rgba(0,0,0,0.28)", flexShrink: 0,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, justifyContent: "center" }}>
+              <div style={{
+                color: "white", fontWeight: 800, fontSize: 14,
+                background: isP1Turn ? "rgba(255,255,255,0.13)" : "transparent",
+                border: `2px solid ${isP1Turn ? "rgba(255,255,255,0.4)" : "transparent"}`,
+                borderRadius: 20, padding: "4px 14px", transition: "all 0.3s",
+              }}>
+                {gameMode === "pvp" ? "👤 Player 1" : "👤 You"}
+                <span style={{ marginLeft: 8, background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: "2px 8px", fontSize: 12 }}>
+                  {p1Hand.length} cards
+                </span>
+              </div>
+              {isP1Turn && <span style={{ color: "#4ade80", fontSize: 12, fontWeight: 700 }}>Your turn!</span>}
+            </div>
+            <div style={{
+              display: "flex", overflowX: "auto", paddingBottom: 6,
+              justifyContent: p1Hand.length < 9 ? "center" : "flex-start",
+            }}>
+              {p1Hand.map((card, i) => {
+                const playable = isP1Turn && canPlay(card, top, activeColor);
+                const isDrawnCard = drawnThis && drawnThis.id === card.id;
+                return (
+                  <div key={card.id} style={{ marginLeft: i === 0 ? 0 : -12, zIndex: playable ? 50 + i : i }}>
+                    <UNOCard
+                      card={card}
+                      onClick={isP1Turn ? () => playCard(card.id) : undefined}
+                      lifted={isDrawnCard}
+                      playable={playable && !isDrawnCard}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+
+            {gameMode === "pvp" && isP2Turn && (
+              <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, textAlign: "center", marginTop: 6 }}>
+                Player 2 — click your cards above to play, or click the draw pile
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>

@@ -19,6 +19,7 @@ Complete website projects ranging from interactive games to practical utilities.
 - **[Rename Files](./Awesome%20Websites/Rename%20Files)** - Batch file renaming tool
 - **[Face Bomp](./Awesome%20Websites/Face%20Bomp)** - Whack-a-mole style reaction game
 - **[War](./Awesome%20Websites/War)** - Classic card game implementation
+- **[UNO](./Awesome%20Websites/UNO)** - Another Classic card game implementation
 
 ### UI Experiments
 
