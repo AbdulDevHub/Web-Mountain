@@ -5,20 +5,15 @@
   margin: 0;
   padding: 0;
 }
-
 :root {
   --gold: #c9a84c;
   --gold-light: #f0d080;
   --felt: #0d3b2e;
   --felt-dark: #081f18;
-  --felt-mid: #134533;
-  --red: #c0392b;
   --cream: #f5f0e8;
-  --shadow: rgba(0, 0, 0, 0.6);
   --card-w: 110px;
   --card-h: 154px;
 }
-
 html,
 body {
   height: 100%;
@@ -27,24 +22,19 @@ body {
   color: var(--cream);
   overflow-x: hidden;
 }
-
 body {
   min-height: 100vh;
-  background: radial-gradient(
-    ellipse 80% 60% at 50% 50%,
-    var(--felt) 0%,
-    var(--felt-dark) 100%
-  );
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, var(--felt) 0%, var(--felt-dark) 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-
-/* Felt texture overlay */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
+  pointer-events: none;
+  z-index: 0;
   background-image: repeating-linear-gradient(
     45deg,
     transparent,
@@ -52,11 +42,8 @@ body::before {
     rgba(255, 255, 255, 0.012) 2px,
     rgba(255, 255, 255, 0.012) 4px
   );
-  pointer-events: none;
-  z-index: 0;
 }
 
-/* ── Header ── */
 .site-header {
   position: relative;
   z-index: 1;
@@ -64,7 +51,6 @@ body::before {
   padding: 28px 20px 8px;
   width: 100%;
 }
-
 .site-header h1 {
   font-family: "Playfair Display", serif;
   font-size: clamp(2.2rem, 6vw, 3.8rem);
@@ -77,16 +63,13 @@ body::before {
     2px 2px 0 rgba(0, 0, 0, 0.5);
   line-height: 1;
 }
-
 .subtitle {
-  font-family: "Crimson Text", serif;
   font-style: italic;
   font-size: 1rem;
   color: rgba(201, 168, 76, 0.65);
   letter-spacing: 0.2em;
   margin-top: 4px;
 }
-
 .divider {
   width: 180px;
   height: 1px;
@@ -94,7 +77,6 @@ body::before {
   margin: 12px auto 0;
 }
 
-/* ── Round Result Banner ── */
 #round-result {
   position: relative;
   z-index: 1;
@@ -103,10 +85,8 @@ body::before {
   align-items: center;
   justify-content: center;
   margin: 10px 0;
-  transition: all 0.3s ease;
 }
-
-#round-result .result-text {
+#result-text {
   font-family: "Playfair Display", serif;
   font-size: clamp(1.4rem, 4vw, 2.1rem);
   font-weight: 700;
@@ -117,45 +97,35 @@ body::before {
   transform: translateY(-8px) scale(0.95);
   transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
-#round-result .result-text.visible {
+#result-text.visible {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
-
-#round-result .result-text.you-win {
+#result-text.you-win {
   color: var(--gold-light);
   text-shadow: 0 0 20px rgba(240, 208, 128, 0.5);
 }
-#round-result .result-text.cpu-win {
+#result-text.cpu-win {
   color: #e74c3c;
   text-shadow: 0 0 20px rgba(231, 76, 60, 0.4);
 }
-#round-result .result-text.war {
+#result-text.war {
   color: #fff;
   letter-spacing: 0.15em;
   text-shadow: 0 0 25px rgba(255, 255, 255, 0.6);
 }
-#round-result .result-text.game-over {
-  color: var(--gold);
-  font-size: clamp(1.6rem, 5vw, 2.4rem);
-}
 
-/* ── Arena ── */
 .arena {
   position: relative;
   z-index: 1;
   display: flex;
   align-items: stretch;
   justify-content: center;
-  gap: 0;
   width: 100%;
   max-width: 700px;
   padding: 0 20px;
   flex: 1;
 }
-
-/* ── Player Panels ── */
 .player-panel {
   flex: 1;
   display: flex;
@@ -164,19 +134,9 @@ body::before {
   gap: 14px;
   padding: 20px 16px;
   border-radius: 16px;
-  position: relative;
-  transition: background 0.4s ease;
-}
-
-.player-panel.you {
   background: rgba(13, 59, 46, 0.4);
   border: 1px solid rgba(201, 168, 76, 0.15);
 }
-.player-panel.cpu {
-  background: rgba(13, 59, 46, 0.4);
-  border: 1px solid rgba(201, 168, 76, 0.15);
-}
-
 .player-panel.winner-flash {
   animation: winnerPulse 0.6s ease;
 }
@@ -194,7 +154,6 @@ body::before {
     box-shadow: none;
   }
 }
-
 .player-panel.loser-flash {
   animation: loserPulse 0.6s ease;
 }
@@ -210,7 +169,6 @@ body::before {
     background: rgba(13, 59, 46, 0.4);
   }
 }
-
 .player-label {
   font-family: "Playfair Display", serif;
   font-size: 0.85rem;
@@ -220,16 +178,13 @@ body::before {
   color: var(--gold);
   opacity: 0.85;
 }
-
 .score-display {
   font-family: "Playfair Display", serif;
   font-size: 2.8rem;
   font-weight: 900;
   color: var(--cream);
   line-height: 1;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
 .score-display.bump {
   animation: scoreBump 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -246,13 +201,11 @@ body::before {
   }
 }
 
-/* ── Card Slot ── */
 .card-slot {
   width: var(--card-w);
   height: var(--card-h);
   perspective: 700px;
 }
-
 .card-inner {
   width: 100%;
   height: 100%;
@@ -260,11 +213,9 @@ body::before {
   transform-style: preserve-3d;
   transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .card-inner.flipped {
   transform: rotateY(180deg);
 }
-
 .card-face,
 .card-back {
   position: absolute;
@@ -273,18 +224,15 @@ body::before {
   border-radius: 8px;
   overflow: hidden;
 }
-
 .card-face {
   transform: rotateY(180deg);
 }
-
 .card-face img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
-
 .card-back {
   background: linear-gradient(135deg, #8b0000 0%, #5a0000 50%, #8b0000 100%);
   border: 3px solid var(--gold);
@@ -292,19 +240,12 @@ body::before {
   align-items: center;
   justify-content: center;
 }
-
 .card-back::after {
   content: "♠";
   font-size: 2.5rem;
   color: rgba(201, 168, 76, 0.4);
 }
 
-/* Empty slot */
-.card-slot.empty .card-inner {
-  transform: rotateY(0deg);
-}
-
-/* ── VS Divider ── */
 .vs-divider {
   display: flex;
   flex-direction: column;
@@ -314,7 +255,6 @@ body::before {
   gap: 10px;
   flex-shrink: 0;
 }
-
 .vs-text {
   font-family: "Playfair Display", serif;
   font-size: 1.1rem;
@@ -322,19 +262,12 @@ body::before {
   letter-spacing: 0.12em;
   color: rgba(201, 168, 76, 0.4);
 }
-
 .vs-line {
   width: 1px;
   flex: 1;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgba(201, 168, 76, 0.25),
-    transparent
-  );
+  background: linear-gradient(to bottom, transparent, rgba(201, 168, 76, 0.25), transparent);
 }
 
-/* ── Controls ── */
 .controls {
   position: relative;
   z-index: 1;
@@ -345,19 +278,16 @@ body::before {
   flex-direction: column;
   gap: 12px;
 }
-
 .deck-info {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 4px;
 }
-
 .remaining-text {
   font-style: italic;
   font-size: 0.95rem;
   color: rgba(245, 240, 232, 0.5);
-  letter-spacing: 0.05em;
 }
 
 .btn {
@@ -372,13 +302,11 @@ body::before {
   transition: all 0.2s ease;
   padding: 12px 24px;
 }
-
 .btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
   transform: none !important;
 }
-
 .btn-primary {
   background: linear-gradient(135deg, var(--gold) 0%, #a87830 100%);
   color: #1a0f00;
@@ -388,20 +316,16 @@ body::before {
   box-shadow:
     0 4px 20px rgba(201, 168, 76, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  letter-spacing: 0.2em;
 }
-
 .btn-primary:not(:disabled):hover {
   transform: translateY(-2px);
   box-shadow:
     0 8px 28px rgba(201, 168, 76, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
-
 .btn-primary:not(:disabled):active {
   transform: translateY(0);
 }
-
 .btn-secondary {
   background: transparent;
   color: rgba(201, 168, 76, 0.7);
@@ -409,14 +333,12 @@ body::before {
   font-size: 0.8rem;
   padding: 8px 16px;
 }
-
 .btn-secondary:hover {
   background: rgba(201, 168, 76, 0.08);
   color: var(--gold);
   border-color: rgba(201, 168, 76, 0.6);
 }
 
-/* ── Game Over Overlay ── */
 #game-over-overlay {
   position: fixed;
   inset: 0;
@@ -427,12 +349,10 @@ body::before {
   background: rgba(8, 31, 24, 0.88);
   backdrop-filter: blur(6px);
 }
-
 #game-over-overlay.show {
   display: flex;
   animation: fadeIn 0.5s ease;
 }
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -441,17 +361,12 @@ body::before {
     opacity: 1;
   }
 }
-
 .game-over-card {
   text-align: center;
   padding: 50px 60px;
   border: 1px solid rgba(201, 168, 76, 0.35);
   border-radius: 16px;
-  background: linear-gradient(
-    160deg,
-    rgba(13, 59, 46, 0.95) 0%,
-    rgba(8, 31, 24, 0.98) 100%
-  );
+  background: linear-gradient(160deg, rgba(13, 59, 46, 0.95) 0%, rgba(8, 31, 24, 0.98) 100%);
   box-shadow:
     0 0 80px rgba(201, 168, 76, 0.15),
     0 30px 60px rgba(0, 0, 0, 0.7);
@@ -459,7 +374,6 @@ body::before {
   max-width: 420px;
   width: 90%;
 }
-
 @keyframes slideUp {
   from {
     transform: translateY(40px);
@@ -470,35 +384,30 @@ body::before {
     opacity: 1;
   }
 }
-
-.game-over-card .trophy {
+.trophy {
   font-size: 4rem;
   line-height: 1;
   margin-bottom: 16px;
   display: block;
 }
-
 .game-over-card h2 {
   font-family: "Playfair Display", serif;
   font-size: 2.2rem;
   font-weight: 900;
   color: var(--gold);
   margin-bottom: 8px;
-  letter-spacing: 0.05em;
 }
-
-.game-over-card .final-scores {
+.final-scores {
   display: flex;
   justify-content: center;
   gap: 40px;
   margin: 24px 0;
   font-family: "Playfair Display", serif;
 }
-
-.final-scores .score-block {
+.score-block {
   text-align: center;
 }
-.final-scores .s-label {
+.s-label {
   font-size: 0.8rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -506,18 +415,16 @@ body::before {
   display: block;
   margin-bottom: 4px;
 }
-.final-scores .s-num {
+.s-num {
   font-size: 2.5rem;
   font-weight: 900;
   color: var(--cream);
 }
-
-.game-over-card .play-again-btn {
+.play-again-btn {
   margin-top: 12px;
   width: 100%;
 }
 
-/* War animation */
 @keyframes warShake {
   0%,
   100% {
@@ -530,7 +437,6 @@ body::before {
     transform: translateX(4px) rotate(1deg);
   }
 }
-
 .war-shake {
   animation: warShake 0.4s ease 2;
 }
