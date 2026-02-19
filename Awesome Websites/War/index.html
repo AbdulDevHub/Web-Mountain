@@ -1,22 +1,83 @@
-<html>
-    <head><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
-        <link rel="preconnect" href="https://fonts.gstatic.com">
-        <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="index.css">
-    </head>
-    <body>
-        <div class="top">
-            <button id="new-deck">New Deck</button>
-            <p id="remaining"></p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>War — The Card Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <h1>War</h1>
+    <p class="subtitle">A game of fortune & fate</p>
+    <div class="divider"></div>
+  </header>
+
+  <div id="round-result">
+    <div class="result-text" id="result-text">Deal the cards to begin</div>
+  </div>
+
+  <div class="arena">
+    <!-- Computer -->
+    <div class="player-panel cpu" id="cpu-panel">
+      <div class="player-label">Dealer</div>
+      <div class="score-display" id="cpu-score">0</div>
+      <div class="card-slot empty" id="cpu-slot">
+        <div class="card-inner" id="cpu-card-inner">
+          <div class="card-back"></div>
+          <div class="card-face"><img id="cpu-card-img" src="" alt="Dealer card" /></div>
         </div>
-        <h2 id="header">Game of War</h2>
-        <h3 id="computer-score">Computer score: 0</h3>
-        <div id="cards">
-            <div class="card-slot"></div>
-            <div class="card-slot"></div>
+      </div>
+    </div>
+
+    <div class="vs-divider">
+      <div class="vs-line"></div>
+      <div class="vs-text">VS</div>
+      <div class="vs-line"></div>
+    </div>
+
+    <!-- Player -->
+    <div class="player-panel you" id="you-panel">
+      <div class="player-label">You</div>
+      <div class="score-display" id="you-score">0</div>
+      <div class="card-slot empty" id="you-slot">
+        <div class="card-inner" id="you-card-inner">
+          <div class="card-back"></div>
+          <div class="card-face"><img id="you-card-img" src="" alt="Your card" /></div>
         </div>
-        <h3 id="my-score">My score: 0</h3>
-        <button id="draw-cards" class="draw">Draw</button>
-        <script src="index.js"></script>
-    </body>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="deck-info">
+      <span class="remaining-text" id="remaining-text">No deck loaded</span>
+      <button class="btn btn-secondary" id="new-deck-btn">New Deck</button>
+    </div>
+    <button class="btn btn-primary" id="draw-btn">Draw Cards</button>
+  </div>
+
+  <!-- Game Over Overlay -->
+  <div id="game-over-overlay">
+    <div class="game-over-card">
+      <span class="trophy" id="trophy-icon">🏆</span>
+      <h2 id="game-over-title">Game Over</h2>
+      <div class="final-scores">
+        <div class="score-block">
+          <span class="s-label">Dealer</span>
+          <span class="s-num" id="final-cpu">0</span>
+        </div>
+        <div class="score-block">
+          <span class="s-label">You</span>
+          <span class="s-num" id="final-you">0</span>
+        </div>
+      </div>
+      <button class="btn btn-primary play-again-btn" id="play-again-btn">Play Again</button>
+    </div>
+  </div>
+  <script src="index.js"></script>
+</body>
 </html>
