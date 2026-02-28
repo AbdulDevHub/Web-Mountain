@@ -245,7 +245,7 @@
     border-radius: 12px;
     box-shadow: 0 4px 6px -1px rgba(26,26,46,0.06), 0 12px 36px -4px rgba(26,26,46,0.1);
     border: 1px solid #e8e5e0;
-    overflow: scroll;
+    overflow: clip;
     font-family: var(--sans);
   }
 
@@ -612,6 +612,9 @@ Best regards,
   /* ── PDF Download ── */
   function downloadPDF() {
     const card = document.getElementById('email-card');
+    // Temporarily set email card overflow to hidden
+    card.style.overflow = 'hidden';
+
     const opt = {
       margin: [10, 10, 10, 10],
       filename: 'mock-email.pdf',
@@ -620,6 +623,9 @@ Best regards,
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     html2pdf().set(opt).from(card).save();
+
+    // Restore overflow after a short delay to ensure PDF generation starts
+    setTimeout(() => {card.style.overflow = 'clip';}, 1000);
   }
 
   /* ── Init ── */
