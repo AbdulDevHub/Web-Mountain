@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Mock Email Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a2e;
+    --ink-soft: #4a4a6a;
+    --ink-faint: #9898b8;
+    --cream: #faf9f6;
+    --paper: #f4f2ed;
+    --rule: #e2dfd8;
+    --accent: #c0392b;
+    --accent-light: #e8d5d3;
+    --teal: #0f6b6b;
+    --teal-light: #d0eaea;
+    --white: #ffffff;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --radius: 10px;
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--cream);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 0 40px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--accent);
+    flex-shrink: 0;
+  }
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .brand-name {
+    font-family: var(--serif);
+    font-size: 22px;
+    letter-spacing: -0.3px;
+  }
+  .brand-sub {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .btn-download {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    letter-spacing: 0.3px;
+  }
+  .btn-download:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-download:active { transform: translateY(0); }
+  .btn-download svg { width: 14px; height: 14px; }
+
+  /* ── Main layout ── */
+  .workspace {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ── Left panel – editor ── */
+  .editor-panel {
+    background: var(--paper);
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .panel-section {
+    padding: 22px 24px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .panel-section:last-child { border-bottom: none; }
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 5px;
+  }
+  .field input, .field textarea {
+    width: 100%;
+    background: var(--white);
+    border: 1.5px solid var(--rule);
+    border-radius: 6px;
+    padding: 8px 11px;
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+    resize: none;
+  }
+  .field input:focus, .field textarea:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px var(--teal-light);
+  }
+  .field textarea { height: 200px; font-family: 'Menlo', 'Monaco', 'Cascadia Code', monospace; font-size: 12.5px; line-height: 1.6; }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Avatar preview */
+  .avatar-controls { display: flex; gap: 10px; align-items: center; }
+  .avatar-preview {
+    width: 44px; height: 44px; border-radius: 8px;
+    background: var(--teal); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-size: 16px; font-weight: bold;
+    flex-shrink: 0;
+  }
+  .avatar-pick { display: flex; gap: 6px; flex-wrap: wrap; }
+  .color-dot {
+    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: border-color 0.15s, transform 0.1s;
+  }
+  .color-dot:hover { transform: scale(1.1); }
+  .color-dot.active { border-color: var(--ink); }
+
+  /* Attachments */
+  .attach-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .attach-item {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--white); border: 1.5px solid var(--rule);
+    border-radius: 6px; padding: 7px 10px; font-size: 13px;
+  }
+  .attach-item .attach-name { flex: 1; }
+  .attach-item .attach-rm {
+    background: none; border: none; cursor: pointer; color: var(--ink-faint);
+    font-size: 16px; line-height: 1; padding: 0 2px;
+    transition: color 0.12s;
+  }
+  .attach-item .attach-rm:hover { color: var(--accent); }
+  .attach-row { display: flex; gap: 8px; }
+  .attach-row input {
+    flex: 1; background: var(--white); border: 1.5px solid var(--rule);
+    border-radius: 6px; padding: 7px 10px; font-family: var(--sans);
+    font-size: 13px; color: var(--ink); outline: none;
+    transition: border-color 0.15s;
+  }
+  .attach-row input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-light); }
+  .btn-add {
+    background: var(--ink); color: white; border: none; border-radius: 6px;
+    padding: 7px 14px; font-family: var(--sans); font-size: 13px;
+    font-weight: 600; cursor: pointer; white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+  .btn-add:hover { opacity: 0.8; }
+
+  /* Upload */
+  .upload-zone {
+    border: 2px dashed var(--rule); border-radius: 8px;
+    padding: 20px; text-align: center; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--teal); background: var(--teal-light);
+  }
+  .upload-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+  }
+  .upload-zone p { font-size: 13px; color: var(--ink-soft); }
+  .upload-zone strong { color: var(--teal); }
+
+  /* ── Right panel – preview ── */
+  .preview-panel {
+    overflow-y: auto;
+    background: var(--cream);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .preview-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--ink-faint);
+    align-self: flex-start; margin-bottom: 20px;
+  }
+
+  /* ── Email card ── */
+  #email-card {
+    width: 100%; max-width: 850px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(26,26,46,0.06), 0 12px 36px -4px rgba(26,26,46,0.1);
+    border: 1px solid #e8e5e0;
+    overflow: hidden;
+    font-family: var(--sans);
+  }
+
+  .ec-topbar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px;
+    color: white;
+  }
+  .ec-topbar-logo {
+    width: 34px; height: 34px; border-radius: 7px;
+    background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+  }
+  .ec-topbar-meta { font-size: 12px; opacity: 0.9; }
+
+  .ec-header {
+    padding: 18px 22px;
+    display: flex; gap: 16px; align-items: flex-start;
+    border-bottom: 1px solid #f1f0ec;
+  }
+  .ec-avatar {
+    width: 52px; height: 52px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: white; font-size: 18px;
+    font-family: var(--serif);
+    flex-shrink: 0;
+  }
+  .ec-header-info { flex: 1; }
+  .ec-subject { margin: 0; font-size: 17px; font-weight: 600; color: #111827; }
+  .ec-meta { color: #6b7280; font-size: 12.5px; margin-top: 5px; }
+  .ec-attach-badge { font-size: 12px; color: #6b7280; padding-top: 4px; }
+
+  .ec-body {
+    padding: 22px 24px 28px;
+    line-height: 1.7; font-size: 14.5px; color: #1f2937;
+  }
+  .ec-body h1, .ec-body h2, .ec-body h3 {
+    margin: 1.2em 0 0.5em; font-weight: 600;
+  }
+  .ec-body h2 { font-size: 15px; }
+  .ec-body h3 { font-size: 14px; }
+  .ec-body p { margin-bottom: 0.9em; }
+  .ec-body ul, .ec-body ol { margin: 0.5em 0 0.9em 20px; }
+  .ec-body li { margin-bottom: 3px; }
+  .ec-body code {
+    background: #f3f4f6; padding: 1px 5px; border-radius: 4px;
+    font-size: 13px; font-family: 'Menlo', 'Monaco', monospace;
+  }
+  .ec-body pre {
+    background: #f3f4f6; padding: 14px; border-radius: 8px;
+    overflow-x: auto; margin-bottom: 1em;
+  }
+  .ec-body pre code { background: none; padding: 0; }
+  .ec-body blockquote {
+    border-left: 3px solid #e5e7eb; padding-left: 14px;
+    color: #6b7280; margin: 0 0 0.9em;
+  }
+  .ec-body a { color: #0f6b6b; }
+  .ec-body strong { font-weight: 600; }
+
+  .ec-attachments {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    padding: 14px 22px;
+    border-top: 1px dashed #eeecea;
+  }
+  .ec-attach {
+    display: flex; gap: 7px; align-items: center;
+    padding: 7px 12px; border-radius: 7px;
+    background: #f8f9fb; border: 1px solid #eef0f4;
+    font-size: 12.5px; color: #374151;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .workspace { grid-template-columns: 1fr; }
+    .editor-panel { border-right: none; border-bottom: 1px solid var(--rule); }
+    .preview-panel { padding: 24px 16px; }
+    header { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="brand-name">Epistola</span>
+    <span class="brand-sub">Mock Email Generator</span>
+  </div>
+  <button class="btn-download" onclick="downloadPDF()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/>
+    </svg>
+    Download PDF
+  </button>
+</header>
+
+<div class="workspace">
+
+  <!-- ── LEFT: Editor ── -->
+  <div class="editor-panel">
+
+    <div class="panel-section">
+      <div class="section-label">Sender</div>
+      <div class="field">
+        <label>Full Name</label>
+        <input id="f-name" type="text" value="Abdul Hadi Khan" placeholder="Jane Smith" oninput="render()"/>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input id="f-from-email" type="text" value="abdul@example.com" placeholder="jane@example.com" oninput="render()"/>
+      </div>
+      <div class="field">
+        <label>Initials &amp; Colour</label>
+        <div class="avatar-controls">
+          <div class="avatar-preview" id="av-preview">AH</div>
+          <div>
+            <div class="avatar-pick" id="color-picker"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">Recipient</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Name</label>
+          <input id="f-to-name" type="text" value="Riley" placeholder="Alex" oninput="render()"/>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input id="f-to-email" type="text" value="riley@example.com" placeholder="alex@example.com" oninput="render()"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">Subject &amp; Date</div>
+      <div class="field">
+        <label>Subject</label>
+        <input id="f-subject" type="text" value="Submission: hash table implementation &amp; analysis" placeholder="Re: Project Update" oninput="render()"/>
+      </div>
+      <div class="field">
+        <label>Date</label>
+        <input id="f-date" type="text" value="Feb 27, 2026" placeholder="Feb 27, 2026" oninput="render()"/>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">Body (Markdown)</div>
+      <div class="field">
+        <div class="upload-zone" id="md-drop">
+          <input type="file" accept=".md,.txt" onchange="loadMarkdown(event)"/>
+          <p>Drop a <strong>.md</strong> file or click to upload</p>
+        </div>
+      </div>
+      <div class="field">
+        <label>Or type / paste markdown</label>
+        <textarea id="f-body" oninput="render()">Hello Riley,
+
+I am writing to submit my completed hash table implementation and the accompanying analysis as requested. The Python file *csc263_interview.py* is attached to this email.
+
+## Implementation
+
+The `HashTable` class stores elements in a list called `self.array`, where each slot holds either `None` (never occupied), the sentinel value `DELETED` (previously occupied), or a `Node` object containing a key-value pair.
+
+## Amortized Runtime Analysis
+
+*Scenario 1* — each doubling rehash copies at most as many elements as the previous capacity, giving **O(1) amortized per insert**.
+
+Please let me know if you have any questions.
+
+Best regards,
+**Abdul Hadi Khan**</textarea>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">Attachments</div>
+      <div class="attach-list" id="attach-list"></div>
+      <div class="attach-row">
+        <input id="attach-input" type="text" placeholder="filename.pdf" onkeydown="if(event.key==='Enter')addAttachment()"/>
+        <button class="btn-add" onclick="addAttachment()">+ Add</button>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-label">Accent Colour</div>
+      <div class="field">
+        <label>Topbar gradient</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="accent-picker"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT: Preview ── -->
+  <div class="preview-panel">
+    <div class="preview-label">Live Preview</div>
+    <div id="email-card">
+      <!-- rendered here -->
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ── Colour palettes ── */
+  const AVATAR_COLORS = [
+    '#0f6b6b','#1e3a5f','#7c2d12','#3b0764','#064e3b',
+    '#44403c','#9b1c1c','#1e40af','#065f46','#581c87'
+  ];
+  const ACCENT_GRADIENTS = [
+    { label: 'Ocean', a: '#2563eb', b: '#06b6d4' },
+    { label: 'Forest', a: '#064e3b', b: '#059669' },
+    { label: 'Crimson', a: '#9b1c1c', b: '#dc2626' },
+    { label: 'Dusk', a: '#1e1b4b', b: '#7c3aed' },
+    { label: 'Slate', a: '#1e3a5f', b: '#0ea5e9' },
+    { label: 'Copper', a: '#7c2d12', b: '#ea580c' },
+  ];
+
+  let avatarColor = AVATAR_COLORS[0];
+  let accentGradient = ACCENT_GRADIENTS[0];
+  let attachments = ['csc263_interview.py', 'interview.tex'];
+
+  /* Build colour pickers */
+  const cpEl = document.getElementById('color-picker');
+  AVATAR_COLORS.forEach((c, i) => {
+    const d = document.createElement('div');
+    d.className = 'color-dot' + (i === 0 ? ' active' : '');
+    d.style.background = c;
+    d.title = c;
+    d.onclick = () => {
+      document.querySelectorAll('#color-picker .color-dot').forEach(x => x.classList.remove('active'));
+      d.classList.add('active');
+      avatarColor = c;
+      render();
+    };
+    cpEl.appendChild(d);
+  });
+
+  const apEl = document.getElementById('accent-picker');
+  ACCENT_GRADIENTS.forEach((g, i) => {
+    const d = document.createElement('div');
+    d.className = 'color-dot' + (i === 0 ? ' active' : '');
+    d.style.background = `linear-gradient(135deg, ${g.a}, ${g.b})`;
+    d.title = g.label;
+    d.onclick = () => {
+      document.querySelectorAll('#accent-picker .color-dot').forEach(x => x.classList.remove('active'));
+      d.classList.add('active');
+      accentGradient = g;
+      render();
+    };
+    apEl.appendChild(d);
+  });
+
+  /* ── Attachment management ── */
+  function renderAttachList() {
+    const list = document.getElementById('attach-list');
+    list.innerHTML = '';
+    attachments.forEach((name, i) => {
+      const el = document.createElement('div');
+      el.className = 'attach-item';
+      el.innerHTML = `<span>📄</span><span class="attach-name">${escHtml(name)}</span>
+        <button class="attach-rm" onclick="removeAttachment(${i})" title="Remove">×</button>`;
+      list.appendChild(el);
+    });
+  }
+
+  function addAttachment() {
+    const inp = document.getElementById('attach-input');
+    const v = inp.value.trim();
+    if (!v) return;
+    attachments.push(v);
+    inp.value = '';
+    renderAttachList();
+    render();
+  }
+
+  function removeAttachment(i) {
+    attachments.splice(i, 1);
+    renderAttachList();
+    render();
+  }
+
+  /* ── Markdown file upload ── */
+  function loadMarkdown(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('f-body').value = ev.target.result;
+      render();
+    };
+    reader.readAsText(file);
+  }
+
+  /* Drag over styling */
+  const mdDrop = document.getElementById('md-drop');
+  mdDrop.addEventListener('dragover', e => { e.preventDefault(); mdDrop.classList.add('dragover'); });
+  mdDrop.addEventListener('dragleave', () => mdDrop.classList.remove('dragover'));
+  mdDrop.addEventListener('drop', e => {
+    e.preventDefault(); mdDrop.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => { document.getElementById('f-body').value = ev.target.result; render(); };
+    reader.readAsText(file);
+  });
+
+  /* ── Helpers ── */
+  function v(id) { return document.getElementById(id).value; }
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function initials(name) {
+    return name.trim().split(/\s+/).map(w => w[0] || '').join('').slice(0,2).toUpperCase() || '??';
+  }
+
+  /* ── Render email card ── */
+  function render() {
+    const name = v('f-name');
+    const fromEmail = v('f-from-email');
+    const toName = v('f-to-name');
+    const toEmail = v('f-to-email');
+    const subject = v('f-subject');
+    const date = v('f-date');
+    const body = v('f-body');
+
+    const ini = initials(name);
+    document.getElementById('av-preview').textContent = ini;
+    document.getElementById('av-preview').style.background = avatarColor;
+
+    const bodyHtml = marked.parse(body);
+
+    const attachHtml = attachments.length
+      ? `<div class="ec-attachments">${attachments.map(a => `<div class="ec-attach">📄 ${escHtml(a)}</div>`).join('')}</div>`
+      : '';
+
+    document.getElementById('email-card').innerHTML = `
+      <div class="ec-topbar" style="background:linear-gradient(90deg,${accentGradient.a},${accentGradient.b})">
+        <div class="ec-topbar-logo">${escHtml(ini)}</div>
+        <div class="ec-topbar-meta">Message preview</div>
+      </div>
+      <div class="ec-header">
+        <div class="ec-avatar" style="background:${avatarColor}">${escHtml(ini)}</div>
+        <div class="ec-header-info">
+          <h1 class="ec-subject">${escHtml(subject)}</h1>
+          <div class="ec-meta">From: ${escHtml(name)} &lt;${escHtml(fromEmail)}&gt; &nbsp;•&nbsp; To: ${escHtml(toName)} &lt;${escHtml(toEmail)}&gt; &nbsp;•&nbsp; ${escHtml(date)}</div>
+        </div>
+        ${attachments.length ? `<div class="ec-attach-badge">📎 ${attachments.length} attachment${attachments.length>1?'s':''}</div>` : ''}
+      </div>
+      <div class="ec-body">${bodyHtml}</div>
+      ${attachHtml}
+    `;
+  }
+
+  /* ── PDF Download ── */
+  function downloadPDF() {
+    const card = document.getElementById('email-card');
+    const opt = {
+      margin: [10, 10, 10, 10],
+      filename: 'mock-email.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(card).save();
+  }
+
+  /* ── Init ── */
+  renderAttachList();
+  render();
+</script>
+</body>
+</html>

@@ -16,6 +16,7 @@ Complete website projects ranging from interactive games to practical utilities.
 - **[Firey Passages](./Awesome%20Websites/Firey%20Pasages)** - Animated text effects showcase
 - **[File Redownloader](./Awesome%20Websites/File%20Redownloader)** - Batch file download utility
 - **[QR Code Generator](./Awesome%20Websites/QR%20Code%20Generator)** - Dynamic QR code creation tool
+- **[Mock Email Generator](./Awesome%20Websites/Mock%20Email%20Generator)** - Interactive mock email generator
 - **[Rename Files](./Awesome%20Websites/Rename%20Files)** - Batch file renaming tool
 - **[Face Bomp](./Awesome%20Websites/Face%20Bomp)** - Whack-a-mole style reaction game
 - **[War](./Awesome%20Websites/War)** - Classic card game implementation
