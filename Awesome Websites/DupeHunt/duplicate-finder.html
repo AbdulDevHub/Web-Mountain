@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Duplicate Finder</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --panel: #141414;
+    --border: #2a2a2a;
+    --accent: #e8ff47;
+    --accent2: #ff4747;
+    --text: #f0f0f0;
+    --muted: #555;
+    --ok: #47ffb2;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232,255,71,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,255,71,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 820px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    margin-bottom: 40px;
+  }
+
+  .tag {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  h1 span {
+    color: var(--accent);
+  }
+
+  .subtitle {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .card-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  textarea {
+    width: 100%;
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    padding: 16px;
+    resize: vertical;
+    min-height: 130px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  textarea:focus {
+    border-color: var(--accent);
+  }
+
+  textarea::placeholder {
+    color: var(--muted);
+  }
+
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  button {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+    border: none;
+    padding: 11px 24px;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0d0d0d;
+    font-weight: 700;
+  }
+  .btn-primary:hover {
+    background: #f5ff7a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(232,255,71,0.25);
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover {
+    color: var(--text);
+    border-color: #444;
+  }
+
+  .sep-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+
+  .sep-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .sep-btns {
+    display: flex;
+    gap: 6px;
+  }
+
+  .sep-btn {
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    padding: 5px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-width: 36px;
+    text-align: center;
+  }
+  .sep-btn:hover { border-color: #444; color: var(--text); }
+  .sep-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0d0d0d;
+    font-weight: 700;
+  }
+
+  .sep-custom-input {
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    padding: 5px 10px;
+    width: 52px;
+    outline: none;
+    transition: border-color 0.2s;
+    display: none;
+    text-align: center;
+  }
+  .sep-custom-input:focus { border-color: var(--accent); }
+
+  /* Results */
+  #results { display: none; }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px 16px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .stat.total .stat-num { color: var(--text); }
+  .stat.dupes .stat-num { color: var(--accent2); }
+  .stat.unique .stat-num { color: var(--ok); }
+
+  /* Duplicate list */
+  .section-title {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .dupe-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 3px;
+    margin-bottom: 8px;
+    animation: slideIn 0.25s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .dupe-name {
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .dupe-count {
+    background: var(--accent2);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  .all-clear {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  .all-clear .icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+  }
+
+  .all-clear p {
+    color: var(--ok);
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .all-clear small {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 6px;
+    display: block;
+  }
+
+  /* Clean list */
+  .clean-list-box {
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--ok);
+    word-break: break-all;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    position: relative;
+  }
+
+  .clean-list-box:hover { border-color: var(--ok); }
+
+  .copy-hint {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-align: right;
+  }
+
+  .copied-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ok);
+    color: #000;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 10px 24px;
+    border-radius: 40px;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .copied-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="tag">// utility tool</div>
+    <h1>DUPE<span>HUNT</span></h1>
+    <p class="subtitle">Paste your <code style="color:var(--accent)">+</code>-separated list below. Duplicates are matched case-insensitively.</p>
+  </header>
+
+  <div class="card">
+    <div class="card-label">// your list</div>
+    <textarea id="input" placeholder="bob + alice + BOB + charlie + Alice + dave ..."></textarea>
+    <div class="controls">
+      <button class="btn-primary" onclick="analyze()">Analyze →</button>
+      <button class="btn-ghost" onclick="clearAll()">Clear</button>
+      <div class="sep-group">
+        <span class="sep-label">sep:</span>
+        <div class="sep-btns">
+          <button class="sep-btn active" data-sep="+">+</button>
+          <button class="sep-btn" data-sep=",">,</button>
+          <button class="sep-btn" data-sep=";">;</button>
+          <button class="sep-btn" data-sep="|">|</button>
+          <button class="sep-btn" data-sep="custom">…</button>
+        </div>
+        <input class="sep-custom-input" id="custom-sep" maxlength="5" placeholder="?" />
+      </div>
+    </div>
+  </div>
+
+  <div id="results">
+    <div class="stats-row">
+      <div class="stat total">
+        <div class="stat-num" id="stat-total">0</div>
+        <div class="stat-label">Total Items</div>
+      </div>
+      <div class="stat dupes">
+        <div class="stat-num" id="stat-dupes">0</div>
+        <div class="stat-label">Duplicate Values</div>
+      </div>
+      <div class="stat unique">
+        <div class="stat-num" id="stat-unique">0</div>
+        <div class="stat-label">Unique Items</div>
+      </div>
+    </div>
+
+    <div id="dupe-section">
+      <div class="section-title">Duplicates found</div>
+      <div id="dupe-list"></div>
+    </div>
+
+    <div id="clean-section" style="margin-top:24px">
+      <div class="section-title">Deduplicated list</div>
+      <div class="copy-hint">↓ click button to copy</div>
+      <div class="clean-list-box" id="clean-output"></div>
+      <button class="btn-primary" style="margin-top:10px;width:100%" onclick="copyClean()">Copy Clean List</button>
+    </div>
+  </div>
+</div>
+
+<div class="copied-toast" id="toast">✓ Copied!</div>
+
+<script>
+  // Separator selector
+  let currentSep = '+';
+  document.querySelectorAll('.sep-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sep-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const customInput = document.getElementById('custom-sep');
+      if (btn.dataset.sep === 'custom') {
+        customInput.style.display = 'block';
+        customInput.focus();
+        currentSep = customInput.value || '';
+      } else {
+        customInput.style.display = 'none';
+        currentSep = btn.dataset.sep;
+      }
+    });
+  });
+  document.getElementById('custom-sep').addEventListener('input', e => {
+    currentSep = e.target.value;
+  });
+
+  function analyze() {
+    const raw = document.getElementById('input').value.trim();
+    const sep = currentSep;
+    if (!raw || !sep) return;
+
+    const items = raw.split(sep).map(s => s.trim()).filter(s => s.length > 0);
+    const total = items.length;
+
+    const countMap = {};
+    items.forEach(item => {
+      const key = item.toLowerCase();
+      if (countMap[key]) {
+        countMap[key].count++;
+      } else {
+        countMap[key] = { display: item, count: 1 };
+      }
+    });
+
+    const dupes = Object.values(countMap).filter(v => v.count > 1);
+    const uniqueCount = Object.keys(countMap).length;
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-dupes').textContent = dupes.length;
+    document.getElementById('stat-unique').textContent = uniqueCount;
+
+    const dupeList = document.getElementById('dupe-list');
+    dupeList.innerHTML = '';
+
+    if (dupes.length === 0) {
+      dupeList.innerHTML = `
+        <div class="all-clear">
+          <div class="icon">✓</div>
+          <p>No duplicates found!</p>
+          <small>All ${total} items are unique.</small>
+        </div>`;
+    } else {
+      dupes.sort((a, b) => b.count - a.count).forEach((d, i) => {
+        const el = document.createElement('div');
+        el.className = 'dupe-item';
+        el.style.animationDelay = `${i * 40}ms`;
+        el.innerHTML = `<span class="dupe-name">${escHtml(d.display)}</span><span class="dupe-count">×${d.count}</span>`;
+        dupeList.appendChild(el);
+      });
+    }
+
+    const cleanItems = Object.values(countMap).map(v => v.display);
+    document.getElementById('clean-output').textContent = cleanItems.join(' ' + sep + ' ');
+
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function copyClean() {
+    const text = document.getElementById('clean-output').textContent;
+    if (!text) return;
+
+    // Try modern clipboard API first, fall back to execCommand
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(showToast).catch(() => fallbackCopy(text));
+    } else {
+      fallbackCopy(text);
+    }
+  }
+
+  function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showToast();
+    } catch(e) {
+      alert('Copy failed — please select the text manually.');
+    }
+    document.body.removeChild(ta);
+  }
+
+  function showToast() {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  function clearAll() {
+    document.getElementById('input').value = '';
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('input').focus();
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  document.getElementById('input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.ctrlKey) analyze();
+  });
+</script>
+</body>
+</html>
