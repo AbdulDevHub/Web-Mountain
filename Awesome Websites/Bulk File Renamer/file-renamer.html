@@ -598,8 +598,78 @@
     <div id="root"></div>
     
     <script type="text/babel">
-        const { useState, useEffect, useRef, memo } = React;
-        
+        const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+        // ─── FilePreview lives OUTSIDE FileRenamer so React never remounts it ───────
+        // Uses createObjectURL (lighter than base64 FileReader) with a module-level cache
+        const objectUrlCache = {};
+
+        const FilePreview = React.memo(({ fileId, originalFile, extension, currentName }) => {
+            const [preview, setPreview] = useState(() => objectUrlCache[fileId] || null);
+
+            useEffect(() => {
+                if (objectUrlCache[fileId]) {
+                    setPreview(objectUrlCache[fileId]);
+                    return;
+                }
+                if (originalFile.type.startsWith('image/')) {
+                    const url = URL.createObjectURL(originalFile);
+                    objectUrlCache[fileId] = url;
+                    setPreview(url);
+                }
+                // No revoke here – we intentionally keep the URL alive for fast re-use
+            }, [fileId]);
+
+            if (preview) {
+                return <img src={preview} alt={currentName} loading="lazy" />;
+            }
+            const ext = extension.toUpperCase().replace('.', '') || '?';
+            return <div className="file-icon-large">{ext}</div>;
+        });
+
+        // ─── Memoized card so it only re-renders when its own data changes ───────────
+        const FileCard = React.memo(({ file, index, isSelected, isLast, compactView, onToggle, onMove }) => (
+            <div className={`file-card ${isSelected ? 'selected' : ''} ${compactView ? 'compact' : ''}`}>
+                <div className="file-card-preview">
+                    <input
+                        type="checkbox"
+                        className="checkbox file-card-checkbox"
+                        checked={isSelected}
+                        onChange={() => onToggle(file.id)}
+                    />
+                    <div className="file-card-index">{index + 1}</div>
+                    <FilePreview
+                        fileId={file.id}
+                        originalFile={file.originalFile}
+                        extension={file.extension}
+                        currentName={file.currentName}
+                    />
+                </div>
+                <div className="file-card-info">
+                    <div className={`file-card-name ${file.isRenamed ? 'renamed' : ''}`}>
+                        {file.currentName}
+                    </div>
+                    <div className="file-card-actions">
+                        <div className="arrow-btns">
+                            <button
+                                className="arrow-btn"
+                                onClick={() => onMove(file.id, 'left')}
+                                disabled={index === 0}
+                                title="Move left"
+                            >←</button>
+                            <button
+                                className="arrow-btn"
+                                onClick={() => onMove(file.id, 'right')}
+                                disabled={isLast}
+                                title="Move right"
+                            >→</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        ));
+
+        // ─── Main component ───────────────────────────────────────────────────────────
         function FileRenamer() {
             const [files, setFiles] = useState([]);
             const [selectedIds, setSelectedIds] = useState(new Set());
@@ -607,198 +677,180 @@
             const [sortDirection, setSortDirection] = useState('desc');
             const [renameInput, setRenameInput] = useState('');
             const [compactView, setCompactView] = useState(false);
-            
+
             const fileInputRef = useRef(null);
             const folderInputRef = useRef(null);
-            const previewCache = useRef({});
-            
-            // Handle file upload
-            const handleFileUpload = (fileList) => {
-                const newFiles = Array.from(fileList).map((file, index) => {
-                    const nameParts = file.name.split('.');
-                    const extension = nameParts.length > 1 ? '.' + nameParts.pop() : '';
-                    const nameWithoutExt = nameParts.join('.');
-                    
-                    return {
-                        id: `file-${Date.now()}-${index}`,
-                        originalFile: file,
-                        originalName: file.name,
-                        currentName: file.name,
-                        nameWithoutExt: nameWithoutExt,
-                        extension: extension,
-                        size: file.size,
-                        dateModified: file.lastModified,
-                        isRenamed: false,
-                        order: files.length + index
-                    };
-                });
-                
-                setFiles([...files, ...newFiles]);
-            };
-            
-            // Sort files
-            const getSortedFiles = () => {
+
+            // ── Derived / memoized values ────────────────────────────────────────────
+            const sortedFiles = useMemo(() => {
                 let sorted = [...files];
-                
                 if (sortMode === 'name') {
                     sorted.sort((a, b) => {
-                        const nameA = a.currentName.toLowerCase();
-                        const nameB = b.currentName.toLowerCase();
-                        // Use natural sorting (alphanumeric) like file explorer
-                        return sortDirection === 'asc' 
-                            ? nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' })
-                            : nameB.localeCompare(nameA, undefined, { numeric: true, sensitivity: 'base' });
+                        const na = a.currentName.toLowerCase();
+                        const nb = b.currentName.toLowerCase();
+                        return sortDirection === 'asc'
+                            ? na.localeCompare(nb, undefined, { numeric: true, sensitivity: 'base' })
+                            : nb.localeCompare(na, undefined, { numeric: true, sensitivity: 'base' });
                     });
                 } else if (sortMode === 'date') {
-                    sorted.sort((a, b) => {
-                        return sortDirection === 'asc'
-                            ? a.dateModified - b.dateModified
-                            : b.dateModified - a.dateModified;
-                    });
+                    sorted.sort((a, b) => sortDirection === 'asc'
+                        ? a.dateModified - b.dateModified
+                        : b.dateModified - a.dateModified);
                 } else if (sortMode === 'custom') {
                     sorted.sort((a, b) => a.order - b.order);
                 }
-                
                 return sorted;
-            };
-            
-            // Handle sort mode change
-            const handleSort = (mode) => {
-                if (sortMode === mode) {
-                    setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-                } else {
-                    setSortMode(mode);
-                    setSortDirection(mode === 'date' ? 'desc' : 'asc');
+            }, [files, sortMode, sortDirection]);
+
+            const renamedCount = useMemo(() => files.filter(f => f.isRenamed).length, [files]);
+
+            const preview = useMemo(() => {
+                if (selectedIds.size === 0 || !renameInput.trim()) {
+                    return 'Select files and enter a name to see preview';
                 }
-            };
-            
-            // Selection handlers
-            const toggleSelection = (id) => {
-                const newSelected = new Set(selectedIds);
-                if (newSelected.has(id)) {
-                    newSelected.delete(id);
-                } else {
-                    newSelected.add(id);
-                    
-                    // Auto-populate rename input with first selected file's name (if input is empty)
-                    if (newSelected.size === 1 && !renameInput.trim()) {
-                        const file = files.find(f => f.id === id);
-                        if (file) {
-                            setRenameInput(file.nameWithoutExt);
+                const sanitized = renameInput.replace(/[<>:"/\\|?*]/g, '');
+                const sortedSelected = sortedFiles.filter(f => selectedIds.has(f.id));
+                if (selectedIds.size === 1) {
+                    return `${sanitized}${sortedSelected[0]?.extension ?? ''}`;
+                }
+                const previews = sortedSelected.slice(0, 3).map((file, idx) =>
+                    `${sanitized} (${idx + 1})${file.extension}`
+                );
+                if (sortedSelected.length > 3) previews.push(`... and ${sortedSelected.length - 3} more`);
+                return previews.join(', ');
+            }, [selectedIds, renameInput, sortedFiles]);
+
+            // ── Stable callbacks (prevent child re-renders) ──────────────────────────
+            const handleFileUpload = useCallback((fileList) => {
+                setFiles(prev => {
+                    const newFiles = Array.from(fileList).map((file, index) => {
+                        const nameParts = file.name.split('.');
+                        const extension = nameParts.length > 1 ? '.' + nameParts.pop() : '';
+                        return {
+                            id: `file-${Date.now()}-${index}`,
+                            originalFile: file,
+                            originalName: file.name,
+                            currentName: file.name,
+                            nameWithoutExt: nameParts.join('.'),
+                            extension,
+                            size: file.size,
+                            dateModified: file.lastModified,
+                            isRenamed: false,
+                            order: prev.length + index
+                        };
+                    });
+                    return [...prev, ...newFiles];
+                });
+            }, []);
+
+            const handleSort = useCallback((mode) => {
+                setSortMode(prev => {
+                    if (prev === mode) {
+                        setSortDirection(d => d === 'asc' ? 'desc' : 'asc');
+                        return prev;
+                    }
+                    setSortDirection(mode === 'date' ? 'desc' : 'asc');
+                    return mode;
+                });
+            }, []);
+
+            const toggleSelection = useCallback((id) => {
+                setSelectedIds(prev => {
+                    const next = new Set(prev);
+                    if (next.has(id)) {
+                        next.delete(id);
+                    } else {
+                        next.add(id);
+                        if (next.size === 1) {
+                            setFiles(fs => {
+                                const file = fs.find(f => f.id === id);
+                                if (file) setRenameInput(r => r.trim() ? r : file.nameWithoutExt);
+                                return fs;
+                            });
                         }
                     }
-                }
-                setSelectedIds(newSelected);
-            };
-            
-            const selectAll = () => {
-                const allIds = new Set(files.map(f => f.id));
-                setSelectedIds(allIds);
-                
-                // Auto-populate rename input with first file's name (if input is empty)
-                if (files.length > 0 && !renameInput.trim()) {
-                    setRenameInput(files[0].nameWithoutExt);
-                }
-            };
-            
-            const deselectAll = () => {
-                setSelectedIds(new Set());
-            };
-            
-            // Rename files
-            const handleRename = () => {
-                if (!renameInput.trim() || selectedIds.size === 0) return;
-                
-                const sanitized = renameInput.replace(/[<>:"/\\|?*]/g, '');
-                const selectedFiles = files.filter(f => selectedIds.has(f.id));
-                const sortedSelected = getSortedFiles().filter(f => selectedIds.has(f.id));
-                
-                const updatedFiles = files.map(file => {
-                    const selectedIndex = sortedSelected.findIndex(f => f.id === file.id);
-                    if (selectedIndex !== -1) {
+                    return next;
+                });
+            }, []);
+
+            const selectAll = useCallback(() => {
+                setFiles(fs => {
+                    setSelectedIds(new Set(fs.map(f => f.id)));
+                    setRenameInput(r => (fs.length > 0 && !r.trim()) ? fs[0].nameWithoutExt : r);
+                    return fs;
+                });
+            }, []);
+
+            const deselectAll = useCallback(() => setSelectedIds(new Set()), []);
+
+            const handleRename = useCallback(() => {
+                setFiles(prevFiles => {
+                    if (!renameInput.trim() || selectedIds.size === 0) return prevFiles;
+                    const sanitized = renameInput.replace(/[<>:"/\\|?*]/g, '');
+                    // Sort once to determine order
+                    let sorted = [...prevFiles];
+                    if (sortMode === 'name') {
+                        sorted.sort((a, b) => sortDirection === 'asc'
+                            ? a.currentName.toLowerCase().localeCompare(b.currentName.toLowerCase(), undefined, { numeric: true, sensitivity: 'base' })
+                            : b.currentName.toLowerCase().localeCompare(a.currentName.toLowerCase(), undefined, { numeric: true, sensitivity: 'base' }));
+                    } else if (sortMode === 'date') {
+                        sorted.sort((a, b) => sortDirection === 'asc' ? a.dateModified - b.dateModified : b.dateModified - a.dateModified);
+                    } else {
+                        sorted.sort((a, b) => a.order - b.order);
+                    }
+                    const sortedSelected = sorted.filter(f => selectedIds.has(f.id));
+                    return prevFiles.map(file => {
+                        const selectedIndex = sortedSelected.findIndex(f => f.id === file.id);
+                        if (selectedIndex === -1) return file;
                         const newName = selectedIds.size === 1
                             ? `${sanitized}${file.extension}`
                             : `${sanitized} (${selectedIndex + 1})${file.extension}`;
-                        
                         return {
                             ...file,
                             currentName: newName,
                             nameWithoutExt: selectedIds.size === 1 ? sanitized : `${sanitized} (${selectedIndex + 1})`,
                             isRenamed: true
                         };
-                    }
-                    return file;
+                    });
                 });
-                
-                setFiles(updatedFiles);
                 setRenameInput('');
-            };
-            
-            // Manual reordering
-            const moveFile = (id, direction) => {
-                if (sortMode !== 'custom') {
-                    setSortMode('custom');
-                }
-                
-                const currentFiles = getSortedFiles();
-                const index = currentFiles.findIndex(f => f.id === id);
-                if (index === -1) return;
-                
-                const newIndex = direction === 'left' ? index - 1 : index + 1;
-                if (newIndex < 0 || newIndex >= currentFiles.length) return;
-                
-                const reordered = [...currentFiles];
-                [reordered[index], reordered[newIndex]] = [reordered[newIndex], reordered[index]];
-                
-                const updatedFiles = reordered.map((file, idx) => ({
-                    ...file,
-                    order: idx
-                }));
-                
-                setFiles(updatedFiles);
-            };
-            
-            // Move selected files to specific index
-            const moveToIndex = (targetIndex) => {
-                if (selectedIds.size === 0) return;
-                if (sortMode !== 'custom') {
-                    setSortMode('custom');
-                }
-                
-                const currentFiles = getSortedFiles();
-                const selectedFiles = currentFiles.filter(f => selectedIds.has(f.id));
-                const unselectedFiles = currentFiles.filter(f => !selectedIds.has(f.id));
-                
-                // Clamp target index
-                const clampedIndex = Math.max(0, Math.min(targetIndex - 1, currentFiles.length - selectedFiles.length));
-                
-                // Insert selected files at target index
-                const reordered = [
-                    ...unselectedFiles.slice(0, clampedIndex),
-                    ...selectedFiles,
-                    ...unselectedFiles.slice(clampedIndex)
-                ];
-                
-                const updatedFiles = reordered.map((file, idx) => ({
-                    ...file,
-                    order: idx
-                }));
-                
-                setFiles(updatedFiles);
-            };
-            
-            // Download selected files as ZIP
-            const downloadSelected = async () => {
-                const selectedFiles = files.filter(f => selectedIds.has(f.id));
-                
-                if (selectedFiles.length === 0) return;
-                
-                const zip = new JSZip();
-                
-                selectedFiles.forEach(file => {
-                    zip.file(file.currentName, file.originalFile);
+            }, [renameInput, selectedIds, sortMode, sortDirection]);
+
+            const moveFile = useCallback((id, direction) => {
+                setSortMode('custom');
+                setFiles(prevFiles => {
+                    let sorted = [...prevFiles].sort((a, b) => a.order - b.order);
+                    const index = sorted.findIndex(f => f.id === id);
+                    if (index === -1) return prevFiles;
+                    const newIndex = direction === 'left' ? index - 1 : index + 1;
+                    if (newIndex < 0 || newIndex >= sorted.length) return prevFiles;
+                    [sorted[index], sorted[newIndex]] = [sorted[newIndex], sorted[index]];
+                    return sorted.map((file, idx) => ({ ...file, order: idx }));
                 });
-                
+            }, []);
+
+            const moveToIndex = useCallback((targetIndex) => {
+                if (selectedIds.size === 0) return;
+                setSortMode('custom');
+                setFiles(prevFiles => {
+                    let sorted = [...prevFiles].sort((a, b) => a.order - b.order);
+                    const selectedFiles = sorted.filter(f => selectedIds.has(f.id));
+                    const unselectedFiles = sorted.filter(f => !selectedIds.has(f.id));
+                    const clampedIndex = Math.max(0, Math.min(targetIndex - 1, sorted.length - selectedFiles.length));
+                    const reordered = [
+                        ...unselectedFiles.slice(0, clampedIndex),
+                        ...selectedFiles,
+                        ...unselectedFiles.slice(clampedIndex)
+                    ];
+                    return reordered.map((file, idx) => ({ ...file, order: idx }));
+                });
+            }, [selectedIds]);
+
+            const downloadSelected = useCallback(async () => {
+                const selectedFiles = files.filter(f => selectedIds.has(f.id));
+                if (selectedFiles.length === 0) return;
+                const zip = new JSZip();
+                selectedFiles.forEach(file => zip.file(file.currentName, file.originalFile));
                 const content = await zip.generateAsync({ type: 'blob' });
                 const url = URL.createObjectURL(content);
                 const a = document.createElement('a');
@@ -806,66 +858,9 @@
                 a.download = `renamed-files-${Date.now()}.zip`;
                 a.click();
                 URL.revokeObjectURL(url);
-            };
-            
-            // Generate preview
-            const getPreview = () => {
-                if (selectedIds.size === 0 || !renameInput.trim()) {
-                    return 'Select files and enter a name to see preview';
-                }
-                
-                const sanitized = renameInput.replace(/[<>:"/\\|?*]/g, '');
-                const sortedSelected = getSortedFiles().filter(f => selectedIds.has(f.id));
-                
-                if (selectedIds.size === 1) {
-                    const file = sortedSelected[0];
-                    return `${sanitized}${file.extension}`;
-                }
-                
-                const previews = sortedSelected.slice(0, 3).map((file, idx) => 
-                    `${sanitized} (${idx + 1})${file.extension}`
-                );
-                
-                if (sortedSelected.length > 3) {
-                    previews.push(`... and ${sortedSelected.length - 3} more`);
-                }
-                
-                return previews.join(', ');
-            };
-            
-            // Create image preview with caching to prevent re-loading
-            const FilePreview = ({ file }) => {
-                const [preview, setPreview] = useState(previewCache.current[file.id] || null);
-                
-                useEffect(() => {
-                    // If already cached, use it
-                    if (previewCache.current[file.id]) {
-                        setPreview(previewCache.current[file.id]);
-                        return;
-                    }
-                    
-                    // Otherwise, load the image
-                    if (file.originalFile.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            const url = e.target.result;
-                            previewCache.current[file.id] = url;
-                            setPreview(url);
-                        };
-                        reader.readAsDataURL(file.originalFile);
-                    }
-                }, [file.id]);
-                
-                if (preview) {
-                    return <img src={preview} alt={file.currentName} />;
-                }
-                
-                const ext = file.extension.toUpperCase().replace('.', '') || '?';
-                return <div className="file-icon-large">{ext}</div>;
-            };
-            
-            const sortedFiles = getSortedFiles();
-            
+            }, [files, selectedIds]);
+
+            // ── Render ───────────────────────────────────────────────────────────────
             return (
                 <div className="app-container">
                     <header>
@@ -882,59 +877,34 @@
                             </button>
                         </div>
                     </header>
-                    
-                    <input 
-                        ref={fileInputRef}
-                        type="file" 
-                        multiple 
-                        onChange={(e) => handleFileUpload(e.target.files)}
-                    />
-                    <input 
-                        ref={folderInputRef}
-                        type="file" 
-                        webkitdirectory="true"
-                        directory="true"
-                        multiple
-                        onChange={(e) => handleFileUpload(e.target.files)}
-                    />
-                    
+
+                    <input ref={fileInputRef} type="file" multiple onChange={(e) => handleFileUpload(e.target.files)} />
+                    <input ref={folderInputRef} type="file" webkitdirectory="true" directory="true" multiple onChange={(e) => handleFileUpload(e.target.files)} />
+
                     {files.length > 0 && (
                         <>
                             <div className="controls">
                                 <div className="controls-group">
                                     <span style={{color: 'var(--text-secondary)'}}>Sort:</span>
-                                    <button 
-                                        className="btn btn-secondary"
-                                        onClick={() => handleSort('name')}
-                                    >
+                                    <button className="btn btn-secondary" onClick={() => handleSort('name')}>
                                         Name {sortMode === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
                                     </button>
-                                    <button 
-                                        className="btn btn-secondary"
-                                        onClick={() => handleSort('date')}
-                                    >
+                                    <button className="btn btn-secondary" onClick={() => handleSort('date')}>
                                         Date {sortMode === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
                                     </button>
                                     <span className={`sort-badge ${sortMode === 'custom' ? 'active' : ''}`}>
                                         {sortMode === 'custom' ? '✓ Custom Order' : 'Custom'}
                                     </span>
                                 </div>
-                                
+
                                 <div className="controls-group">
-                                    <button className="btn btn-secondary" onClick={selectAll}>
-                                        Select All
-                                    </button>
-                                    <button className="btn btn-secondary" onClick={deselectAll}>
-                                        Deselect All
-                                    </button>
-                                    <button 
-                                        className="btn btn-secondary"
-                                        onClick={() => setCompactView(!compactView)}
-                                    >
+                                    <button className="btn btn-secondary" onClick={selectAll}>Select All</button>
+                                    <button className="btn btn-secondary" onClick={deselectAll}>Deselect All</button>
+                                    <button className="btn btn-secondary" onClick={() => setCompactView(v => !v)}>
                                         {compactView ? '⊟ Compact' : '⊞ Normal'} View
                                     </button>
                                 </div>
-                                
+
                                 <div className="stats">
                                     <div className="stat">
                                         <div className="stat-label">Total:</div>
@@ -946,95 +916,59 @@
                                     </div>
                                     <div className="stat">
                                         <div className="stat-label">Renamed:</div>
-                                        <div className="stat-value">{files.filter(f => f.isRenamed).length}</div>
+                                        <div className="stat-value">{renamedCount}</div>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="file-list" style={{
-                                gridTemplateColumns: compactView 
-                                    ? 'repeat(auto-fill, minmax(120px, 1fr))' 
+                                gridTemplateColumns: compactView
+                                    ? 'repeat(auto-fill, minmax(120px, 1fr))'
                                     : 'repeat(auto-fill, minmax(200px, 1fr))'
                             }}>
                                 {sortedFiles.map((file, index) => (
-                                    <div 
+                                    <FileCard
                                         key={file.id}
-                                        className={`file-card ${selectedIds.has(file.id) ? 'selected' : ''} ${compactView ? 'compact' : ''}`}
-                                    >
-                                        <div className="file-card-preview">
-                                            <input 
-                                                type="checkbox"
-                                                className="checkbox file-card-checkbox"
-                                                checked={selectedIds.has(file.id)}
-                                                onChange={() => toggleSelection(file.id)}
-                                            />
-                                            <div className="file-card-index">{index + 1}</div>
-                                            <FilePreview file={file} />
-                                        </div>
-                                        
-                                        <div className="file-card-info">
-                                            <div className={`file-card-name ${file.isRenamed ? 'renamed' : ''}`}>
-                                                {file.currentName}
-                                            </div>
-                                            
-                                            <div className="file-card-actions">
-                                                <div className="arrow-btns">
-                                                    <button 
-                                                        className="arrow-btn"
-                                                        onClick={() => moveFile(file.id, 'left')}
-                                                        disabled={index === 0}
-                                                        title="Move left"
-                                                    >
-                                                        ←
-                                                    </button>
-                                                    <button 
-                                                        className="arrow-btn"
-                                                        onClick={() => moveFile(file.id, 'right')}
-                                                        disabled={index === sortedFiles.length - 1}
-                                                        title="Move right"
-                                                    >
-                                                        →
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                        file={file}
+                                        index={index}
+                                        isSelected={selectedIds.has(file.id)}
+                                        isLast={index === sortedFiles.length - 1}
+                                        compactView={compactView}
+                                        onToggle={toggleSelection}
+                                        onMove={moveFile}
+                                    />
                                 ))}
                             </div>
-                            
+
                             <div className="rename-section-spacer"></div>
-                            
+
                             <div className="rename-section">
                                 <div className="rename-section-inner">
                                     <h3>Rename</h3>
-                                    
+
                                     <div className="rename-input-group">
-                                        <input 
+                                        <input
                                             type="text"
                                             className="rename-input"
                                             placeholder="Enter new filename..."
                                             value={renameInput}
                                             onChange={(e) => setRenameInput(e.target.value)}
-                                            onKeyPress={(e) => {
-                                                if (e.key === 'Enter') handleRename();
-                                            }}
+                                            onKeyPress={(e) => { if (e.key === 'Enter') handleRename(); }}
                                         />
-                                        <button 
+                                        <button
                                             className="btn btn-primary"
                                             onClick={handleRename}
                                             disabled={!renameInput.trim() || selectedIds.size === 0}
                                             style={{padding: '0.5rem 1rem'}}
-                                        >
-                                            Rename
-                                        </button>
+                                        >Rename</button>
                                     </div>
-                                    
+
                                     <div className="preview-text">
-                                        <strong>Preview:</strong> {getPreview()}
+                                        <strong>Preview:</strong> {preview}
                                     </div>
-                                    
+
                                     <div className="rename-input-group" style={{minWidth: '200px', maxWidth: '200px'}}>
-                                        <input 
+                                        <input
                                             type="number"
                                             className="rename-input"
                                             placeholder="Move to index..."
@@ -1048,24 +982,19 @@
                                             }}
                                             disabled={selectedIds.size === 0}
                                         />
-                                        <button 
+                                        <button
                                             className="btn btn-primary"
                                             onClick={(e) => {
                                                 const input = e.target.previousElementSibling;
-                                                if (input.value) {
-                                                    moveToIndex(parseInt(input.value));
-                                                    input.value = '';
-                                                }
+                                                if (input.value) { moveToIndex(parseInt(input.value)); input.value = ''; }
                                             }}
                                             disabled={selectedIds.size === 0}
                                             style={{padding: '0.5rem 1rem'}}
                                             title="Move selected files to this position"
-                                        >
-                                            Move
-                                        </button>
+                                        >Move</button>
                                     </div>
-                                    
-                                    <button 
+
+                                    <button
                                         className="btn btn-primary"
                                         onClick={downloadSelected}
                                         disabled={selectedIds.size === 0}
@@ -1077,7 +1006,7 @@
                             </div>
                         </>
                     )}
-                    
+
                     {files.length === 0 && (
                         <div className="empty-state">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1091,7 +1020,7 @@
                 </div>
             );
         }
-        
+
         ReactDOM.render(<FileRenamer />, document.getElementById('root'));
     </script>
 </body>
