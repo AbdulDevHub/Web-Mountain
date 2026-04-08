@@ -372,6 +372,21 @@
             flex: 1;
             min-width: 300px;
         }
+
+        .rename-input-group.start-from {
+            flex: 0 0 auto;
+            min-width: unset;
+            width: 160px;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .start-from-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            font-family: 'JetBrains Mono', monospace;
+        }
         
         .rename-input {
             flex: 1;
@@ -541,6 +556,10 @@
             .rename-input-group, .preview-text {
                 min-width: 100%;
             }
+
+            .rename-input-group.start-from {
+                width: 100%;
+            }
         }
         
         /*----------------Text Selection----------*/
@@ -676,6 +695,7 @@
             const [sortMode, setSortMode] = useState('date');
             const [sortDirection, setSortDirection] = useState('desc');
             const [renameInput, setRenameInput] = useState('');
+            const [startFrom, setStartFrom] = useState(1);
             const [compactView, setCompactView] = useState(false);
 
             const fileInputRef = useRef(null);
@@ -704,6 +724,7 @@
 
             const renamedCount = useMemo(() => files.filter(f => f.isRenamed).length, [files]);
 
+            // Preview uses startFrom for multi-file numbering
             const preview = useMemo(() => {
                 if (selectedIds.size === 0 || !renameInput.trim()) {
                     return 'Select files and enter a name to see preview';
@@ -713,14 +734,14 @@
                 if (selectedIds.size === 1) {
                     return `${sanitized}${sortedSelected[0]?.extension ?? ''}`;
                 }
+                const start = Math.max(1, parseInt(startFrom) || 1);
                 const previews = sortedSelected.slice(0, 3).map((file, idx) =>
-                    `${sanitized} (${idx + 1})${file.extension}`
+                    `${sanitized} (${start + idx})${file.extension}`
                 );
                 if (sortedSelected.length > 3) previews.push(`... and ${sortedSelected.length - 3} more`);
                 return previews.join(', ');
-            }, [selectedIds, renameInput, sortedFiles]);
+            }, [selectedIds, renameInput, sortedFiles, startFrom]);
 
-            // ── Stable callbacks (prevent child re-renders) ──────────────────────────
             const handleFileUpload = useCallback((fileList) => {
                 setFiles(prev => {
                     const newFiles = Array.from(fileList).map((file, index) => {
@@ -787,7 +808,8 @@
                 setFiles(prevFiles => {
                     if (!renameInput.trim() || selectedIds.size === 0) return prevFiles;
                     const sanitized = renameInput.replace(/[<>:"/\\|?*]/g, '');
-                    // Sort once to determine order
+                    const start = Math.max(1, parseInt(startFrom) || 1);
+
                     let sorted = [...prevFiles];
                     if (sortMode === 'name') {
                         sorted.sort((a, b) => sortDirection === 'asc'
@@ -802,19 +824,20 @@
                     return prevFiles.map(file => {
                         const selectedIndex = sortedSelected.findIndex(f => f.id === file.id);
                         if (selectedIndex === -1) return file;
+                        // Single file: no number suffix; multiple: use start + index
                         const newName = selectedIds.size === 1
                             ? `${sanitized}${file.extension}`
-                            : `${sanitized} (${selectedIndex + 1})${file.extension}`;
+                            : `${sanitized} (${start + selectedIndex})${file.extension}`;
                         return {
                             ...file,
                             currentName: newName,
-                            nameWithoutExt: selectedIds.size === 1 ? sanitized : `${sanitized} (${selectedIndex + 1})`,
+                            nameWithoutExt: selectedIds.size === 1 ? sanitized : `${sanitized} (${start + selectedIndex})`,
                             isRenamed: true
                         };
                     });
                 });
                 setRenameInput('');
-            }, [renameInput, selectedIds, sortMode, sortDirection]);
+            }, [renameInput, selectedIds, sortMode, sortDirection, startFrom]);
 
             const moveFile = useCallback((id, direction) => {
                 setSortMode('custom');
@@ -961,6 +984,20 @@
                                             disabled={!renameInput.trim() || selectedIds.size === 0}
                                             style={{padding: '0.5rem 1rem'}}
                                         >Rename</button>
+                                    </div>
+
+                                    {/* Start From input — only meaningful when renaming multiple files */}
+                                    <div className="rename-input-group start-from" title="First number used when renaming multiple files (e.g. set to 6 to get Photo (6), Photo (7)…)">
+                                        <span className="start-from-label">Start #</span>
+                                        <input
+                                            type="number"
+                                            className="rename-input"
+                                            min="1"
+                                            value={startFrom}
+                                            onChange={(e) => setStartFrom(e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1))}
+                                            style={{width: '70px', flex: 'none'}}
+                                            title="Starting number for the incrementer"
+                                        />
                                     </div>
 
                                     <div className="preview-text">
