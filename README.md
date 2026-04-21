@@ -14,6 +14,7 @@ Complete website projects ranging from interactive games to practical utilities.
 - **[Pastel](./Awesome%20Websites/Pastel)** - Bootstrap-based portfolio template
 - **[Bulk File Renamer](./Awesome%20Websites/Bulk%20File%20Renamer)** - Batch file renaming tool
 - **[DupeHunter](./Awesome%20Websites/DupeHunter)** - Duplicate text finder utility
+- **[Link To Google Bookmarks](./Awesome%20Websites/Link%20To%20Google%20Bookmarks%20Generator)** - Bookmark link generator
 - **[Firey Passages](./Awesome%20Websites/Firey%20Pasages)** - Animated text effects showcase
 - **[File Redownloader](./Awesome%20Websites/File%20Redownloader)** - Batch file download utility
 - **[QR Code Generator](./Awesome%20Websites/QR%20Code%20Generator)** - Dynamic QR code creation tool
