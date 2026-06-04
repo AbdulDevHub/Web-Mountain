@@ -2,7 +2,7 @@
 // This is the central configuration file for Vitest.
 // It controls how tests are discovered, run, and reported.
 
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config.js';
 
 export default defineConfig({
   test: {
