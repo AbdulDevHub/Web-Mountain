@@ -34,6 +34,12 @@ Creative UI concepts and experimental interface designs.
 - **[Momentum](./UI%20Experiments/Momentum)** - Minimalist productivity dashboard
 - **[Video Background Website](./UI%20Experiments/Video%20Background%20Website)** - Immersive video-based landing page
 
+### Tech Experiments
+
+Exploring the latest frontend technologies and tools.
+
+- **[Vitest Testing](./Tech%20Experiments/VitestTesting)** - Unit & integration testing with Vitest
+
 ### Awesome Effects
 
 Interactive visual effects and animations that demonstrate creative uses of CSS, JavaScript, and WebGL.
