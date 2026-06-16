@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Renamer - Batch Rename Tool</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'%3E%3C/path%3E%3Cpolyline points='14 2 14 8 20 8'%3E%3C/polyline%3E%3Cpath d='M10.4 12.6a2 2 0 1 1 3 3L8 21l-4 1 1-4 5.4-5.4z'%3E%3C/path%3E%3C/svg%3E">
     <style>
@@ -632,10 +632,26 @@
                 }
                 if (originalFile.type.startsWith('image/')) {
                     const url = URL.createObjectURL(originalFile);
-                    objectUrlCache[fileId] = url;
-                    setPreview(url);
+
+                    if (originalFile.type === 'image/gif') {
+                        // Draw first frame onto a canvas, store as static JPEG
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = img.naturalWidth;
+                            canvas.height = img.naturalHeight;
+                            canvas.getContext('2d').drawImage(img, 0, 0);
+                            const staticUrl = canvas.toDataURL('image/jpeg', 0.7);
+                            URL.revokeObjectURL(url); // free the blob URL immediately
+                            objectUrlCache[fileId] = staticUrl;
+                            setPreview(staticUrl);
+                        };
+                        img.src = url;
+                    } else {
+                        objectUrlCache[fileId] = url;
+                        setPreview(url);
+                    }
                 }
-                // No revoke here – we intentionally keep the URL alive for fast re-use
             }, [fileId]);
 
             if (preview) {
