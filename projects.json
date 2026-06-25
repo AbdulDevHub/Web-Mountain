@@ -290,6 +290,12 @@
     "image": "Awesome Effects/Shine Effect.png"
   },
   {
+    "name": "Balloon Spawn Effect",
+    "category": "effects",
+    "href": "Awesome Effects/Balloon Spawn Effect/index.html",
+    "image": "Awesome Effects/Balloon Spawn Effect/Screenshot.png"
+  },
+  {
     "name": "Gallery Bookmark Viewer",
     "category": "extensions",
     "href": "https://github.com/AbdulDevHub/Web-Mountain/tree/main/Chrome%20Extensions/Gallery%20Bookmark%20Viewer",

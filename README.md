@@ -68,6 +68,7 @@ Interactive visual effects and animations that demonstrate creative uses of CSS,
 - **[Redirecting Loader](./Awesome%20Effects/Redirecting%20Loader.html)** - Page redirect loading animation
 - **[Shine Animation](./Awesome%20Effects/Shine%20Animation.html)** - Animated shine sweep effect
 - **[Shine Effect](./Awesome%20Effects/Shine%20Effect.html)** - Glossy shine overlay effect
+- **[Balloon Spawn Effect](./Awesome%20Effects/Balloon%20Spawn%20Effect)** - Interactive balloon spawn animation
 
 ### Chrome Extensions
 
