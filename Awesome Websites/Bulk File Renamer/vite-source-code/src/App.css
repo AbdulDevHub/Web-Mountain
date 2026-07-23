@@ -391,6 +391,7 @@ h1 {
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
 }
 
+/* Hide number input spinners */
 .rename-input[type="number"]::-webkit-inner-spin-button,
 .rename-input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -535,4 +536,54 @@ input[type="file"] {
   .rename-input-group.start-from {
     width: 100%;
   }
+}
+
+/*----------------Text Selection----------*/
+::selection {
+  background: var(--accent); /* WebKit/Blink Browsers */
+  color: var(--bg-primary);
+}
+
+::-moz-selection {
+  background: var(--accent); /* Gecko Browsers */
+  color: var(--bg-primary);
+}
+
+::-ms-selection {
+  background: var(--accent); /* IE 10+ */
+  color: var(--bg-primary);
+}
+
+/*----------------Scrollbar----------*/
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  transition: 1s;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(16, 185, 129, 0.4);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  transition: 1s;
+}
+
+::-webkit-scrollbar-thumb:vertical:hover,
+::-webkit-scrollbar-thumb:horizontal:hover {
+  background-color: rgba(16, 185, 129, 0.6);
+  transition: 0.3s;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb:vertical:active,
+::-webkit-scrollbar-thumb:horizontal:active {
+  background: rgba(16, 185, 129, 0.8);
+}
+
+::-webkit-scrollbar-corner {
+  background: none;
 }

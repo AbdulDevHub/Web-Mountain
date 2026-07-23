@@ -89,16 +89,17 @@ function App() {
     })
   }, [])
 
-  const handleSort = useCallback((mode: SortMode) => {
-    setSortMode((prev) => {
-      if (prev === mode) {
+  const handleSort = useCallback(
+    (mode: SortMode) => {
+      if (sortMode === mode) {
         setSortDirection((d) => (d === "asc" ? "desc" : "asc"))
-        return prev
+      } else {
+        setSortMode(mode)
+        setSortDirection(mode === "date" ? "desc" : "asc")
       }
-      setSortDirection(mode === "date" ? "desc" : "asc")
-      return mode
-    })
-  }, [])
+    },
+    [sortMode],
+  )
 
   const toggleSelection = useCallback((id: string) => {
     setSelectedIds((prev) => {
