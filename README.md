@@ -107,7 +107,15 @@ npm run dev
 
 ## Working with Submodules
 
-Several projects in this repo (the Chrome Extensions and DhikrForest) are Git submodules pointing to their own standalone repos.
+Several projects in this repo are Git submodules pointing to their own standalone repos:
+
+| Project | Location | Repo |
+|---|---|---|
+| Gallery Viewer | `Chrome Extensions/Gallery-Viewer` | [AbdulDevHub/Gallery-Viewer](https://github.com/AbdulDevHub/Gallery-Viewer) |
+| Linkest | `Chrome Extensions/Linkest` | [AbdulDevHub/Linkest](https://github.com/AbdulDevHub/Linkest) |
+| Hydration Hero | `Chrome Extensions/Hydration-Hero` | [AbdulDevHub/Hydration-Hero](https://github.com/AbdulDevHub/Hydration-Hero) |
+| Local Video Player | `Chrome Extensions/Local-Video-Player` | [AbdulDevHub/Local-Video-Player](https://github.com/AbdulDevHub/Local-Video-Player) |
+| DhikrForest | `Awesome Websites/DhikrForest` | [AbdulDevHub/DhikrForest](https://github.com/AbdulDevHub/DhikrForest) |
 
 ### Cloning this repo with all submodules
 
