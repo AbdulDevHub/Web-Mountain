@@ -1,0 +1,15 @@
+[submodule "Chrome Extensions/Gallery-Viewer"]
+	path = Chrome Extensions/Gallery-Viewer
+	url = https://github.com/AbdulDevHub/Gallery-Viewer.git
+[submodule "Chrome Extensions/Linkest"]
+	path = Chrome Extensions/Linkest
+	url = https://github.com/AbdulDevHub/Linkest.git
+[submodule "Chrome Extensions/Hydration-Hero"]
+	path = Chrome Extensions/Hydration-Hero
+	url = https://github.com/AbdulDevHub/Hydration-Hero.git
+[submodule "Chrome Extensions/Local-Video-Player"]
+	path = Chrome Extensions/Local-Video-Player
+	url = https://github.com/AbdulDevHub/Local-Video-Player.git
+[submodule "Awesome Websites/DhikrForest"]
+	path = Awesome Websites/DhikrForest
+	url = https://github.com/AbdulDevHub/DhikrForest.git
