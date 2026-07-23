@@ -2,6 +2,8 @@
 
 A fast, responsive, and privacy-focused web application built with **React**, **TypeScript**, and **Vite** for batch renaming files and folders directly in the browser.
 
+![Screenshot](Screenshot.png)
+
 ---
 
 ## ✨ Features

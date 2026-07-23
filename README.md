@@ -83,25 +83,30 @@ To explore these projects locally:
 1. Clone the repository:
 
 ```bash
-   git clone https://github.com/AbdulDevHub/Web-Mountain.git
+git clone https://github.com/AbdulDevHub/Web-Mountain.git
+cd Web-Mountain
 ```
 
-1. Navigate to the project directory:
+2. Open `index.html` in your browser to view the project showcase.
+3. **For Vite/React Projects:**
+Individual Vite applications (such as *Bulk File Renamer*) live in their respective `vite-source-code` subfolders.
+To run a Vite project locally:
 
 ```bash
-   cd Web-Mountain
+cd "Awesome Websites/Bulk File Renamer/vite-source-code"
+npm install
+npm run dev
 ```
 
-1. Open `index.html` in your browser to view the project showcase
-
-2. Navigate to individual project folders to explore specific implementations
+> ⚡ **CI/CD & Deployment:** Netlify automatically builds all Vite-based projects into their parent output directories upon pushing to `main`, ensuring seamless deployment without committing compiled `dist` files.
 
 ## Technologies Used
 
+- **Frameworks & Tooling**: React, TypeScript, Vite
 - **Core**: HTML5, CSS3, JavaScript (ES6+)
 - **Animation**: Anime.js, CSS animations, Canvas API
 - **Graphics**: WebGL, GPU.js, SVG
-- **Libraries**: jQuery, Bootstrap, dat.GUI
+- **Libraries**: JSZip, jQuery, Bootstrap, dat.GUI
 - **Tools**: Materialize, Video.js
 - **Techniques**: CSS Grid, Flexbox, Responsive Design
 
@@ -117,4 +122,4 @@ This repository serves as a living archive of frontend learning experiments, sho
 
 Each project demonstrates different aspects of modern web development, from foundational concepts to advanced techniques.
 
-**_Feel free to explore each project folder for implementation details. Happy Coding!_** 🚀
+***Feel free to explore each project folder for implementation details. Happy Coding!*** 🚀
