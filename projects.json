@@ -304,7 +304,7 @@
   {
     "name": "Gallery Viewer",
     "category": "extensions",
-    "href": "https://github.com/AbdulDevHub/Gallery-Viewer",
+    "href": "Chrome Extensions/Gallery-Viewer/index.html",
     "image": "Chrome Extensions/Gallery-Viewer/Screenshots/Screenshot 1.png"
   },
   {
@@ -322,7 +322,7 @@
   {
     "name": "Local Video Player",
     "category": "extensions",
-    "href": "https://github.com/AbdulDevHub/Local-Video-Player",
+    "href": "Chrome Extensions/Local-Video-Player/index.html",
     "image": "Chrome Extensions/Local-Video-Player/Screenshot.png"
   },
   {
