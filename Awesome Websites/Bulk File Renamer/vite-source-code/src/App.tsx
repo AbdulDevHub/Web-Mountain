@@ -18,6 +18,7 @@ function App() {
   const [sortMode, setSortMode] = useState<SortMode>("date")
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
   const [renameInput, setRenameInput] = useState("")
+  const [prefixInput, setPrefixInput] = useState("")
   const [startFrom, setStartFrom] = useState<number | "">(1)
   const [compactView, setCompactView] = useState(false)
 
@@ -64,6 +65,17 @@ function App() {
     if (sortedSelected.length > 3) previews.push(`... and ${sortedSelected.length - 3} more`)
     return previews.join(", ")
   }, [selectedIds, renameInput, sortedFiles, startFrom])
+
+  // Preview for the "append prefix" action
+  const prefixPreview = useMemo(() => {
+    if (selectedIds.size === 0 || !prefixInput.trim()) {
+      return "Select files and enter a prefix to see preview"
+    }
+    const sortedSelected = sortedFiles.filter((f) => selectedIds.has(f.id))
+    const previews = sortedSelected.slice(0, 3).map((file) => `${prefixInput}${file.currentName}`)
+    if (sortedSelected.length > 3) previews.push(`... and ${sortedSelected.length - 3} more`)
+    return previews.join(", ")
+  }, [selectedIds, prefixInput, sortedFiles])
 
   const handleFileUpload = useCallback((fileList: FileList | null) => {
     if (!fileList) return
@@ -174,6 +186,24 @@ function App() {
     })
     setRenameInput("")
   }, [renameInput, selectedIds, sortMode, sortDirection, startFrom])
+
+  const handlePrefix = useCallback(() => {
+    setFiles((prevFiles) => {
+      if (!prefixInput.trim() || selectedIds.size === 0) return prevFiles
+      const sanitized = prefixInput.replace(/[<>:"/\\|?*]/g, "")
+      return prevFiles.map((file) => {
+        if (!selectedIds.has(file.id)) return file
+        const newNameWithoutExt = `${sanitized}${file.nameWithoutExt}`
+        return {
+          ...file,
+          currentName: `${newNameWithoutExt}${file.extension}`,
+          nameWithoutExt: newNameWithoutExt,
+          isRenamed: true,
+        }
+      })
+    })
+    setPrefixInput("")
+  }, [prefixInput, selectedIds])
 
   const moveFile = useCallback((id: string, direction: "left" | "right") => {
     setSortMode("custom")
@@ -364,6 +394,33 @@ function App() {
 
               <div className="preview-text">
                 <strong>Preview:</strong> {preview}
+              </div>
+
+              <h3>Add Prefix</h3>
+
+              <div className="rename-input-group">
+                <input
+                  type="text"
+                  className="rename-input"
+                  placeholder="Enter prefix, e.g. Food - ..."
+                  value={prefixInput}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setPrefixInput(e.target.value)}
+                  onKeyPress={(e: KeyboardEvent<HTMLInputElement>) => {
+                    if (e.key === "Enter") handlePrefix()
+                  }}
+                />
+                <button
+                  className="btn btn-primary"
+                  onClick={handlePrefix}
+                  disabled={!prefixInput.trim() || selectedIds.size === 0}
+                  style={{ padding: "0.5rem 1rem" }}
+                >
+                  Append
+                </button>
+              </div>
+
+              <div className="preview-text">
+                <strong>Preview:</strong> {prefixPreview}
               </div>
 
               <div className="rename-input-group" style={{ minWidth: "200px", maxWidth: "200px" }}>
