@@ -18,6 +18,18 @@
     "image": "Awesome Websites/Bulk File Renamer/Screenshot.png"
   },
   {
+    "name": "Gallery Viewer",
+    "category": "extensions",
+    "href": "Chrome Extensions/Gallery-Viewer/index.html",
+    "image": "Chrome Extensions/Gallery-Viewer/Screenshots/Screenshot 1.png"
+  },
+  {
+    "name": "Local Video Player",
+    "category": "extensions",
+    "href": "Chrome Extensions/Local-Video-Player/index.html",
+    "image": "Chrome Extensions/Local-Video-Player/Screenshot.png"
+  },
+  {
     "name": "DupeHunt",
     "category": "websites",
     "href": "Awesome Websites/DupeHunt/duplicate-finder.html",
@@ -302,12 +314,6 @@
     "image": "Awesome Effects/Balloon Spawn Effect/Screenshot.png"
   },
   {
-    "name": "Gallery Viewer",
-    "category": "extensions",
-    "href": "Chrome Extensions/Gallery-Viewer/index.html",
-    "image": "Chrome Extensions/Gallery-Viewer/Screenshots/Screenshot 1.png"
-  },
-  {
     "name": "Linkest",
     "category": "extensions",
     "href": "https://github.com/AbdulDevHub/Linkest",
@@ -318,12 +324,6 @@
     "category": "extensions",
     "href": "https://github.com/AbdulDevHub/Hydration-Hero",
     "image": "Chrome Extensions/Hydration-Hero/Demo.gif"
-  },
-  {
-    "name": "Local Video Player",
-    "category": "extensions",
-    "href": "Chrome Extensions/Local-Video-Player/index.html",
-    "image": "Chrome Extensions/Local-Video-Player/Screenshot.png"
   },
   {
     "name": "Gallery Bookmark Viewer",
