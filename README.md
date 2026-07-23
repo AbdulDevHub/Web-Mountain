@@ -23,6 +23,7 @@ Complete website projects ranging from interactive games to practical utilities.
 - **[Face Bomp](./Awesome%20Websites/Face%20Bomp)** - Whack-a-mole style reaction game
 - **[War](./Awesome%20Websites/War)** - Classic card game implementation
 - **[UNO](./Awesome%20Websites/UNO)** - Another Classic card game implementation
+- **[DhikrForest](./Awesome%20Websites/DhikrForest)** - Offline-first dhikr (Islamic remembrance) counter that visualizes worship as a growing forest, with Laylatul Qadr mode and milestone notifications
 
 ### UI Experiments
 
@@ -75,20 +76,24 @@ Interactive visual effects and animations that demonstrate creative uses of CSS,
 Browser extensions that enhance functionality and user experience.
 
 - **[Gallery Bookmark Viewer](./Chrome%20Extensions/Gallery%20Bookmark%20Viewer)** - Visual bookmark management extension with customizable viewing options
+- **[Gallery Viewer](./Chrome%20Extensions/Gallery-Viewer)** - Offline-first gallery browser for large image/video collections with recursive folder loading, video frame extraction, flexible grid layouts (1–24 images/row), three zoom modes, folder bookmarks, and spotlight mode. Opened via Alt+G
+- **[Linkest](./Chrome%20Extensions/Linkest)** - Link and note manager with one-click tab saving, smart URL vs. plain-text detection, multi-select batch operations, position-based insertion, and persistent local storage
+- **[Hydration Hero](./Chrome%20Extensions/Hydration-Hero)** - Privacy-first water intake tracker with customizable logging, daily goal progress, timestamped history, and midnight auto-reset, built with React + Vite + Tailwind
+- **[Local Video Player](./Chrome%20Extensions/Local-Video-Player)** - Feature-rich local video player with volume amplification up to 500%, resume-from-position, fine-grained speed controls (0.1x–16x), Picture-in-Picture, and Global Media Controls integration
 
 ## Setup
 
 To explore these projects locally:
 
-1. Clone the repository:
+1. Clone the repository (including submodules):
 
 ```bash
-git clone https://github.com/AbdulDevHub/Web-Mountain.git
+git clone --recurse-submodules https://github.com/AbdulDevHub/Web-Mountain.git
 cd Web-Mountain
 ```
 
-2. Open `index.html` in your browser to view the project showcase.
-3. **For Vite/React Projects:**
+1. Open `index.html` in your browser to view the project showcase.
+2. **For Vite/React Projects:**
 Individual Vite applications (such as *Bulk File Renamer*) live in their respective `vite-source-code` subfolders.
 To run a Vite project locally:
 
@@ -100,14 +105,90 @@ npm run dev
 
 > ⚡ **CI/CD & Deployment:** Netlify automatically builds all Vite-based projects into their parent output directories upon pushing to `main`, ensuring seamless deployment without committing compiled `dist` files.
 
+## Working with Submodules
+
+Several projects in this repo (the Chrome Extensions and DhikrForest) are Git submodules pointing to their own standalone repos.
+
+### Cloning this repo with all submodules
+
+If you're cloning fresh, pull submodule content in the same step:
+
+```bash
+git clone --recurse-submodules https://github.com/AbdulDevHub/Web-Mountain.git
+```
+
+### If you already cloned without submodules
+
+Your submodule folders will exist but be empty. Fix it with:
+
+```bash
+git submodule update --init --recursive
+```
+
+### Pulling the latest changes (including submodule updates)
+
+To pull the parent repo *and* update all submodules to the commit the parent repo currently points to:
+
+```bash
+git pull
+git submodule update --init --recursive
+```
+
+Or combine both in one step for future pulls:
+
+```bash
+git pull --recurse-submodules
+```
+
+### Updating submodules to their latest main branch commit
+
+By default, a submodule is pinned to a specific commit, not "always latest." To pull each submodule's newest `main` (or default branch) commit:
+
+```bash
+git submodule update --remote --merge
+```
+
+This updates all submodules. To update just one:
+
+```bash
+git submodule update --remote --merge "Chrome Extensions/Gallery-Viewer"
+```
+
+After running this, the parent repo will show the submodule folders as "modified" (pointing to a new commit) — commit that pointer update in Web-Mountain itself:
+
+```bash
+git add "Chrome Extensions/Gallery-Viewer"
+git commit -m "Update Gallery-Viewer submodule to latest"
+git push
+```
+
+> ⚠️ `git submodule update --remote --merge` moves a submodule to whatever is newest on its default branch, which can pull in unfinished work if a side repo is mid-change. For a portfolio repo, it's safer to update one submodule at a time and check its `git log` before committing the pointer bump.
+
+### Adding a new submodule in the future
+
+```bash
+git submodule add https://github.com/AbdulDevHub/repo-name.git "Category/Project-Name"
+git commit -m "Add repo-name as submodule"
+git push
+```
+
+### Removing a submodule
+
+```bash
+git submodule deinit -f "Category/Project-Name"
+git rm -f "Category/Project-Name"
+rm -rf .git/modules/"Category/Project-Name"
+git commit -m "Remove Project-Name submodule"
+```
+
 ## Technologies Used
 
-- **Frameworks & Tooling**: React, TypeScript, Vite
+- **Frameworks & Tooling**: React, TypeScript, Vite, Tailwind CSS
 - **Core**: HTML5, CSS3, JavaScript (ES6+)
 - **Animation**: Anime.js, CSS animations, Canvas API
 - **Graphics**: WebGL, GPU.js, SVG
 - **Libraries**: JSZip, jQuery, Bootstrap, dat.GUI
-- **Tools**: Materialize, Video.js
+- **Tools**: Materialize, Video.js, Docker, pnpm
 - **Techniques**: CSS Grid, Flexbox, Responsive Design
 
 ## Purpose
