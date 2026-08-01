@@ -18,8 +18,9 @@ function App() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [pivotIndex, setPivotIndex] = useState<number | null>(null)
   const [focusedIndex, setFocusedIndex] = useState<number>(0)
-  const [sortMode, setSortMode] = useState<SortMode>("date")
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
+  const [sortMode, setSortMode] = useState<SortMode>("name")
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
+  const [renameTab, setRenameTab] = useState<"rename" | "prefix">("rename")
   const [renameInput, setRenameInput] = useState("")
   const [prefixInput, setPrefixInput] = useState("")
   const [startFrom, setStartFrom] = useState<number | "">(1)
@@ -559,10 +560,16 @@ function App() {
           <div className="controls">
             <div className="controls-group">
               <span style={{ color: "var(--text-secondary)" }}>Sort:</span>
-              <button className="btn btn-secondary" onClick={() => handleSort("name")}>
+              <button
+                className={`btn ${sortMode === "name" ? "btn-sort-active" : "btn-secondary"}`}
+                onClick={() => handleSort("name")}
+              >
                 Name {sortMode === "name" && (sortDirection === "asc" ? "↑" : "↓")}
               </button>
-              <button className="btn btn-secondary" onClick={() => handleSort("date")}>
+              <button
+                className={`btn ${sortMode === "date" ? "btn-sort-active" : "btn-secondary"}`}
+                onClick={() => handleSort("date")}
+              >
                 Date {sortMode === "date" && (sortDirection === "asc" ? "↑" : "↓")}
               </button>
               <span className={`sort-badge ${sortMode === "custom" ? "active" : ""}`}>
@@ -632,120 +639,140 @@ function App() {
 
           <div className="rename-section">
             <div className="rename-section-inner">
-              <h3>Rename</h3>
-
-              <div className="rename-input-group">
-                <input
-                  type="text"
-                  className="rename-input"
-                  placeholder="Enter new filename..."
-                  value={renameInput}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setRenameInput(e.target.value)}
-                  onKeyPress={(e: KeyboardEvent<HTMLInputElement>) => {
-                    if (e.key === "Enter") handleRename()
-                  }}
-                />
+              {/* ── Tab switcher ─────────────────────────────── */}
+              <div className="rename-tabs">
                 <button
-                  className="btn btn-primary"
-                  onClick={handleRename}
-                  disabled={!renameInput.trim() || selectedIds.size === 0}
-                  style={{ padding: "0.5rem 1rem" }}
+                  className={`rename-tab ${renameTab === "rename" ? "active" : ""}`}
+                  onClick={() => setRenameTab("rename")}
                 >
                   Rename
                 </button>
-              </div>
-
-              {/* Start From input — only meaningful when renaming multiple files */}
-              <div
-                className="rename-input-group start-from"
-                title="First number used when renaming multiple files (e.g. set to 6 to get Photo (6), Photo (7)…)"
-              >
-                <span className="start-from-label">Start #</span>
-                <input
-                  type="number"
-                  className="rename-input"
-                  min="1"
-                  value={startFrom}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setStartFrom(e.target.value === "" ? "" : Math.max(1, parseInt(e.target.value) || 1))
-                  }
-                  style={{ width: "70px", flex: "none" }}
-                  title="Starting number for the incrementer"
-                />
-              </div>
-
-              <div className="preview-text">
-                <strong>Preview:</strong> {preview}
-              </div>
-
-              <h3>Add Prefix</h3>
-
-              <div className="rename-input-group">
-                <input
-                  type="text"
-                  className="rename-input"
-                  placeholder="Enter prefix, e.g. Food - ..."
-                  value={prefixInput}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setPrefixInput(e.target.value)}
-                  onKeyPress={(e: KeyboardEvent<HTMLInputElement>) => {
-                    if (e.key === "Enter") handlePrefix()
-                  }}
-                />
                 <button
-                  className="btn btn-primary"
-                  onClick={handlePrefix}
-                  disabled={!prefixInput.trim() || selectedIds.size === 0}
-                  style={{ padding: "0.5rem 1rem" }}
+                  className={`rename-tab ${renameTab === "prefix" ? "active" : ""}`}
+                  onClick={() => setRenameTab("prefix")}
                 >
-                  Append
+                  Add Prefix
                 </button>
               </div>
 
-              <div className="preview-text">
-                <strong>Preview:</strong> {prefixPreview}
+              {/* ── Active tab inputs + preview (stacked vertically) ── */}
+              <div className="rename-main">
+                {renameTab === "rename" ? (
+                  <>
+                    <div className="rename-input-group">
+                      <input
+                        type="text"
+                        className="rename-input"
+                        placeholder="Enter new filename..."
+                        value={renameInput}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => setRenameInput(e.target.value)}
+                        onKeyPress={(e: KeyboardEvent<HTMLInputElement>) => {
+                          if (e.key === "Enter") handleRename()
+                        }}
+                      />
+                      <span
+                        className="start-from-label"
+                        title="First number used when renaming multiple files (e.g. set to 6 to get Photo (6), Photo (7)…)"
+                      >
+                        Start #
+                      </span>
+                      <input
+                        type="number"
+                        className="rename-input"
+                        min="1"
+                        value={startFrom}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                          setStartFrom(e.target.value === "" ? "" : Math.max(1, parseInt(e.target.value) || 1))
+                        }
+                        style={{ width: "60px", flex: "none" }}
+                        title="Starting number for the incrementer"
+                      />
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleRename}
+                        disabled={!renameInput.trim() || selectedIds.size === 0}
+                        style={{ padding: "0.5rem 1rem" }}
+                      >
+                        Rename
+                      </button>
+                    </div>
+                    <div className="preview-text">
+                      <strong>Preview:</strong> {preview}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="rename-input-group">
+                      <input
+                        type="text"
+                        className="rename-input"
+                        placeholder="Enter prefix, e.g. Food - ..."
+                        value={prefixInput}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => setPrefixInput(e.target.value)}
+                        onKeyPress={(e: KeyboardEvent<HTMLInputElement>) => {
+                          if (e.key === "Enter") handlePrefix()
+                        }}
+                      />
+                      <button
+                        className="btn btn-primary"
+                        onClick={handlePrefix}
+                        disabled={!prefixInput.trim() || selectedIds.size === 0}
+                        style={{ padding: "0.5rem 1rem" }}
+                      >
+                        Append
+                      </button>
+                    </div>
+                    <div className="preview-text">
+                      <strong>Preview:</strong> {prefixPreview}
+                    </div>
+                  </>
+                )}
               </div>
 
-              <div className="rename-input-group" style={{ minWidth: "200px", maxWidth: "200px" }}>
-                <input
-                  type="number"
-                  className="rename-input"
-                  placeholder="Move to index..."
-                  min="1"
-                  max={files.length}
-                  onKeyPress={(e: KeyboardEvent<HTMLInputElement>) => {
-                    const target = e.target as HTMLInputElement
-                    if (e.key === "Enter" && target.value) {
-                      moveToIndex(parseInt(target.value))
-                      target.value = ""
-                    }
-                  }}
-                  disabled={selectedIds.size === 0}
-                />
+              {/* ── Always-visible actions ───────────────────── */}
+              <div className="rename-actions">
+                <div className="rename-input-group move-group">
+                  <input
+                    type="number"
+                    className="rename-input"
+                    placeholder="Move to index..."
+                    min="1"
+                    max={files.length}
+                    onKeyPress={(e: KeyboardEvent<HTMLInputElement>) => {
+                      const target = e.target as HTMLInputElement
+                      if (e.key === "Enter" && target.value) {
+                        moveToIndex(parseInt(target.value))
+                        target.value = ""
+                      }
+                    }}
+                    disabled={selectedIds.size === 0}
+                  />
+                  <button
+                    className="btn btn-primary"
+                    onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                      const input = (e.target as HTMLElement).previousElementSibling as HTMLInputElement | null
+                      if (input?.value) {
+                        moveToIndex(parseInt(input.value))
+                        input.value = ""
+                      }
+                    }}
+                    disabled={selectedIds.size === 0}
+                    style={{ padding: "0.5rem 1rem" }}
+                    title="Move selected files to this position"
+                  >
+                    Move
+                  </button>
+                </div>
+
                 <button
-                  className="btn btn-primary"
-                  onClick={(e: MouseEvent<HTMLButtonElement>) => {
-                    const input = (e.target as HTMLElement).previousElementSibling as HTMLInputElement | null
-                    if (input?.value) {
-                      moveToIndex(parseInt(input.value))
-                      input.value = ""
-                    }
-                  }}
+                  className="btn btn-primary download-btn"
+                  onClick={downloadSelected}
                   disabled={selectedIds.size === 0}
-                  style={{ padding: "0.5rem 1rem" }}
-                  title="Move selected files to this position"
+                  style={{ padding: "0.5rem 1rem", whiteSpace: "nowrap" }}
                 >
-                  Move
+                  📦 Download ({selectedIds.size})
                 </button>
               </div>
-
-              <button
-                className="btn btn-primary"
-                onClick={downloadSelected}
-                disabled={selectedIds.size === 0}
-                style={{ padding: "0.5rem 1rem", whiteSpace: "nowrap" }}
-              >
-                📦 Download Selected ({selectedIds.size})
-              </button>
             </div>
           </div>
         </>

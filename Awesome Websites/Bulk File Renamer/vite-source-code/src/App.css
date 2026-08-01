@@ -77,8 +77,9 @@ h1 {
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: "DM Sans", sans-serif;
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
 }
 
@@ -101,6 +102,17 @@ h1 {
 .btn-secondary:hover {
   background: var(--bg-secondary);
   border-color: var(--accent);
+}
+
+.btn-sort-active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+  color: var(--bg-primary);
+  font-weight: 700;
+}
+
+.btn-sort-active:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
 }
 
 .btn:disabled {
@@ -336,9 +348,28 @@ h1 {
   max-width: 1400px;
   margin: 0 auto;
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+}
+
+/* Main rename area: input + preview inline in one row */
+.rename-main {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Actions row: Move group + Download side by side */
+.rename-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  align-items: center;
 }
 
 @keyframes slideUp {
@@ -351,7 +382,7 @@ h1 {
 }
 
 .rename-section-spacer {
-  height: 80px;
+  height: 52px;
 }
 
 .rename-section h3 {
@@ -361,11 +392,53 @@ h1 {
   white-space: nowrap;
 }
 
+/* Tab switcher inside rename section */
+.rename-tabs {
+  display: flex;
+  gap: 0;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+.rename-tab {
+  padding: 0.3rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: "DM Sans", sans-serif;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.rename-tab.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+  color: var(--bg-primary);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+}
+
+.rename-tab:not(.active):hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .rename-input-group {
   display: flex;
   gap: 0.5rem;
-  flex: 1;
-  min-width: 300px;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.rename-input-group.move-group {
+  flex: 0 0 auto;
+  min-width: 200px;
+  max-width: 220px;
 }
 
 .rename-input-group.start-from {
@@ -380,10 +453,15 @@ h1 {
   color: var(--text-secondary);
   white-space: nowrap;
   font-family: "JetBrains Mono", monospace;
+  padding-left: 0.6rem;
+  border-left: 1px solid var(--border);
+  margin-left: 0.2rem;
 }
 
 .rename-input {
   flex: 1;
+  width: 200px;
+  min-width: 0;
   padding: 0.5rem 0.75rem;
   background: var(--bg-tertiary);
   border: 1px solid var(--border);
@@ -412,7 +490,7 @@ h1 {
 }
 
 .preview-text {
-  padding: 0.5rem 0.75rem;
+  padding: 0.4rem 0.65rem;
   background: var(--bg-tertiary);
   border-radius: 6px;
   color: var(--text-secondary);
@@ -420,7 +498,10 @@ h1 {
   font-size: 0.75rem;
   border: 1px solid var(--border);
   flex: 1;
-  min-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .preview-text strong {
@@ -527,10 +608,60 @@ input[type="file"] {
     padding: 0.75rem;
   }
 
+  /* Re-enable wrapping so tabs, inputs, and actions stack vertically */
   .rename-section-inner {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .rename-tabs {
+    width: 100%;
+    justify-content: stretch;
+    flex-shrink: 0;
+  }
+
+  .rename-tab {
+    flex: 1;
+    text-align: center;
+  }
+
+  /* Input + preview take full width below the tabs */
+  .rename-main {
+    width: 100%;
+    flex: 0 0 100%;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .rename-input-group {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Actions row goes full-width on its own line */
+  .rename-actions {
+    width: 100%;
+    flex: 0 0 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .rename-input-group.move-group {
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .download-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .start-from-label {
+    border-left: none;
+    padding-left: 0;
+    margin-left: 0;
   }
 
   .stats {
