@@ -24,6 +24,9 @@ function App() {
   const [prefixInput, setPrefixInput] = useState("")
   const [startFrom, setStartFrom] = useState<number | "">(1)
   const [compactView, setCompactView] = useState(false)
+  const [draggingIds, setDraggingIds] = useState<Set<string>>(new Set())
+  const [dropTarget, setDropTarget] = useState<{ id: string; position: "before" | "after" } | null>(null)
+  const [dragOverlay, setDragOverlay] = useState<{ x: number; y: number; label: string } | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const folderInputRef = useRef<HTMLInputElement>(null)
@@ -48,6 +51,132 @@ function App() {
     }
     return sorted
   }, [files, sortMode, sortDirection])
+
+  // Track cursor position globally during drag to position our 100% solid drag badge
+  useEffect(() => {
+    if (draggingIds.size === 0) return
+
+    const handleWindowDragOver = (e: DragEvent) => {
+      e.preventDefault()
+      if (e.clientX === 0 && e.clientY === 0) return
+      setDragOverlay((prev) => (prev ? { ...prev, x: e.clientX, y: e.clientY } : null))
+    }
+
+    window.addEventListener("dragover", handleWindowDragOver)
+    return () => window.removeEventListener("dragover", handleWindowDragOver)
+  }, [draggingIds])
+
+  // ── Drag & Drop Handlers ─────────────────────────────────────────────────
+  const handleDragStart = useCallback(
+    (id: string, e: React.DragEvent) => {
+      let idsToDrag: Set<string>
+      if (selectedIds.has(id)) {
+        idsToDrag = new Set(selectedIds)
+      } else {
+        idsToDrag = new Set([id])
+        setSelectedIds(idsToDrag)
+      }
+      setDraggingIds(idsToDrag)
+
+      const count = idsToDrag.size
+      const sampleFile = files.find((f) => f.id === id)
+      const displayName = count === 1 ? sampleFile?.currentName || "File" : `${count} Files`
+
+      // Pass a 1x1 transparent canvas to setDragImage to suppress Chrome's default faded ghost
+      const canvas = document.createElement("canvas")
+      canvas.width = 1
+      canvas.height = 1
+      const ctx = canvas.getContext("2d")
+      if (ctx) ctx.clearRect(0, 0, 1, 1)
+
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = "move"
+        e.dataTransfer.setData("text/plain", id)
+        e.dataTransfer.setDragImage(canvas, 0, 0)
+      }
+
+      setDragOverlay({
+        x: e.clientX,
+        y: e.clientY,
+        label: displayName,
+      })
+    },
+    [selectedIds, files],
+  )
+
+  const handleDragOver = useCallback(
+    (id: string, e: React.DragEvent) => {
+      e.preventDefault()
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = "move"
+      }
+
+      if (draggingIds.has(id)) {
+        setDropTarget((prev) => (prev !== null ? null : prev))
+        return
+      }
+
+      const cardElement = e.currentTarget as HTMLElement
+      const rect = cardElement.getBoundingClientRect()
+      const midX = rect.left + rect.width / 2
+      const position: "before" | "after" = e.clientX < midX ? "before" : "after"
+
+      setDropTarget((prev) => {
+        if (prev && prev.id === id && prev.position === position) return prev
+        return { id, position }
+      })
+    },
+    [draggingIds],
+  )
+
+  const handleDragLeave = useCallback((id: string, e: React.DragEvent) => {
+    const related = e.relatedTarget as Node | null
+    if (e.currentTarget.contains(related)) return
+    setDropTarget((prev) => (prev?.id === id ? null : prev))
+  }, [])
+
+  const handleDrop = useCallback(
+    (targetId: string, e: React.DragEvent) => {
+      e.preventDefault()
+      if (draggingIds.size === 0 || !dropTarget) return
+
+      const position = dropTarget.position
+
+      setFiles(() => {
+        // Base reordering on current visible list (sortedFiles)
+        const currentList = [...sortedFiles]
+        const draggedFiles = currentList.filter((f) => draggingIds.has(f.id))
+        const unselectedFiles = currentList.filter((f) => !draggingIds.has(f.id))
+
+        let targetIndex = unselectedFiles.findIndex((f) => f.id === targetId)
+        if (targetIndex === -1) {
+          targetIndex = unselectedFiles.length
+        } else if (position === "after") {
+          targetIndex += 1
+        }
+
+        const reordered = [
+          ...unselectedFiles.slice(0, targetIndex),
+          ...draggedFiles,
+          ...unselectedFiles.slice(targetIndex),
+        ]
+
+        return reordered.map((file, idx) => ({ ...file, order: idx }))
+      })
+
+      setSortMode("custom")
+      setDraggingIds(new Set())
+      setDropTarget(null)
+      setDragOverlay(null)
+    },
+    [draggingIds, dropTarget, sortedFiles],
+  )
+
+  const handleDragEnd = useCallback(() => {
+    setDraggingIds(new Set())
+    setDropTarget(null)
+    setDragOverlay(null)
+  }, [])
 
   const renamedCount = useMemo(() => files.filter((f) => f.isRenamed).length, [files])
 
@@ -347,25 +476,27 @@ function App() {
     setPrefixInput("")
   }, [prefixInput, selectedIds])
 
-  const moveFile = useCallback((id: string, direction: "left" | "right") => {
-    setSortMode("custom")
-    setFiles((prevFiles) => {
-      const sorted = [...prevFiles].sort((a, b) => a.order - b.order)
-      const index = sorted.findIndex((f) => f.id === id)
-      if (index === -1) return prevFiles
-      const newIndex = direction === "left" ? index - 1 : index + 1
-      if (newIndex < 0 || newIndex >= sorted.length) return prevFiles
-      ;[sorted[index], sorted[newIndex]] = [sorted[newIndex], sorted[index]]
-      return sorted.map((file, idx) => ({ ...file, order: idx }))
-    })
-  }, [])
+  const moveFile = useCallback(
+    (id: string, direction: "left" | "right") => {
+      setFiles(() => {
+        const sorted = [...sortedFiles]
+        const index = sorted.findIndex((f) => f.id === id)
+        if (index === -1) return sorted
+        const newIndex = direction === "left" ? index - 1 : index + 1
+        if (newIndex < 0 || newIndex >= sorted.length) return sorted
+        ;[sorted[index], sorted[newIndex]] = [sorted[newIndex], sorted[index]]
+        return sorted.map((file, idx) => ({ ...file, order: idx }))
+      })
+      setSortMode("custom")
+    },
+    [sortedFiles],
+  )
 
   const moveToIndex = useCallback(
     (targetIndex: number) => {
       if (selectedIds.size === 0) return
-      setSortMode("custom")
-      setFiles((prevFiles) => {
-        const sorted = [...prevFiles].sort((a, b) => a.order - b.order)
+      setFiles(() => {
+        const sorted = [...sortedFiles]
         const selectedFiles = sorted.filter((f) => selectedIds.has(f.id))
         const unselectedFiles = sorted.filter((f) => !selectedIds.has(f.id))
         const clampedIndex = Math.max(0, Math.min(targetIndex - 1, sorted.length - selectedFiles.length))
@@ -376,8 +507,9 @@ function App() {
         ]
         return reordered.map((file, idx) => ({ ...file, order: idx }))
       })
+      setSortMode("custom")
     },
-    [selectedIds],
+    [selectedIds, sortedFiles],
   )
 
   const downloadSelected = useCallback(async () => {
@@ -483,8 +615,15 @@ function App() {
                 isFocused={focusedIndex === index}
                 isLast={index === sortedFiles.length - 1}
                 compactView={compactView}
+                isDragging={draggingIds.has(file.id)}
+                dropIndicator={dropTarget?.id === file.id ? dropTarget.position : null}
                 onClick={handleCardClick}
                 onMove={moveFile}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onDragEnd={handleDragEnd}
               />
             ))}
           </div>
@@ -620,6 +759,19 @@ function App() {
           </svg>
           <h3>No files uploaded yet</h3>
           <p>Upload files or folders to get started</p>
+        </div>
+      )}
+
+      {dragOverlay && (
+        <div
+          className="custom-drag-overlay"
+          style={{
+            left: `${dragOverlay.x + 16}px`,
+            top: `${dragOverlay.y + 16}px`,
+          }}
+        >
+          <span className="ghost-icon">📄</span>
+          <span className="ghost-text">Moving {dragOverlay.label}</span>
         </div>
       )}
     </div>

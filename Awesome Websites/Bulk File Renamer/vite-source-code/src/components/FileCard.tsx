@@ -9,20 +9,52 @@ interface FileCardProps {
   isFocused: boolean
   isLast: boolean
   compactView: boolean
+  isDragging: boolean
+  dropIndicator: "before" | "after" | null
   onClick: (id: string, index: number, event: React.MouseEvent) => void
   onMove: (id: string, direction: "left" | "right") => void
+  onDragStart: (id: string, event: React.DragEvent) => void
+  onDragOver: (id: string, event: React.DragEvent) => void
+  onDragLeave: (id: string, event: React.DragEvent) => void
+  onDrop: (id: string, event: React.DragEvent) => void
+  onDragEnd: () => void
 }
 
 const FileCard = React.memo(
-  ({ file, index, isSelected, isFocused, isLast, compactView, onClick, onMove }: FileCardProps) => (
+  ({
+    file,
+    index,
+    isSelected,
+    isFocused,
+    isLast,
+    compactView,
+    isDragging,
+    dropIndicator,
+    onClick,
+    onMove,
+    onDragStart,
+    onDragOver,
+    onDragLeave,
+    onDrop,
+    onDragEnd,
+  }: FileCardProps) => (
     <div
       className={`file-card ${isSelected ? "selected" : ""} ${isFocused ? "focused" : ""} ${
         compactView ? "compact" : ""
-      }`}
+      } ${isDragging ? "is-dragging" : ""} ${dropIndicator ? `drop-target-${dropIndicator}` : ""}`}
       tabIndex={0}
       data-index={index}
+      draggable={true}
       onClick={(e) => onClick(file.id, index, e)}
+      onDragStart={(e) => onDragStart(file.id, e)}
+      onDragOver={(e) => onDragOver(file.id, e)}
+      onDragLeave={(e) => onDragLeave(file.id, e)}
+      onDrop={(e) => onDrop(file.id, e)}
+      onDragEnd={onDragEnd}
     >
+      {dropIndicator === "before" && <div className="drop-indicator drop-indicator-left" />}
+      {dropIndicator === "after" && <div className="drop-indicator drop-indicator-right" />}
+
       <div className="file-card-preview">
         <input
           type="checkbox"
@@ -76,3 +108,4 @@ const FileCard = React.memo(
 )
 
 export default FileCard
+

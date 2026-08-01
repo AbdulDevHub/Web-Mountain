@@ -192,6 +192,8 @@ h1 {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  pointer-events: none;
+  user-select: none;
 }
 
 .file-card-checkbox {
@@ -594,3 +596,110 @@ input[type="file"] {
 ::-webkit-scrollbar-corner {
   background: none;
 }
+
+/* ── Drag & Drop Styles ─────────────────────────────────────────────────── */
+.file-card[draggable="true"] {
+  cursor: grab;
+}
+
+.file-card.is-dragging {
+  opacity: 0.35;
+  filter: grayscale(60%);
+  border-style: dashed;
+  border-color: var(--accent);
+  cursor: grabbing;
+}
+
+.file-card.drop-target-before {
+  border-left: 3px solid #00ff88 !important;
+  box-shadow: -6px 0 16px rgba(0, 255, 136, 0.4) !important;
+}
+
+.file-card.drop-target-after {
+  border-right: 3px solid #00ff88 !important;
+  box-shadow: 6px 0 16px rgba(0, 255, 136, 0.4) !important;
+}
+
+.drop-indicator {
+  position: absolute;
+  top: -12px;
+  bottom: -12px;
+  width: 8px;
+  background-color: #00ff88;
+  border-radius: 4px;
+  box-shadow: 0 0 24px #00ff88, 0 0 12px #10b981, 0 0 6px #ffffff;
+  z-index: 1000;
+  pointer-events: none;
+  animation: pulseIndicator 0.8s infinite ease-in-out;
+}
+
+.drop-indicator-left {
+  left: -14px;
+}
+
+.drop-indicator-right {
+  right: -14px;
+}
+
+.drop-indicator::before,
+.drop-indicator::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  background-color: #00ff88;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 14px #00ff88, 0 0 6px #ffffff;
+}
+
+.drop-indicator::before {
+  top: -6px;
+}
+
+.drop-indicator::after {
+  bottom: -6px;
+}
+
+@keyframes pulseIndicator {
+  0%,
+  100% {
+    opacity: 0.9;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1.3);
+  }
+}
+
+/* 100% OPAQUE, Fixed Position Cursor-Following Drag Badge */
+.custom-drag-overlay {
+  position: fixed;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.3rem;
+  background: #141414;
+  color: #ffffff;
+  border: 2px solid #10b981;
+  border-radius: 10px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.9), 0 0 24px rgba(16, 185, 129, 0.6);
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 1 !important;
+}
+
+.ghost-icon {
+  font-size: 1.25rem;
+}
+
+
+
+
