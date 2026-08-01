@@ -6,21 +6,33 @@ interface FileCardProps {
   file: FileItem
   index: number
   isSelected: boolean
+  isFocused: boolean
   isLast: boolean
   compactView: boolean
-  onToggle: (id: string) => void
+  onClick: (id: string, index: number, event: React.MouseEvent) => void
   onMove: (id: string, direction: "left" | "right") => void
 }
 
 const FileCard = React.memo(
-  ({ file, index, isSelected, isLast, compactView, onToggle, onMove }: FileCardProps) => (
-    <div className={`file-card ${isSelected ? "selected" : ""} ${compactView ? "compact" : ""}`}>
+  ({ file, index, isSelected, isFocused, isLast, compactView, onClick, onMove }: FileCardProps) => (
+    <div
+      className={`file-card ${isSelected ? "selected" : ""} ${isFocused ? "focused" : ""} ${
+        compactView ? "compact" : ""
+      }`}
+      tabIndex={0}
+      data-index={index}
+      onClick={(e) => onClick(file.id, index, e)}
+    >
       <div className="file-card-preview">
         <input
           type="checkbox"
           className="checkbox file-card-checkbox"
           checked={isSelected}
-          onChange={() => onToggle(file.id)}
+          onClick={(e) => {
+            e.stopPropagation()
+            onClick(file.id, index, e)
+          }}
+          onChange={() => {}}
         />
         <div className="file-card-index">{index + 1}</div>
         <FilePreview
@@ -36,7 +48,10 @@ const FileCard = React.memo(
           <div className="arrow-btns">
             <button
               className="arrow-btn"
-              onClick={() => onMove(file.id, "left")}
+              onClick={(e) => {
+                e.stopPropagation()
+                onMove(file.id, "left")
+              }}
               disabled={index === 0}
               title="Move left"
             >
@@ -44,7 +59,10 @@ const FileCard = React.memo(
             </button>
             <button
               className="arrow-btn"
-              onClick={() => onMove(file.id, "right")}
+              onClick={(e) => {
+                e.stopPropagation()
+                onMove(file.id, "right")
+              }}
               disabled={isLast}
               title="Move right"
             >

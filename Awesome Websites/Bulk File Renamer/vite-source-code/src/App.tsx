@@ -3,6 +3,7 @@ import {
   useRef,
   useMemo,
   useCallback,
+  useEffect,
   type ChangeEvent,
   type KeyboardEvent,
   type MouseEvent,
@@ -15,6 +16,8 @@ import "./App.css"
 function App() {
   const [files, setFiles] = useState<FileItem[]>([])
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [pivotIndex, setPivotIndex] = useState<number | null>(null)
+  const [focusedIndex, setFocusedIndex] = useState<number>(0)
   const [sortMode, setSortMode] = useState<SortMode>("date")
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
   const [renameInput, setRenameInput] = useState("")
@@ -113,34 +116,173 @@ function App() {
     [sortMode],
   )
 
-  const toggleSelection = useCallback((id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
+  const handleCardClick = useCallback(
+    (id: string, index: number, e: React.MouseEvent) => {
+      setFocusedIndex(index)
+
+      if (e.shiftKey && sortedFiles.length > 0) {
+        const anchor = pivotIndex !== null ? pivotIndex : focusedIndex
+        const start = Math.min(anchor, index)
+        const end = Math.max(anchor, index)
+        const rangeIds = sortedFiles.slice(start, end + 1).map((f) => f.id)
+
+        setSelectedIds((prev) => {
+          const next = new Set(prev)
+          rangeIds.forEach((rid) => next.add(rid))
+          return next
+        })
+      } else if (e.metaKey || e.ctrlKey) {
+        setPivotIndex(index)
+        setSelectedIds((prev) => {
+          const next = new Set(prev)
+          if (next.has(id)) {
+            next.delete(id)
+          } else {
+            next.add(id)
+          }
+          return next
+        })
       } else {
-        next.add(id)
-        if (next.size === 1) {
-          setFiles((fs) => {
-            const file = fs.find((f) => f.id === id)
-            if (file) setRenameInput((r) => (r.trim() ? r : file.nameWithoutExt))
-            return fs
-          })
-        }
+        setPivotIndex(index)
+        setSelectedIds((prev) => {
+          const next = new Set(prev)
+          if (next.has(id)) {
+            next.delete(id)
+          } else {
+            next.add(id)
+            if (next.size === 1) {
+              const file = files.find((f) => f.id === id)
+              if (file) setRenameInput((r) => (r.trim() ? r : file.nameWithoutExt))
+            }
+          }
+          return next
+        })
       }
-      return next
-    })
-  }, [])
+    },
+    [sortedFiles, pivotIndex, focusedIndex, files],
+  )
 
   const selectAll = useCallback(() => {
-    setFiles((fs) => {
-      setSelectedIds(new Set(fs.map((f) => f.id)))
-      setRenameInput((r) => (fs.length > 0 && !r.trim() ? fs[0].nameWithoutExt : r))
-      return fs
+    if (files.length === 0) return
+    setSelectedIds((prev) => {
+      if (prev.size === files.length) {
+        return new Set()
+      } else {
+        if (!renameInput.trim()) {
+          setRenameInput(files[0].nameWithoutExt)
+        }
+        return new Set(files.map((f) => f.id))
+      }
     })
-  }, [])
+  }, [files, renameInput])
 
   const deselectAll = useCallback(() => setSelectedIds(new Set()), [])
+
+  useEffect(() => {
+    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
+      const active = document.activeElement
+      if (
+        active &&
+        (active.tagName === "INPUT" ||
+          active.tagName === "TEXTAREA" ||
+          (active as HTMLElement).isContentEditable)
+      ) {
+        return
+      }
+
+      if (sortedFiles.length === 0) return
+
+      const isArrowKey = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(e.key)
+      const isSelectAll = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a"
+
+      if (isSelectAll) {
+        e.preventDefault()
+        selectAll()
+        return
+      }
+
+      if (!isArrowKey && e.key !== " ") return
+
+      if (isArrowKey) {
+        e.preventDefault()
+        let nextIndex = focusedIndex
+
+        const container = document.querySelector(".file-list")
+        let columns = 1
+        if (container) {
+          const gridComputedStyle = window.getComputedStyle(container)
+          const gridTemplateColumns = gridComputedStyle.getPropertyValue("grid-template-columns")
+          if (gridTemplateColumns) {
+            columns = Math.max(1, gridTemplateColumns.split(" ").filter(Boolean).length)
+          }
+        }
+
+        switch (e.key) {
+          case "ArrowLeft":
+            nextIndex = Math.max(0, focusedIndex - 1)
+            break
+          case "ArrowRight":
+            nextIndex = Math.min(sortedFiles.length - 1, focusedIndex + 1)
+            break
+          case "ArrowUp":
+            nextIndex = Math.max(0, focusedIndex - columns)
+            break
+          case "ArrowDown":
+            nextIndex = Math.min(sortedFiles.length - 1, focusedIndex + columns)
+            break
+          case "Home":
+            nextIndex = 0
+            break
+          case "End":
+            nextIndex = sortedFiles.length - 1
+            break
+        }
+
+        setFocusedIndex(nextIndex)
+
+        if (e.shiftKey) {
+          const anchor = pivotIndex !== null ? pivotIndex : focusedIndex
+          const start = Math.min(anchor, nextIndex)
+          const end = Math.max(anchor, nextIndex)
+          const rangeIds = sortedFiles.slice(start, end + 1).map((f) => f.id)
+          setSelectedIds((prev) => {
+            const next = new Set(prev)
+            rangeIds.forEach((rid) => next.add(rid))
+            return next
+          })
+        } else {
+          setPivotIndex(nextIndex)
+          const nextId = sortedFiles[nextIndex]?.id
+          if (nextId) {
+            setSelectedIds(new Set([nextId]))
+          }
+        }
+
+        const el = document.querySelector(`[data-index="${nextIndex}"]`)
+        if (el) {
+          el.scrollIntoView({ block: "nearest", behavior: "smooth" })
+        }
+      } else if (e.key === " ") {
+        e.preventDefault()
+        const currentFile = sortedFiles[focusedIndex]
+        if (currentFile) {
+          setSelectedIds((prev) => {
+            const next = new Set(prev)
+            if (next.has(currentFile.id)) {
+              next.delete(currentFile.id)
+            } else {
+              next.add(currentFile.id)
+            }
+            return next
+          })
+          setPivotIndex(focusedIndex)
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [sortedFiles, focusedIndex, pivotIndex, selectAll])
 
   const handleRename = useCallback(() => {
     setFiles((prevFiles) => {
@@ -338,9 +480,10 @@ function App() {
                 file={file}
                 index={index}
                 isSelected={selectedIds.has(file.id)}
+                isFocused={focusedIndex === index}
                 isLast={index === sortedFiles.length - 1}
                 compactView={compactView}
-                onToggle={toggleSelection}
+                onClick={handleCardClick}
                 onMove={moveFile}
               />
             ))}

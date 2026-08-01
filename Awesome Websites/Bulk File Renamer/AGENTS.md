@@ -9,4 +9,4 @@
 ## Guidelines for AI Agents
 
 1. **Source Code Location**: All source files, configuration, and dependencies for this application reside inside `vite-source-code/`. When developing, testing, or modifying code, work inside the `vite-source-code/` directory.
-2. **Build Outputs**: Do not commit compiled build artifacts or `dist` directories to Git.
+2. **Build Outputs**: Do not commit compiled build artifacts or `dist` directories to Git. For reference, the dist folder is produced as `file-renamer/` instead of `dist/` to give the acutal website a cleaner URL path.

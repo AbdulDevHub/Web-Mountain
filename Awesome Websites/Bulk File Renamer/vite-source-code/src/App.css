@@ -158,6 +158,8 @@ h1 {
   transition: all 0.3s ease;
   border: 2px solid transparent;
   position: relative;
+  cursor: pointer;
+  user-select: none;
 }
 
 .file-card:hover {
@@ -168,6 +170,11 @@ h1 {
 .file-card.selected {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+}
+
+.file-card.focused {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
 }
 
 .file-card-preview {
