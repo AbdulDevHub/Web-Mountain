@@ -66,6 +66,46 @@ Push to GitHub and import the repo in Vercel with defaults (Vite preset).
 Make sure `src/data/gitmojiEmbeddings.json` is committed (it's the
 precomputed data the deployed site ships with) — don't gitignore it.
 
+## Improving match quality
+
+1. **Run the eval first, before changing anything**, to get a baseline:
+   ```bash
+   npm run eval
+   ```
+   This runs `eval/cases.ts` (60 realistic commit descriptions with the
+   emoji you'd actually want) through the real ranking code and reports
+   top-1 / top-3 accuracy plus every miss. Add more cases as you find gaps —
+   write them the way you actually type, not the way `gitmojis.ts` is
+   worded, or you're just testing string overlap instead of semantics.
+
+2. **For each miss, decide which lever to pull:**
+   - *The right emoji was close but not #1* → add a keyword boost rule in
+     `src/lib/rank.ts` (`KEYWORD_BOOSTS`), or add the words you actually
+     used to that emoji's `aliases` in `gitmojis.ts`.
+   - *The right emoji wasn't even in the top 3* → its description in
+     `gitmojis.ts` is probably too abstract or too close to a neighboring
+     emoji's description. Make it more concrete and specific.
+   - *Two emoji keep tying / swapping places* → their descriptions likely
+     overlap semantically — differentiate the wording.
+   - After any edit to `gitmojis.ts`, re-run `npm run precompute` before
+     `npm run eval` — the eval reads the precomputed embeddings, not the
+     source file.
+
+3. **Try the bigger model** if quality plateaus with the current one:
+   ```ts
+   // src/lib/embeddingModel.ts
+   export const EMBEDDING_MODEL = "Xenova/all-MiniLM-L12-v2";
+   ```
+   Then `npm run precompute && npm run eval` to compare against baseline.
+   L12 is slower and a larger download (~60MB vs ~30MB) but more accurate.
+   If you change the model, clear your browser's site data for localhost
+   once (or just use a private window) so it doesn't try to reuse the old
+   model's cached files.
+
+4. **Iterate**: eval → tweak → eval → compare numbers. Don't just eyeball a
+   handful of manual tries — the eval script exists so you have something
+   objective to compare against.
+
 ## Notes / things you may want to tune
 
 - **Model size vs. quality**: `Xenova/all-MiniLM-L6-v2` (current choice) is

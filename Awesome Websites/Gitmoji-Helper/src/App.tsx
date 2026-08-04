@@ -90,7 +90,7 @@ export default function App() {
                 <span className="emoji">{m.emoji}</span>
                 <span className="type">{m.type}</span>
                 <span className="desc">{m.description}</span>
-                <span className="score">{Math.round(m.score * 100)}%</span>
+                <span className="score">{Math.round(m.confidence * 100)}%</span>
               </button>
             </li>
           ))}

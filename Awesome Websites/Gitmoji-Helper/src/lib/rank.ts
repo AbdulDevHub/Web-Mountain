@@ -5,7 +5,8 @@ export interface RankedMatch {
   emoji: string;
   type: string;
   description: string;
-  score: number; // 0..1, roughly a confidence
+  score: number; // raw cosine + boost, used for ranking — don't display raw
+  confidence: number; // 0..1, rescaled against this query's own score spread, for display
 }
 
 interface EmbeddedEntry {
@@ -59,5 +60,19 @@ export async function rankGitmojis(input: string, topN = 3): Promise<RankedMatch
   });
 
   scored.sort((a, b) => b.score - a.score);
-  return scored.slice(0, topN);
+  const top = scored.slice(0, topN);
+
+  // Raw cosine similarity from MiniLM clusters tightly (often 0.3-0.6 even
+  // for a clearly-best match), which reads as a misleadingly low percentage.
+  // Rescale relative to the score spread across *all* candidates for this
+  // specific query, purely for display — ranking above already used the raw score.
+  const allScores = scored.map((s) => s.score);
+  const min = Math.min(...allScores);
+  const max = Math.max(...allScores);
+  const range = max - min || 1;
+
+  return top.map((m) => ({
+    ...m,
+    confidence: Math.max(0, Math.min(1, (m.score - min) / range)),
+  }));
 }

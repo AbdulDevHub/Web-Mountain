@@ -5,4 +5,4 @@
 //
 // all-MiniLM-L6-v2: 384-dim sentence embeddings, small (~30MB quantized),
 // good general-purpose semantic similarity, well supported by Transformers.js.
-export const EMBEDDING_MODEL = "Xenova/all-MiniLM-L6-v2";
+export const EMBEDDING_MODEL = "Xenova/all-MiniLM-L12-v2";
