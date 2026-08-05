@@ -95,11 +95,10 @@ cd Web-Mountain
 
 1. Open `index.html` in your browser to view the project showcase.
 2. **For Vite/React Projects:**
-Individual Vite applications (such as *Bulk File Renamer*) live in their respective `vite-source-code` subfolders.
 To run a Vite project locally:
 
 ```bash
-cd "Awesome Websites/Bulk File Renamer/vite-source-code"
+cd "Awesome Websites/Bulk File Renamer"
 npm install
 npm run dev
 ```

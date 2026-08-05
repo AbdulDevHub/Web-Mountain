@@ -5,7 +5,7 @@ import react from "@vitejs/plugin-react"
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: "../gitmoji-helper", // <-- Outputs right next to your screenshot!
+    outDir: "gitmoji-helper",
     emptyOutDir: true,
   },
   optimizeDeps: {
