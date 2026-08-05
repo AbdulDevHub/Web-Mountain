@@ -99,8 +99,8 @@ To run a Vite project locally:
 
 ```bash
 cd "Awesome Websites/Bulk File Renamer"
-npm install
-npm run dev
+npm install (or pnpm install)
+npm run dev (or pnpm dev)
 ```
 
 > ⚡ **CI/CD & Deployment:** Netlify automatically builds all Vite-based projects into their parent output directories upon pushing to `main`, ensuring seamless deployment without committing compiled `dist` files.
