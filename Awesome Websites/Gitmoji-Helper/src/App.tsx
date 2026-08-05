@@ -29,7 +29,7 @@ export default function App() {
     setSearching(true);
     setSelected(null);
     try {
-      const results = await rankGitmojis(input, 3);
+      const results = await rankGitmojis(input, 5);
       setMatches(results);
     } finally {
       setSearching(false);
@@ -78,6 +78,13 @@ export default function App() {
           {searching ? "Matching…" : "Match"}
         </button>
       </form>
+
+      {matches.length > 0 && matches[0].confidence < 0.75 && (
+        <p className="low-confidence-hint">
+          None of these stood out strongly — try describing the actual code
+          change rather than the task in general terms.
+        </p>
+      )}
 
       {matches.length > 0 && (
         <ul className="results">

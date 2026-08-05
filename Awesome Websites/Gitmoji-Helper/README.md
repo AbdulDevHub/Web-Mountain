@@ -1,7 +1,7 @@
 # Gitmoji Commit Helper
 
 Type a plain-English commit description (e.g. `fix scrolling behaviour`) and
-get the top 3 Gitmoji + Conventional Commit matches, ranked by semantic
+get the top 5 Gitmoji + Conventional Commit matches, ranked by semantic
 similarity — computed entirely in your browser. No API keys, no backend, no
 cost.
 
@@ -74,7 +74,7 @@ precomputed data the deployed site ships with) — don't gitignore it.
    ```
    This runs `eval/cases.ts` (60 realistic commit descriptions with the
    emoji you'd actually want) through the real ranking code and reports
-   top-1 / top-3 accuracy plus every miss. Add more cases as you find gaps —
+   top-1 / top-5 accuracy plus every miss. Add more cases as you find gaps —
    write them the way you actually type, not the way `gitmojis.ts` is
    worded, or you're just testing string overlap instead of semantics.
 
@@ -82,7 +82,7 @@ precomputed data the deployed site ships with) — don't gitignore it.
    - *The right emoji was close but not #1* → add a keyword boost rule in
      `src/lib/rank.ts` (`KEYWORD_BOOSTS`), or add the words you actually
      used to that emoji's `aliases` in `gitmojis.ts`.
-   - *The right emoji wasn't even in the top 3* → its description in
+   - *The right emoji wasn't even in the top 5* → its description in
      `gitmojis.ts` is probably too abstract or too close to a neighboring
      emoji's description. Make it more concrete and specific.
    - *Two emoji keep tying / swapping places* → their descriptions likely
@@ -120,5 +120,5 @@ precomputed data the deployed site ships with) — don't gitignore it.
   behind a dynamic `import()` if you want a snappier initial paint.
 - **Eval dataset** (ChatGPT's suggestion): once this is working, add
   `eval/cases.json` of `{ input, expectedEmoji }` pairs and a small script
-  that runs `rankGitmojis` over them to report top-1/top-3 accuracy — makes
+  that runs `rankGitmojis` over them to report top-1/top-5 accuracy — makes
   it easy to tell if a ranking tweak actually helped.

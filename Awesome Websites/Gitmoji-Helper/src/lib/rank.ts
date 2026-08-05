@@ -29,6 +29,8 @@ const KEYWORD_BOOSTS: { pattern: RegExp; emojiTypes: string[]; boost: number }[]
   { pattern: /\btest(s|ing)?\b/i, emojiTypes: ["✅", "🧪", "🤡"], boost: 0.06 },
   { pattern: /\btypo\b/i, emojiTypes: ["✏️"], boost: 0.1 },
   { pattern: /\bsecurity|vulnerab/i, emojiTypes: ["🔒️"], boost: 0.08 },
+  { pattern: /\b(dev|developer)\b.*\bsetup\b|\bsetup\b.*\b(dev|developer)\b|\bonboarding\b/i, emojiTypes: ["🧑‍💻"], boost: 0.1 },
+  { pattern: /\bbundle size|\bshrink\b|\bsmaller bundle\b/i, emojiTypes: ["⚡️"], boost: 0.08 },
 ];
 
 function keywordBoostFor(input: string, emoji: string): number {
@@ -42,7 +44,7 @@ function keywordBoostFor(input: string, emoji: string): number {
 }
 
 /** Embed the user's input and return the top-N gitmoji matches, best first. */
-export async function rankGitmojis(input: string, topN = 3): Promise<RankedMatch[]> {
+export async function rankGitmojis(input: string, topN = 5): Promise<RankedMatch[]> {
   const trimmed = input.trim();
   if (!trimmed) return [];
 
@@ -62,17 +64,21 @@ export async function rankGitmojis(input: string, topN = 3): Promise<RankedMatch
   scored.sort((a, b) => b.score - a.score);
   const top = scored.slice(0, topN);
 
-  // Raw cosine similarity from MiniLM clusters tightly (often 0.3-0.6 even
-  // for a clearly-best match), which reads as a misleadingly low percentage.
-  // Rescale relative to the score spread across *all* candidates for this
-  // specific query, purely for display — ranking above already used the raw score.
+  // Raw min-max rescaling always maps the #1 result to 100%, even when it's
+  // only marginally ahead of everything else (e.g. a vague/meta query where
+  // no candidate is a genuinely good match) — that's misleading. Instead,
+  // measure how far each score stands out above the *average* of the full
+  // candidate pool, in standard deviations, then squash through a sigmoid.
+  // A dominant, clearly-best match => confidence near 100%.
+  // A weak win where everything scored similarly => confidence near 50%.
   const allScores = scored.map((s) => s.score);
-  const min = Math.min(...allScores);
-  const max = Math.max(...allScores);
-  const range = max - min || 1;
+  const mean = allScores.reduce((a, b) => a + b, 0) / allScores.length;
+  const variance = allScores.reduce((a, b) => a + (b - mean) ** 2, 0) / allScores.length;
+  const std = Math.sqrt(variance) || 1e-6;
 
-  return top.map((m) => ({
-    ...m,
-    confidence: Math.max(0, Math.min(1, (m.score - min) / range)),
-  }));
+  return top.map((m) => {
+    const z = (m.score - mean) / std;
+    const confidence = 1 / (1 + Math.exp(-z)); // sigmoid
+    return { ...m, confidence };
+  });
 }
