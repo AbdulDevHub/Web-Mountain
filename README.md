@@ -24,7 +24,7 @@ Complete website projects ranging from interactive games to practical utilities.
 - **[War](./Awesome%20Websites/War)** - Classic card game implementation
 - **[UNO](./Awesome%20Websites/UNO)** - Another Classic card game implementation
 - **[DhikrForest](./Awesome%20Websites/DhikrForest)** - Offline-first dhikr (Islamic remembrance) counter that visualizes worship as a growing forest, with Laylatul Qadr mode and milestone notifications
-- **[Gitmoji Helper](./Awesome%20Websites/Gitmoji-Helper) - Finds the top 5 Gitmoji and Conventional Commit matches from plain English using vector embeddings and ONNX/WASM cosine similarity—100% local, zero backend.
+- **[Gitmoji Helper](./Awesome%20Websites/Gitmoji-Helper)** - Finds the top 5 Gitmoji and Conventional Commit matches from plain English using vector embeddings and ONNX/WASM cosine similarity—100% local, zero backend.
 
 ### UI Experiments
 
@@ -103,7 +103,7 @@ npm install (or pnpm install)
 npm run dev (or pnpm dev)
 ```
 
-> ⚡ **CI/CD & Deployment:** Netlify automatically builds all Vite-based projects into their parent output directories upon pushing to `main`, ensuring seamless deployment without committing compiled `dist` files.
+> ⚡ **CI/CD & Deployment:** Netlify automatically builds all Vite-based projects into their parent output directories upon pushing to `main` via netlify.toml and a root `build.sh` script, ensuring seamless deployment without committing compiled `dist` files.
 
 ## Working with Submodules
 
