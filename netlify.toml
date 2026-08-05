@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  command = "cd 'Awesome Websites/Bulk File Renamer/vite-source-code' && npm ci && npm run build"
+  command = "cd 'Awesome Websites/Bulk File Renamer/vite-source-code' && npm ci && npm run build && cd '../../Gitmoji-Helper/vite-source-code' && npm ci && npm run build"
 
 [build.environment]
   NODE_VERSION = "24"

@@ -24,6 +24,7 @@ Complete website projects ranging from interactive games to practical utilities.
 - **[War](./Awesome%20Websites/War)** - Classic card game implementation
 - **[UNO](./Awesome%20Websites/UNO)** - Another Classic card game implementation
 - **[DhikrForest](./Awesome%20Websites/DhikrForest)** - Offline-first dhikr (Islamic remembrance) counter that visualizes worship as a growing forest, with Laylatul Qadr mode and milestone notifications
+- **[Gitmoji Helper](./Awesome%20Websites/Gitmoji-Helper) - Finds the top 5 Gitmoji and Conventional Commit matches from plain English using vector embeddings and ONNX/WASM cosine similarity—100% local, zero backend.
 
 ### UI Experiments
 
@@ -110,7 +111,7 @@ npm run dev
 Several projects in this repo are Git submodules pointing to their own standalone repos:
 
 | Project | Location | Repo |
-|---|---|---|
+| --- | --- | --- |
 | Gallery Viewer | `Chrome Extensions/Gallery-Viewer` | [AbdulDevHub/Gallery-Viewer](https://github.com/AbdulDevHub/Gallery-Viewer) |
 | Linkest | `Chrome Extensions/Linkest` | [AbdulDevHub/Linkest](https://github.com/AbdulDevHub/Linkest) |
 | Hydration Hero | `Chrome Extensions/Hydration-Hero` | [AbdulDevHub/Hydration-Hero](https://github.com/AbdulDevHub/Hydration-Hero) |
