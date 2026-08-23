@@ -9,6 +9,8 @@ export default function App() {
   const [modelState, setModelState] = useState<ModelState>("loading");
   const [loadPct, setLoadPct] = useState(0);
   const [input, setInput] = useState("");
+  const [showScope, setShowScope] = useState(false);
+  const [scope, setScope] = useState("");
   const [matches, setMatches] = useState<RankedMatch[]>([]);
   const [selected, setSelected] = useState<RankedMatch | null>(null);
   const [searching, setSearching] = useState(false);
@@ -38,8 +40,10 @@ export default function App() {
 
   const commitMessage = useMemo(() => {
     if (!selected) return "";
-    return `${selected.emoji} ${selected.type}: ${input.trim()}`;
-  }, [selected, input]);
+    const trimmedScope = showScope ? scope.trim() : "";
+    const typeAndScope = trimmedScope ? `${selected.type}(${trimmedScope})` : selected.type;
+    return `${selected.emoji} ${typeAndScope}: ${input.trim()}`;
+  }, [selected, input, scope, showScope]);
 
   async function handleCopy() {
     if (!commitMessage) return;
@@ -64,6 +68,26 @@ export default function App() {
         <div className="model-status error">
           Couldn't load the embedding model. Check your connection and reload.
         </div>
+      )}
+
+      <label className="scope-toggle">
+        <input
+          type="checkbox"
+          checked={showScope}
+          onChange={(e) => setShowScope(e.target.checked)}
+        />
+        Add scope
+      </label>
+
+      {showScope && (
+        <input
+          type="text"
+          className="scope-field"
+          placeholder="scope — e.g. CarerFlow"
+          value={scope}
+          onChange={(e) => setScope(e.target.value)}
+          disabled={modelState !== "ready"}
+        />
       )}
 
       <form onSubmit={handleSearch} className="search-form">

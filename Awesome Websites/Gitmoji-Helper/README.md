@@ -26,10 +26,23 @@ pin these two rather than taking whatever `@latest` gives you.
   types.
 - `src/lib/rank.ts` — cosine similarity between the query vector and each
   precomputed gitmoji vector, plus a small keyword boost, sorted descending.
+- `src/App.tsx` — the UI. Runs the search, renders the ranked results, and
+  assembles the final commit string shown in the output box.
 
 Both the precompute script and the browser both import the model id from
 `src/lib/embeddingModel.ts` — **don't let these drift apart**, or the
 similarity scores stop being comparable.
+
+### Optional scope
+
+There's an "Add scope" checkbox above the search box. Checked, it reveals a
+free-text field, and the copied commit message becomes
+`emoji type(scope): description` (e.g. `✨ feat(CarerFlow): add scripts for
+checking query plans`) instead of the default `emoji type: description`.
+This is purely a display/formatting concern in `App.tsx` — scope is never
+sent to `rankGitmojis` and has no effect on matching or ranking. If the
+checkbox is unchecked, whatever's typed in the field is ignored even if it
+wasn't cleared, so toggling it off always reverts to the plain format.
 
 ## Setup
 
@@ -69,9 +82,11 @@ precomputed data the deployed site ships with) — don't gitignore it.
 ## Improving match quality
 
 1. **Run the eval first, before changing anything**, to get a baseline:
+
    ```bash
    npm run eval
    ```
+
    This runs `eval/cases.ts` (60 realistic commit descriptions with the
    emoji you'd actually want) through the real ranking code and reports
    top-1 / top-5 accuracy plus every miss. Add more cases as you find gaps —
@@ -92,10 +107,12 @@ precomputed data the deployed site ships with) — don't gitignore it.
      source file.
 
 3. **Try the bigger model** if quality plateaus with the current one:
+
    ```ts
    // src/lib/embeddingModel.ts
    export const EMBEDDING_MODEL = "Xenova/all-MiniLM-L12-v2";
    ```
+
    Then `npm run precompute && npm run eval` to compare against baseline.
    L12 is slower and a larger download (~60MB vs ~30MB) but more accurate.
    If you change the model, clear your browser's site data for localhost
