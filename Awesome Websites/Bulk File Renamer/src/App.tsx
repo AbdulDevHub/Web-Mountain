@@ -517,7 +517,11 @@ function App() {
     const selectedFiles = files.filter((f) => selectedIds.has(f.id))
     if (selectedFiles.length === 0) return
     const zip = new JSZip()
-    selectedFiles.forEach((file) => zip.file(file.currentName, file.originalFile))
+    selectedFiles.forEach((file) =>
+      zip.file(file.currentName, file.originalFile, {
+        date: new Date(file.dateModified),
+      }),
+    )
     const content = await zip.generateAsync({ type: "blob" })
     const url = URL.createObjectURL(content)
     const a = document.createElement("a")
