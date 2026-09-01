@@ -1,6 +1,6 @@
 # AI Projects
 
-<img src="./Screenshot.png" alt="App Screenshot" width="500">
+<img src="./Screenshot.jpg" alt="App Screenshot" width="1000">
 
 This repository serves as a collection of various AI projects. Each project resides in its own dedicated folder. Here's a brief overview of each project:
 
