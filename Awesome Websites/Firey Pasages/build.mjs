@@ -10,6 +10,7 @@ import { build } from "esbuild"
 import { copyFileSync, mkdirSync, statSync } from "node:fs"
 
 mkdirSync("vendor", { recursive: true })
+mkdirSync("public/vendor", { recursive: true })
 
 await build({
   entryPoints: ["src/tts-worker.js"],
@@ -26,8 +27,11 @@ await build({
   conditions: ["onnxruntime-web-use-extern-wasm"],
   logLevel: "info",
 })
+copyFileSync("vendor/tts-worker.js", "public/vendor/tts-worker.js")
 
 for (const f of ["ort-wasm-simd-threaded.jsep.mjs", "ort-wasm-simd-threaded.jsep.wasm"]) {
   copyFileSync(`node_modules/onnxruntime-web/dist/${f}`, `vendor/${f}`)
+  copyFileSync(`node_modules/onnxruntime-web/dist/${f}`, `public/vendor/${f}`)
   console.log(`copied ${f} (${(statSync(`vendor/${f}`).size / 1e6).toFixed(1)} MB)`)
 }
+

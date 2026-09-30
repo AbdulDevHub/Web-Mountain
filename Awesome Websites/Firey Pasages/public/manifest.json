@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "Fiery Passages",
+  "version": "1.1",
+  "description": "Story audio player with on-device text-to-speech and a visualizer",
+  "permissions": [
+    "activeTab",
+    "unlimitedStorage"
+  ],
+  "host_permissions": [
+    "https://huggingface.co/*",
+    "https://*.huggingface.co/*",
+    "https://*.hf.co/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "cross_origin_embedder_policy": {
+    "value": "require-corp"
+  },
+  "cross_origin_opener_policy": {
+    "value": "same-origin"
+  },
+  "action": {
+    "default_icon": {
+      "16": "Favicon.png",
+      "48": "Favicon.png",
+      "128": "Favicon.png"
+    },
+    "default_title": "Open Fiery Passages"
+  },
+  "background": {
+    "service_worker": "scripts/background.js"
+  },
+  "commands": {
+    "open-extension": {
+      "suggested_key": {
+        "default": "Alt+E"
+      },
+      "description": "Open Fiery Passages"
+    }
+  },
+  "icons": {
+    "16": "Favicon.png",
+    "48": "Favicon.png",
+    "128": "Favicon.png"
+  }
+}

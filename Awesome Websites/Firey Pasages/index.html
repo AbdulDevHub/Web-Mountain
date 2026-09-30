@@ -2,116 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Fiery Passages</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="icon" type="image/png" href="Favicon.png" />
-    <link rel="stylesheet" href="styles/main.css" />
-    <link rel="stylesheet" href="styles/effects.css" />
-
-    <script src="scripts/materialize.js"></script>
+    <title>Fiery Passages — Story Audio Player</title>
+    <link rel="icon" type="image/png" href="/Favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
   </head>
-
   <body>
-    <header>
-      <div class="header-left">
-        <img src="Favicon.png" alt="Logo" />
-        <h1>Fiery Passages</h1>
-      </div>
-
-      <div class="header-right">
-        <select id="storySelect" aria-label="Story"></select>
-        <button id="uploadBtn" class="hbtn waves-effect waves-light" title="Add story .txt files">＋ Add stories</button>
-        <button id="deleteBtn" class="hbtn waves-effect waves-light" title="Delete this story and its saved audio">🗑</button>
-        <select id="voiceSelect" aria-label="Voice"></select>
-        <select id="engineSelect" aria-label="Speech engine" title="Where the voice model runs">
-          <option value="wasm">CPU · 86 MB model</option>
-          <option value="webgpu">GPU (WebGPU) · 326 MB model</option>
-        </select>
-        <input type="file" id="fileInput" accept=".txt,text/plain" multiple hidden />
-      </div>
-    </header>
-
-    <main>
-      <section class="panel">
-        <div class="story-header">
-          <h2 id="storyTitle" class="panel-title">No story yet</h2>
-          <div class="font-controls">
-            <button id="font-dec" class="waves-effect waves-light">A−</button>
-            <button id="font-inc" class="waves-effect waves-light">A+</button>
-          </div>
-        </div>
-
-        <div id="storyMeta" class="story-meta" hidden>
-          <p id="storyDesc"></p>
-          <a id="storyLink" target="_blank" rel="noopener noreferrer"></a>
-        </div>
-
-        <div id="storyText" class="text-container" hidden></div>
-
-        <div id="emptyState" class="text-container empty-state">
-          <h3>Add your first story</h3>
-          <p>
-            Click <strong>＋ Add stories</strong> or drop <code>.txt</code> files anywhere on this
-            window. Each file should look like this:
-          </p>
-          <pre>Title: Batteries Not Included
-Description: I hate it when the batteries die.
-URL: https://www.website.com/s/batteries-not-included-4
-==================================================
-
-Story text here onwards…</pre>
-          <p>
-            Description and URL are optional. Audio is generated on your device with Kokoro the
-            first time you press play, then saved so it's instant afterwards.
-          </p>
-        </div>
-      </section>
-
-      <div class="right-column">
-        <section class="panel audio-panel">
-          <h2 class="panel-title">Audio</h2>
-          <canvas id="visualizer"></canvas>
-
-          <div class="player-controls">
-            <button id="playPause" class="waves-effect waves-light">▶</button>
-            <button id="rewind" class="waves-effect waves-light">⏪</button>
-            <div id="timeDisplay">0:00 / 0:00</div>
-            <input type="range" id="seekBar" min="0" value="0" step="0.01" />
-            <button id="mute" class="waves-effect waves-light">🔊</button>
-
-            <div class="speed-control-container">
-              <button class="speed-btn waves-effect waves-light" id="decrease-speed-btn">−</button>
-              <div class="speed-display">
-                <span id="speed-value">1.00</span>x
-              </div>
-              <button class="speed-btn waves-effect waves-light" id="increase-speed-btn">+</button>
-            </div>
-          </div>
-
-          <div class="tts-status" aria-live="polite">
-            <div id="ttsBar" class="tts-bar" hidden><div id="ttsBarFill"></div></div>
-            <span id="ttsStatus"></span>
-            <button id="genAll" class="link-btn" hidden>Generate all now</button>
-            <button id="retryBtn" class="link-btn" hidden>Retry</button>
-          </div>
-
-          <audio id="audio" preload="auto"></audio>
-        </section>
-
-        <section class="panel gradient-panel">
-          <div class="gradient-section"></div>
-        </section>
-      </div>
-    </main>
-
-    <footer>
-      Speech is generated on your device (Kokoro) • Fine-grained playback speed • Audio saved locally
-    </footer>
-
-    <div id="dropOverlay" class="drop-overlay" hidden>Drop .txt story files to add them</div>
-    <div id="toast" class="toast" role="status" hidden></div>
-
-    <script type="module" src="scripts/main.js"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
