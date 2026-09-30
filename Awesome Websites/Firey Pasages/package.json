@@ -1,0 +1,17 @@
+{
+  "name": "fiery-passages",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Fiery Passages - story audio player with on-device Kokoro text-to-speech",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "kokoro-js": "^1.2.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

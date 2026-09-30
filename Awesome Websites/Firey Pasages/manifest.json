@@ -1,11 +1,26 @@
 {
   "manifest_version": 3,
   "name": "Fiery Passages",
-  "version": "1.0",
-  "description": "Audio player with visualizer",
+  "version": "1.1",
+  "description": "Story audio player with on-device text-to-speech and a visualizer",
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "unlimitedStorage"
   ],
+  "host_permissions": [
+    "https://huggingface.co/*",
+    "https://*.huggingface.co/*",
+    "https://*.hf.co/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "cross_origin_embedder_policy": {
+    "value": "require-corp"
+  },
+  "cross_origin_opener_policy": {
+    "value": "same-origin"
+  },
   "action": {
     "default_icon": {
       "16": "Favicon.png",

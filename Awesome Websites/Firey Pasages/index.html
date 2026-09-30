@@ -19,23 +19,53 @@
         <h1>Fiery Passages</h1>
       </div>
 
-      <select id="storySelect">
-        <option value="Awakened">Awakened</option>
-        <option value="Night Light">Night Light</option>
-      </select>
+      <div class="header-right">
+        <select id="storySelect" aria-label="Story"></select>
+        <button id="uploadBtn" class="hbtn waves-effect waves-light" title="Add story .txt files">＋ Add stories</button>
+        <button id="deleteBtn" class="hbtn waves-effect waves-light" title="Delete this story and its saved audio">🗑</button>
+        <select id="voiceSelect" aria-label="Voice"></select>
+        <select id="engineSelect" aria-label="Speech engine" title="Where the voice model runs">
+          <option value="wasm">CPU · 86 MB model</option>
+          <option value="webgpu">GPU (WebGPU) · 326 MB model</option>
+        </select>
+        <input type="file" id="fileInput" accept=".txt,text/plain" multiple hidden />
+      </div>
     </header>
 
     <main>
       <section class="panel">
         <div class="story-header">
-          <h2 id="storyTitle" class="panel-title">Loading…</h2>
+          <h2 id="storyTitle" class="panel-title">No story yet</h2>
           <div class="font-controls">
             <button id="font-dec" class="waves-effect waves-light">A−</button>
             <button id="font-inc" class="waves-effect waves-light">A+</button>
           </div>
         </div>
 
-        <div id="storyText" class="text-container">Loading story…</div>
+        <div id="storyMeta" class="story-meta" hidden>
+          <p id="storyDesc"></p>
+          <a id="storyLink" target="_blank" rel="noopener noreferrer"></a>
+        </div>
+
+        <div id="storyText" class="text-container" hidden></div>
+
+        <div id="emptyState" class="text-container empty-state">
+          <h3>Add your first story</h3>
+          <p>
+            Click <strong>＋ Add stories</strong> or drop <code>.txt</code> files anywhere on this
+            window. Each file should look like this:
+          </p>
+          <pre>Title: Batteries Not Included
+Description: I hate it when the batteries die.
+URL: https://www.website.com/s/batteries-not-included-4
+==================================================
+
+Story text here onwards…</pre>
+          <p>
+            Description and URL are optional. Audio is generated on your device with Kokoro the
+            first time you press play, then saved so it's instant afterwards.
+          </p>
+        </div>
       </section>
 
       <div class="right-column">
@@ -59,6 +89,13 @@
             </div>
           </div>
 
+          <div class="tts-status" aria-live="polite">
+            <div id="ttsBar" class="tts-bar" hidden><div id="ttsBarFill"></div></div>
+            <span id="ttsStatus"></span>
+            <button id="genAll" class="link-btn" hidden>Generate all now</button>
+            <button id="retryBtn" class="link-btn" hidden>Retry</button>
+          </div>
+
           <audio id="audio" preload="auto"></audio>
         </section>
 
@@ -69,9 +106,12 @@
     </main>
 
     <footer>
-      Lightweight canvas visualizer • Fine-grained playback speed • Audio-only
+      Speech is generated on your device (Kokoro) • Fine-grained playback speed • Audio saved locally
     </footer>
 
-    <script src="scripts/main.js"></script>
+    <div id="dropOverlay" class="drop-overlay" hidden>Drop .txt story files to add them</div>
+    <div id="toast" class="toast" role="status" hidden></div>
+
+    <script type="module" src="scripts/main.js"></script>
   </body>
 </html>
