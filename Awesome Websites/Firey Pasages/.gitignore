@@ -1,3 +1,4 @@
 node_modules/
 dist/
-test/
+generation/node_modules/
+generation/voice_samples/

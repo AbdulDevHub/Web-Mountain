@@ -8,7 +8,7 @@
 # Fiery Passages (Agent Guide)
 
 ## Project Overview
-Fiery Passages is an on-device story audio player built with React and Vite. It parses story text files, synthesizes speech locally using Kokoro-82M (via ONNX Runtime Web in WebAssembly/WebGPU with no cloud backend), and delivers gapless audio playback with visualizer frequency analysis.
+Fiery Passages is an on-device story audio player built with React and Vite. It parses story text files, synthesizes speech locally using Kokoro-82M (via ONNX Runtime Web in WebAssembly/WebGPU with no cloud backend), and delivers gapless audio playback with visualizer frequency analysis, smoothly looping ambient video players (Cozy Cottage and Brown Noise), and an immersive full screen mode.
 
 ## Tech Stack
 - **Framework & Bundler**: React 19, Vite 6, `@vitejs/plugin-react`
@@ -16,6 +16,7 @@ Fiery Passages is an on-device story audio player built with React and Vite. It 
 - **TTS Engine**: Kokoro TTS (`kokoro-js`, `@huggingface/transformers`, `onnxruntime-web`)
 - **Storage**: IndexedDB (stories & audio chunk cache)
 - **Audio Processing**: Custom WAV encoder, silence trimmer, dual `<audio>` element ping-pong player (`SegmentPlayer`), Web Audio API AnalyserNode
+- **Media & Visuals**: Hardware-accelerated WebM looping video backgrounds, reactive Web Audio spectrum canvas, Fullscreen API with interactive HUD
 
 ## Setup & Run Commands
 - `npm install`: Install dependencies

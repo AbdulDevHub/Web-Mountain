@@ -127,15 +127,17 @@ export async function loadAudioSet(setId) {
   const prefix = []
   for (const r of records) {
     if (r.index !== prefix.length) break
-    prefix.push({ index: r.index, blob: r.blob, duration: r.duration, bytes: r.bytes, skipped: !!r.skipped })
+    prefix.push({ index: r.index, blob: r.blob, duration: r.duration, bytes: r.bytes, skipped: !!r.skipped, fullAudio: !!r.fullAudio })
   }
   return prefix
 }
 
 // Stores a chunk and returns the copy backed by IndexedDB's own storage, so
 // callers can drop the in-memory original (a long story is hundreds of MB).
-export async function saveAudioChunk({ setId, storyId, index, blob, duration, skipped = false }) {
-  const record = { key: chunkKey(setId, index), setId, storyId, index, blob, duration, bytes: blob.size, skipped }
+// Pass fullAudio: true when the blob represents the entire story (imported WAV/MP3),
+// so openStory can skip generation entirely.
+export async function saveAudioChunk({ setId, storyId, index, blob, duration, skipped = false, fullAudio = false }) {
+  const record = { key: chunkKey(setId, index), setId, storyId, index, blob, duration, bytes: blob.size, skipped, fullAudio }
   await run("audio", "readwrite", (s) => s.put(record))
   try {
     const stored = await run("audio", "readonly", (s) => s.get(record.key))

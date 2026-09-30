@@ -100,12 +100,11 @@ export function StoryView({ currentStory, fontSize, onIncreaseFont, onDecreaseFo
           </p>
           <pre>{`Title: Batteries Not Included
 Description: I hate it when the batteries die.
-URL: https://www.website.com/s/batteries-not-included-4
 ==================================================
 
 Story text here onwards…`}</pre>
           <p>
-            Description and URL headers are optional. Audio is generated on your device with Kokoro the
+            Description header is optional. Audio is generated on your device with Kokoro the
             first time you press play, then cached locally for instant future replay.
           </p>
         </div>

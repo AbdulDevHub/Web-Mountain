@@ -7,7 +7,7 @@ export function DropOverlay({ isVisible }) {
   return (
     <div id="dropOverlay" className="drop-overlay">
       <UploadCloud size={48} color="#818cf8" />
-      <div>Drop .txt story files to add them</div>
+      <div>Drop .txt story files or audio (.wav, .mp3) to add them</div>
     </div>
   )
 }

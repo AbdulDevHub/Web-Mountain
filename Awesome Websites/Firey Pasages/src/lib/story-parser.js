@@ -1,13 +1,12 @@
-// Parses story .txt files in the format produced by scraping_scripts/*.py:
+// Parses story .txt files:
 //
 //   Title: Batteries Not Included
 //   Description: I hate it when the batteries die.
-//   URL: https://www.website.com/s/batteries-not-included-4
 //   ==================================================
 //
 //   Story text here onwards...
 //
-// Description and URL are optional. A file with no header at all is still
+// Description is optional. A file with no header at all is still
 // accepted: the file name becomes the title and the whole file is the story.
 
 const KEY_LINE = /^\s*(title|description|url)\s*:\s?(.*)$/i

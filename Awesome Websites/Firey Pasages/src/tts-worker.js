@@ -25,10 +25,10 @@ env.useBrowserCache = true // model + voices are cached after the first download
 const onnxWasm = env.backends.onnx.wasm
 onnxWasm.wasmPaths = new URL("./", import.meta.url).href // vendor/ folder
 onnxWasm.proxy = false
-// Threads need SharedArrayBuffer, i.e. cross-origin isolation (enabled in
-// manifest.json). Without it ONNX Runtime silently runs single-threaded.
+// Threads need SharedArrayBuffer, i.e. cross-origin isolation.
+// Use full hardware concurrency up to 8 threads without artificial halving
 const threads = self.crossOriginIsolated
-  ? Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 4) >> 1))
+  ? Math.max(1, Math.min(8, navigator.hardwareConcurrency || 4))
   : 1
 onnxWasm.numThreads = threads
 
@@ -82,8 +82,16 @@ async function init(requested) {
   post({ type: "ready", device: loaded.device, dtype: loaded.dtype, threads })
 }
 
+function cleanTextForTTS(text) {
+  return String(text || "")
+    .replace(/([a-zA-Z])\1{2,}/g, "$1$1")
+    .replace(/(\w+)\.\.\.(\w+)/g, "$1, $2")
+    .replace(/\.\.\./g, "—")
+}
+
 async function generate({ id, text, voice }) {
-  const out = await tts.generate(text, { voice })
+  const cleaned = cleanTextForTTS(text)
+  const out = await tts.generate(cleaned, { voice })
   const samples = new Float32Array(out.audio) // copy out of the ORT tensor buffer
   post({ type: "audio", id, samples, sampleRate: out.sampling_rate }, [samples.buffer])
 }

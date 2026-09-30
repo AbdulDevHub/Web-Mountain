@@ -61,7 +61,7 @@ export function Header({
         <button
           id="uploadBtn"
           className="btn btn-primary"
-          title="Add story .txt files"
+          title="Add story .txt files or pre-generated audio (.wav, .mp3)"
           onClick={onUploadClick}
         >
           <Plus size={16} />
@@ -116,7 +116,7 @@ export function Header({
           ref={fileInputRef}
           type="file"
           id="fileInput"
-          accept=".txt,text/plain"
+          accept=".txt,text/plain,.wav,.mp3,.ogg,.m4a,.aac,.flac,audio/*"
           multiple
           hidden
           onChange={onFileChange}

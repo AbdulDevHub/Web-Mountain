@@ -456,7 +456,10 @@ export function App() {
       p.addSegment(c.blob, c.duration)
     }
 
-    if (s.next >= chunks.length) {
+    // A fullAudio chunk means the whole story was imported as a pre-generated file
+    // so we skip TTS generation entirely and mark the session complete immediately.
+    const hasFullAudio = cached.length > 0 && cached[0].fullAudio
+    if (s.next >= chunks.length || hasFullAudio) {
       s.complete = true
       p.markFinished()
     }
@@ -533,12 +536,16 @@ export function App() {
   // File uploading & parsing
   const handleFiles = useCallback(async (fileList) => {
     const all = Array.from(fileList)
-    const files = all.filter((f) => /\.txt$/i.test(f.name) || f.type.startsWith('text/'))
-    const problems = all.filter((f) => !files.includes(f)).map((f) => `${f.name}: not a .txt file`)
+    const txtFiles = all.filter((f) => /\.txt$/i.test(f.name) || f.type.startsWith('text/'))
+    const audioFiles = all.filter((f) => /\.(wav|mp3|ogg|m4a|aac|flac)$/i.test(f.name) || f.type.startsWith('audio/'))
+    const unknownFiles = all.filter((f) => !txtFiles.includes(f) && !audioFiles.includes(f))
+    const problems = unknownFiles.map((f) => `${f.name}: not a .txt or audio file`)
     const counts = { added: 0, updated: 0, unchanged: 0 }
     let firstId = null
 
-    for (const file of files) {
+    // 1. Process .txt files first so stories exist before audio is matched
+    const storyMap = new Map() // stem -> story
+    for (const file of txtFiles) {
       try {
         if (file.size > MAX_FILE_BYTES) throw new Error('larger than 10 MB')
         const text = decodeTextBytes(await file.arrayBuffer())
@@ -547,6 +554,41 @@ export function App() {
         if (!parsed.text.trim()) throw new Error('no story text found')
         const { story, status } = await upsertStory(parsed)
         counts[status]++
+        firstId ??= story.id
+        const stem = file.name.replace(/\.txt$/i, '').toLowerCase()
+        storyMap.set(stem, story)
+      } catch (err) {
+        problems.push(`${file.name}: ${err.message || err}`)
+      }
+    }
+
+    // 2. Process audio files: match by filename stem to a loaded story,
+    //    or to the currently selected story if no stem match.
+    for (const file of audioFiles) {
+      try {
+        const stem = file.name.replace(/\.(wav|mp3|ogg|m4a|aac|flac)$/i, '').toLowerCase()
+        const story = storyMap.get(stem) ?? currentStory
+        if (!story) {
+          problems.push(`${file.name}: no matching story found (upload the .txt file first)`)
+          continue
+        }
+
+        // Read the audio into a blob and probe its duration
+        const arrayBuf = await file.arrayBuffer()
+        const audioBlob = new Blob([arrayBuf], { type: file.type || 'audio/wav' })
+        const duration = await new Promise((resolve) => {
+          const url = URL.createObjectURL(audioBlob)
+          const a = new Audio()
+          a.onloadedmetadata = () => { URL.revokeObjectURL(url); resolve(a.duration || 0) }
+          a.onerror = () => { URL.revokeObjectURL(url); resolve(0) }
+          a.src = url
+        })
+
+        // Store as chunk 0 of the pre-baked audio set keyed for this voice
+        const activeVoice = voice
+        const setId = audioSetId(story, activeVoice)
+        await saveAudioChunk({ setId, storyId: story.id, index: 0, blob: audioBlob, duration, fullAudio: true })
+        showToast(`Audio loaded for "${story.title}" (${Math.round(duration)}s)`, 5000)
         firstId ??= story.id
       } catch (err) {
         problems.push(`${file.name}: ${err.message || err}`)
@@ -564,7 +606,7 @@ export function App() {
     const updatedList = await listStories()
     setStories(updatedList)
     if (firstId) await openStory(firstId)
-  }, [openStory, showToast])
+  }, [currentStory, openStory, showToast, voice])
 
   const handleDeleteStory = useCallback(async () => {
     if (!currentStory) return
@@ -677,6 +719,9 @@ export function App() {
         case 'arrowright':
           playerRef.current?.seek(playerRef.current.currentTime + 10)
           break
+        case 'm':
+          handleToggleMute()
+          break
         case 'a':
           handleSetSpeed(1)
           break
@@ -702,7 +747,7 @@ export function App() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [handlePlayPause, handleSetSpeed])
+  }, [handlePlayPause, handleSetSpeed, handleToggleMute])
 
   // Drag and Drop
   useEffect(() => {

@@ -1,7 +1,7 @@
 // Generated from kokoro-js@1.2.1 (its built-in voice table).
 // Voice ids must match what kokoro-js accepts; grades are the model author's
 // own quality ratings (A is best).
-export const DEFAULT_VOICE = "af_heart"
+export const DEFAULT_VOICE = "af_bella"
 
 export const VOICES = [
   {
