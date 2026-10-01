@@ -8,6 +8,7 @@ export default defineConfig({
   build: {
     outDir: "firey-passages",
     emptyOutDir: true,
+    target: 'esnext',
   },
   server: {
     port: 5173,
@@ -22,8 +23,5 @@ export default defineConfig({
       'Cross-Origin-Embedder-Policy': 'require-corp',
       'Cross-Origin-Opener-Policy': 'same-origin',
     },
-  },
-  build: {
-    target: 'esnext',
   },
 })
