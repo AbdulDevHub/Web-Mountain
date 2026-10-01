@@ -28,6 +28,14 @@
 - [ ] Enhance mobile layout with swipe gesture seeking.
 
 ## Session Log
+### 2026-09-30 — Fixed Asset 404s Under Nested Deploy Sub-Path
+- **Root cause**: `AudioPanel.jsx`, `Header.jsx`, and `tts-client.js` referenced public-folder files with origin-absolute paths (`/videos/brown-noise.webm`, `/Favicon.png`, `/vendor/tts-worker.js`). Origin-absolute paths resolve against the **site root**, so they 404 whenever the app isn't served from `/` — exactly what happens on Netlify, which mounts it at `/awesome websites/firey passages/firey-passages/`.
+- **Why it looked fine locally**: Vite's dev server and `vite preview` both serve the app at `/`, where `/videos/...` happens to be correct, hiding the bug.
+- **Fix**: Added `src/lib/assets.js` exporting `assetUrl(path)`, which joins a public-folder path onto `import.meta.env.BASE_URL` (compiled to `"./"` by `base: "./"`). All public-folder references now resolve base-relative.
+- Updated `tts-client.js` to resolve the worker against `document.baseURI` (not `import.meta.url`, which points one level deeper into `assets/`).
+- `index.html`'s favicon needed no change — Vite already rewrote `/Favicon.png` → `./Favicon.png` in the emitted HTML.
+- **Verified**: rebuilt and served the bundle from a nested path containing spaces (`/awesome%20websites/firey%20passages/firey-passages/`); all assets return 200 and the old root-absolute path now correctly 404s. 22/22 unit tests pass.
+
 ### 2026-09-30 — UX Polish, Bella Default, Audio Import & Batch Generator
 - Added visual modes to `AudioPanel.jsx` allowing instant switching between:
   - **Waveform**: Live reactive frequency visualizer and ambient sine wave.

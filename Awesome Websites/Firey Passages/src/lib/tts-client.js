@@ -1,15 +1,20 @@
 // Main-thread wrapper around the TTS worker: lazy start, model-download
 // progress events, and a promise-based generate().
 
+import { assetUrl } from "./assets.js"
+
 function workerUrl() {
-  const base = typeof window !== "undefined" ? window.location.href : "http://localhost/"
+  // assetUrl() already yields a base-relative URL ("." / "./vendor/..."), so it
+  // must be resolved against the document, not against import.meta.url — the
+  // app's own chunks live in <base>/assets/, one level deeper.
+  const docUrl = typeof document !== "undefined" && document.baseURI ? document.baseURI : undefined
   const q = typeof location !== "undefined" ? new URLSearchParams(location.search) : new URLSearchParams()
   if (q.get("engine") === "fake") {
-    const url = new URL("/dev/fake-tts-worker.js", base)
+    const url = new URL(assetUrl("dev/fake-tts-worker.js"), docUrl)
     for (const k of ["delay", "initfail"]) if (q.has(k)) url.searchParams.set(k, q.get(k))
     return url
   }
-  return new URL("/vendor/tts-worker.js", base)
+  return new URL(assetUrl("vendor/tts-worker.js"), docUrl)
 }
 
 export class TTSClient extends EventTarget {

@@ -1,6 +1,7 @@
 import React, { useRef } from 'react'
 import { Plus, Trash2, Sparkles, Cpu } from 'lucide-react'
 import { VOICES } from '../lib/voices.js'
+import { assetUrl } from '../lib/assets.js'
 
 export function Header({
   stories,
@@ -30,7 +31,7 @@ export function Header({
     <header className="app-header">
       <div className="header-left">
         <div className="logo-badge">
-          <img src="/Favicon.png" alt="Fiery Passages Logo" />
+          <img src={assetUrl('/Favicon.png')} alt="Fiery Passages Logo" />
         </div>
         <div className="header-title-wrap">
           <h1>Fiery Passages</h1>

@@ -11,6 +11,7 @@ import {
   Headphones,
   Flame,
 } from 'lucide-react'
+import { assetUrl } from '../lib/assets'
 
 function formatTime(seconds) {
   seconds = Math.max(0, Math.floor(seconds || 0))
@@ -364,7 +365,7 @@ export function AudioPanel({
           {/* Brown Noise Video */}
           <video
             ref={brownNoiseRef}
-            src="/videos/brown-noise.webm"
+            src={assetUrl('videos/brown-noise.webm')}
             loop
             playsInline
             autoPlay
@@ -377,7 +378,7 @@ export function AudioPanel({
           {/* Cozy Cottage Video */}
           <video
             ref={cozyCottageRef}
-            src="/videos/cozy-cottage.webm"
+            src={assetUrl('videos/cozy-cottage.webm')}
             loop
             playsInline
             autoPlay
