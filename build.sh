@@ -13,4 +13,10 @@ pnpm i
 pnpm run build
 cd ../..
 
+echo "Building Firey Passages..."
+cd "Awesome Websites/Firey Passages"
+pnpm i
+pnpm run build
+cd ../..
+
 echo "All builds finished successfully!"

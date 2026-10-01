@@ -49,9 +49,9 @@
   },
   {
     "name": "Firey Passages",
-    "category": "websites",
-    "href": "Awesome Websites/Firey Pasages/index.html",
-    "image": "Awesome Websites/Firey Pasages/Screenshot.png"
+    "category": "websites", 
+    "href": "Awesome Websites/Firey Passages/firey-passages/index.html",
+    "image": "Awesome Websites/Firey Passages/Screenshot.png"
   },
   {
     "name": "File Redownloader",
