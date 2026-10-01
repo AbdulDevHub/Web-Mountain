@@ -266,15 +266,18 @@ main.app-main {
 }
 
 .panel.audio-panel {
-  flex: 1;
+  /* Size to content so the status line sits right under the player controls
+     instead of leaving dead space at the bottom of the panel. */
+  flex: 0 0 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
 }
 
 .panel.gradient-panel {
-  height: 85px;
-  flex: 0 0 85px;
+  /* Absorb the leftover vertical space vacated by the audio panel. */
+  flex: 1 1 auto;
+  height: auto;
   min-height: 85px;
   padding: 0;
   border: none;
@@ -985,5 +988,6 @@ footer.app-footer {
   .panel.gradient-panel {
     min-height: 85px;
     height: 85px;
+    flex: 0 0 85px;
   }
 }
