@@ -1,5 +1,5 @@
 // Resolves public-folder assets to URLs that work under any deployment
-// sub-path (e.g. Netlify serving this app from /awesome-websites/firey-passages/).
+// sub-path (e.g. Netlify serving this app from /awesome-websites/midnight-passages/).
 //
 // Why this exists: origin-absolute paths like "/videos/brown-noise.webm" resolve
 // against the site ROOT, not the app folder, so they 404 whenever the app is not

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Discord JSON Formatter</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      background: #1e1e2e;
+      color: #cdd6f4;
+    }
+    .instructions {
+      background: #181825;
+      border: 1px solid #313244;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .instructions h3 {
+      margin-top: 0;
+      color: #89b4fa;
+    }
+    .instructions ol {
+      margin: 0;
+      padding-left: 1.2rem;
+      line-height: 1.5;
+    }
+    textarea {
+      width: 100%;
+      height: 180px;
+      background: #181825;
+      color: #cdd6f4;
+      border: 1px solid #45475a;
+      border-radius: 6px;
+      padding: 0.75rem;
+      box-sizing: border-box;
+      font-family: monospace;
+    }
+    button {
+      margin-top: 0.75rem;
+      padding: 0.6rem 1.2rem;
+      background: #89b4fa;
+      color: #11111b;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #b4befe;
+    }
+    #status {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #a6e3a1;
+      height: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h2>Discord JSON Chat Cleaner</h2>
+
+  <div class="instructions">
+    <h3>How to get the Network Response:</h3>
+    <ol>
+      <li>Open Discord in your browser and press <strong>F12</strong> (Developer Tools).</li>
+      <li>Select the <strong>Network</strong> tab.</li>
+      <li>In the filter box, type <code>messages</code>.</li>
+      <li>Click into the target DM or channel to trigger a fetch.</li>
+      <li>Click the request named <code>messages?limit=50</code>.</li>
+      <li>Open the <strong>Response</strong> tab, right-click the text, and select <strong>Copy Response</strong>.</li>
+      <li>Paste the raw text below and click the button.</li>
+    </ol>
+  </div>
+
+  <label for="input"><strong>Paste JSON Response:</strong></label>
+  <textarea id="input" placeholder="Paste raw message JSON here..."></textarea>
+  <br>
+  <button onclick="processJSON()">Format & Copy to Clipboard</button>
+  <div id="status"></div>
+
+  <h3 style="margin-top: 1.5rem;">Formatted Output:</h3>
+  <textarea id="output" readonly placeholder="Cleaned text will appear here..."></textarea>
+
+  <script>
+    function processJSON() {
+      const rawInput = document.getElementById("input").value.trim();
+      const statusDiv = document.getElementById("status");
+      const outputTextarea = document.getElementById("output");
+
+      try {
+        const messages = JSON.parse(rawInput);
+        
+        if (!Array.isArray(messages)) {
+          throw new Error("JSON is not an array of messages.");
+        }
+
+        const formattedChat = [...messages].reverse().map(msg => {
+          const author = msg.author?.global_name || msg.author?.username || "Unknown";
+          return `[${author}]: ${msg.content || ""}`;
+        }).join("\n\n");
+
+        outputTextarea.value = formattedChat;
+        navigator.clipboard.writeText(formattedChat);
+        statusDiv.style.color = "#a6e3a1";
+        statusDiv.textContent = "Copied clean chat to clipboard!";
+      } catch (e) {
+        statusDiv.style.color = "#f38ba8";
+        statusDiv.textContent = "Invalid JSON input: " + e.message;
+      }
+    }
+  </script>
+</body>
+</html>

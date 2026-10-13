@@ -13,8 +13,8 @@ pnpm i
 pnpm run build
 cd ../..
 
-echo "Building Firey Passages..."
-cd "Awesome Websites/Firey Passages"
+echo "Building Midnight Passages..."
+cd "Awesome Websites/Midnight Passages"
 pnpm i
 pnpm run build
 cd ../..

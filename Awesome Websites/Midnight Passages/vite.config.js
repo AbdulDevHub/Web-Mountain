@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   base: "./", // Ensures JS and CSS bundles load correctly relative to the dist folder
   build: {
-    outDir: "firey-passages",
+    outDir: "midnight-passages",
     emptyOutDir: true,
     target: 'esnext',
   },

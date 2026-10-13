@@ -35,7 +35,7 @@ Fiery Passages is an on-device story audio player built with React and Vite. It 
 ## Boundaries
 - Do not edit binary files in `vendor/` or `public/vendor/` directly (`ort-wasm-simd-threaded.jsep.*`). Rebuild only via `npm run build:worker`.
 - Avoid adding heavy CSS utility frameworks (e.g. Tailwind) without explicit request; maintain the existing cohesive Vanilla CSS design system.
-- **No origin-absolute asset paths**: The app is deployed under a nested sub-path (Netlify serves it from `Awesome Websites/Firey Passages/firey-passages/`), so paths beginning with `/` resolve against the site root and 404. Always reference files in `public/` through `assetUrl()` from `src/lib/assets.js`. This applies to `<img src>`, `<video src>`, worker URLs, and CSS `url()`. It does not show up locally because the dev server and preview both serve the app at `/`.
+- **No origin-absolute asset paths**: The app is deployed under a nested sub-path (Netlify serves it from `Awesome Websites/Midnight Passages/midnight-passages/`), so paths beginning with `/` resolve against the site root and 404. Always reference files in `public/` through `assetUrl()` from `src/lib/assets.js`. This applies to `<img src>`, `<video src>`, worker URLs, and CSS `url()`. It does not show up locally because the dev server and preview both serve the app at `/`.
 
 ## Where to Look for More
 - `README.md`: High-level user documentation and setup guide.

@@ -35,7 +35,7 @@ npm run preview
 
 ### Deploying Under a Sub-Path
 
-The app builds with `base: "./"` into `firey-passages/`, so it can be served from **any** sub-path (for example `https://example.com/awesome-websites/firey-passages/`) without extra configuration.
+The app builds with `base: "./"` into `midnight-passages/`, so it can be served from **any** sub-path (for example `https://example.com/awesome-websites/midnight-passages/`) without extra configuration.
 
 Because of that, never hard-code a leading `/` when referencing a file from `public/` — an origin-absolute path like `/videos/brown-noise.webm` resolves against the **site root** and returns 404 when the app is not served from `/`. Route public-folder assets through the helper instead:
 
