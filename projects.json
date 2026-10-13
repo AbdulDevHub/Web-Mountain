@@ -42,6 +42,12 @@
     "image": "Awesome Websites/Link To Google Bookmarks Generator/Screenshot.png"
   },
   {
+    "name": "Discord Thread Extractor",
+    "category": "websites",
+    "href": "Awesome Websites/Oneshot/discord-thread-extraction.html",
+    "image": "Awesome Websites/Oneshot/Screenshot.png"
+  },
+  {
     "name": "Gitmoji Helper",
     "category": "websites",
     "href": "Awesome Websites/Gitmoji-Helper/gitmoji-helper/index.html",
@@ -49,7 +55,7 @@
   },
   {
     "name": "Midnight Passages",
-    "category": "websites", 
+    "category": "websites",
     "href": "Awesome Websites/Midnight Passages/midnight-passages/index.html",
     "image": "Awesome Websites/Midnight Passages/Screenshot.png"
   },
