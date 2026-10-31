@@ -158,18 +158,39 @@ async function remixPrompt(): Promise<string> {
 
 // ---------- Generation ----------
 
-async function generateImage(prompt: string): Promise<Blob> {
-  const res = await fetch("/api/image-gen", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt, aspect }),
-  })
-  if (!res.ok) {
-    const data = await res.json().catch(() => null)
-    if (!data && [404, 405, 501].includes(res.status)) throw new Error("Image generation isn't available on this host.")
-    throw new Error(data?.error ?? `Image generation failed (${res.status})`)
+const SIZES: Record<string, [number, number]> = { square: [1024, 1024], portrait: [832, 1216], landscape: [1216, 832] }
+
+// Server path first (uses the site's Pollinations token if one is set). If that
+// fails, e.g. the anonymous quota of Netlify's shared IPs is used up, the browser
+// asks Pollinations directly, which counts against the visitor's own anonymous quota.
+async function generateImage(prompt: string): Promise<string> {
+  try {
+    const res = await fetch("/api/image-gen", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, aspect }),
+    })
+    if (res.ok) return URL.createObjectURL(await res.blob())
+  } catch {
+    // Network error: try the direct route
   }
-  return res.blob()
+  const [width, height] = SIZES[aspect]
+  const params = new URLSearchParams({
+    width: String(width),
+    height: String(height),
+    seed: String(Math.floor(Math.random() * 1_000_000)),
+    model: "flux",
+    nologo: "true",
+    referrer: "ai-valley",
+  })
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?${params}`
+  await new Promise<void>((resolve, reject) => {
+    const probe = new Image()
+    probe.onload = () => resolve()
+    probe.onerror = () => reject(new Error("The free image service is busy right now. Try again in a minute."))
+    probe.src = url
+  })
+  return url
 }
 
 async function run() {
@@ -180,15 +201,16 @@ async function run() {
     const prompt = tab === "generate" ? textPrompt() : await remixPrompt()
     statusLabel.textContent = "Painting… (free models take 5-20 seconds)"
     canvas.dataset.busy = "true"
-    const blob = await generateImage(prompt)
+    const src = await generateImage(prompt)
     if (lastObjectUrl) URL.revokeObjectURL(lastObjectUrl)
-    lastObjectUrl = URL.createObjectURL(blob)
+    lastObjectUrl = src.startsWith("blob:") ? src : null
     const img = el("img")
-    img.src = lastObjectUrl
+    img.src = src
     img.alt = prompt
     canvas.replaceChildren(img)
     usedPrompt.textContent = `Prompt: ${prompt}`
-    download.href = lastObjectUrl
+    download.href = src // cross-origin fallback images open in a new tab instead of downloading
+    download.target = lastObjectUrl ? "" : "_blank"
     download.hidden = false
     statusLabel.textContent = ""
   } catch (err) {
