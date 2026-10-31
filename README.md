@@ -82,6 +82,13 @@ Browser extensions that enhance functionality and user experience.
 - **[Hydration Hero](./Chrome%20Extensions/Hydration-Hero)** - Privacy-first water intake tracker with customizable logging, daily goal progress, timestamped history, and midnight auto-reset, built with React + Vite + Tailwind
 - **[Local Video Player](./Chrome%20Extensions/Local-Video-Player)** - Feature-rich local video player with volume amplification up to 500%, resume-from-position, fine-grained speed controls (0.1x–16x), Picture-in-Picture, and Global Media Controls integration
 
+### AI Valley
+
+AI web apps: LLM chat, RAG, agents, image generation and in-browser computer vision. Merged in with full history from the former AI-Mountain repo. See the [AI Valley README](./AI%20Valley) for all 18 projects and their status.
+
+- **[Face Emotion Detection](./AI%20Valley/Face-Detection)** - Real-time face, landmark and emotion detection from your webcam with face-api.js, fully in the browser
+- **[Vision AI App](./AI%20Valley/Vision%20AI%20App)** - In-browser object detection with Transformers.js, no API key needed
+
 ## Setup
 
 To explore these projects locally:
@@ -196,6 +203,7 @@ git commit -m "Remove Project-Name submodule"
 - **Animation**: Anime.js, CSS animations, Canvas API
 - **Graphics**: WebGL, GPU.js, SVG
 - **Libraries**: JSZip, jQuery, Bootstrap, dat.GUI
+- **AI**: OpenAI API, LangChain, Transformers.js, face-api.js (TensorFlow.js), Hugging Face, Supabase vector store
 - **Tools**: Materialize, Video.js, Docker, pnpm
 - **Techniques**: CSS Grid, Flexbox, Responsive Design
 
@@ -208,6 +216,7 @@ This repository serves as a living archive of frontend learning experiments, sho
 - 🎨 UI/UX design implementations
 - 🔧 Practical web utilities
 - 🧩 Chrome extension development
+- 🤖 AI-powered web apps
 
 Each project demonstrates different aspects of modern web development, from foundational concepts to advanced techniques.
 
