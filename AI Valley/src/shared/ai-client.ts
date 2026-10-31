@@ -6,9 +6,9 @@
 
 // Keep in sync with DEFAULT_MODELS in netlify/functions/ai-chat.mts
 export const FREE_MODELS = [
-  "nvidia/nemotron-3.5-lightning:free",
-  "google/gemma-4-31b-it:free",
   "openrouter/free",
+  "google/gemma-4-31b-it:free",
+  "nvidia/nemotron-3.5-super-vl:free",
 ]
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"

@@ -9,12 +9,12 @@
 //   503 = no key configured
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-// Fast non-reasoning models first; openrouter/free (picks any free model, some
-// of them slow reasoning ones) is the catch-all
+// openrouter/free routes to whichever free model is available (usually answers
+// in 1-2s on live tests); the named models are fallbacks if the router fails
 const DEFAULT_MODELS = [
-  "nvidia/nemotron-3.5-lightning:free",
-  "google/gemma-4-31b-it:free",
   "openrouter/free",
+  "google/gemma-4-31b-it:free",
+  "nvidia/nemotron-3.5-super-vl:free",
 ]
 
 const MAX_MESSAGES = 40
