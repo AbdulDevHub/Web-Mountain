@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lingua · AI Valley</title>
+    <meta
+      name="description"
+      content="Translate between 20 languages, on-device in Chrome or with free cloud models, and hear the result read aloud."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="page">
+      <header class="valley-bar">
+        <a href="/">← AI Valley</a>
+        <span id="account"></span>
+      </header>
+
+      <section class="app-hero">
+        <h1>Lingua</h1>
+        <p>
+          Translate between 20 languages. It runs on-device in Chrome when it can and on free cloud models
+          everywhere else, and it can read any result aloud.
+        </p>
+      </section>
+
+      <main class="translator card">
+        <div class="lang-row">
+          <label class="lang-select">
+            <span>From</span>
+            <select id="source"></select>
+          </label>
+          <button id="swap" class="btn btn-icon" type="button" aria-label="Swap languages" title="Swap languages">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
+          </button>
+          <label class="lang-select">
+            <span>To</span>
+            <select id="target"></select>
+          </label>
+        </div>
+
+        <div class="panes">
+          <div class="pane">
+            <label for="input" class="sr-only">Text to translate</label>
+            <textarea id="input" maxlength="5000" placeholder="Type or paste text to translate…"></textarea>
+            <div class="pane-foot">
+              <span id="detected" class="hint"></span>
+              <span id="count" class="hint">0 / 5000</span>
+              <button id="hear-source" class="btn btn-icon" type="button" aria-label="Read source aloud" title="Read aloud" disabled>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="pane pane-output">
+            <div id="output" class="output-text" aria-live="polite" data-empty="true">Your translation appears here.</div>
+            <div class="pane-foot">
+              <span id="engine" class="pill"><span class="pill-dot"></span><span class="pill-text"></span></span>
+              <button id="hear-target" class="btn btn-icon" type="button" aria-label="Read translation aloud" title="Read aloud" disabled>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
+              </button>
+              <button id="copy" class="btn btn-icon" type="button" aria-label="Copy translation" title="Copy" disabled>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <span id="status" class="hint" role="status"></span>
+          <button id="translate" class="btn btn-primary" type="button">
+            Translate <kbd>Ctrl ↵</kbd>
+          </button>
+        </div>
+        <div id="notice-slot"></div>
+      </main>
+
+      <section class="how">
+        <h2>How it works</h2>
+        <ul>
+          <li>
+            <strong>On-device first.</strong> In desktop Chrome, Lingua uses the built-in Translator and Language
+            Detector APIs. Text never leaves your machine, and each language pack downloads once.
+          </li>
+          <li>
+            <strong>Cloud fallback.</strong> In other browsers, or for pairs Chrome can't handle, it calls free
+            open-weight models on OpenRouter through a small serverless proxy, so no API key ever ships to the
+            browser.
+          </li>
+          <li>
+            <strong>Read aloud.</strong> The speaker buttons use your system's voices through the Web Speech API.
+          </li>
+        </ul>
+      </section>
+    </div>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

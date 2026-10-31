@@ -344,6 +344,12 @@
     "image": "Chrome Extensions/Gallery Bookmark Viewer/images/Screenshot%201.png"
   },
   {
+    "name": "Lingua",
+    "category": "ai",
+    "href": "AI Valley/apps/translator/index.html",
+    "image": "AI Valley/src/translator/Screenshot.png"
+  },
+  {
     "name": "Face Emotion Detection",
     "category": "ai",
     "href": "AI Valley/Face-Detection/index.html",
