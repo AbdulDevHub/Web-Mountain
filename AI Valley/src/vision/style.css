@@ -1,0 +1,174 @@
+:root {
+  --accent: #8b7bff;
+}
+
+.lab {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 16px;
+  margin-top: 28px;
+  align-items: start;
+}
+
+.stage-card,
+.ask-card {
+  padding: 16px;
+}
+
+.source-row,
+.detect-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  margin: 14px 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.stage img,
+.stage video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.stage img:not([src]) {
+  display: none;
+}
+
+.boxes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.box {
+  position: absolute;
+  border: 2px solid var(--box-color);
+  border-radius: 4px;
+}
+
+.box span {
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  padding: 1px 6px;
+  border-radius: 3px 0 4px 0;
+  background: var(--box-color);
+  color: #0b0f17;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.objects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.objects span {
+  padding: 2px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.ask-card h2 {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.ask-form {
+  display: flex;
+  gap: 8px;
+}
+
+.ask-form input {
+  flex: 1;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.quick button {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.answer {
+  margin-top: 14px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.answer:empty {
+  display: none;
+}
+
+.answer[data-error="true"] {
+  color: var(--danger);
+}
+
+.hint {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.how {
+  margin-top: 36px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.how h2 {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.how ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.how strong {
+  color: var(--text);
+}
+
+@media (max-width: 820px) {
+  .lab {
+    grid-template-columns: 1fr;
+  }
+}

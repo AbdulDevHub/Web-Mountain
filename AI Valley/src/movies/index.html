@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ReelRecs · AI Valley</title>
+    <meta name="description" content="A movie chatbot built on retrieval-augmented generation: in-browser embeddings plus a free LLM." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="valley-bar">
+        <a href="/">← AI Valley</a>
+        <span id="account"></span>
+      </header>
+
+      <section class="app-hero">
+        <h1>ReelRecs</h1>
+        <p>
+          A movie buff that only answers from its own shelf of recent films. It finds the most relevant movies with
+          embeddings computed in your browser, then a free LLM writes the answer from them.
+        </p>
+      </section>
+
+      <main class="chat card">
+        <div id="log" class="chat-log" aria-live="polite"></div>
+        <div id="suggestions" class="suggestions">
+          <button type="button">Something funny for a family movie night?</button>
+          <button type="button">I want a mind-bending mystery.</button>
+          <button type="button">Which movie has the highest rating?</button>
+          <button type="button">Recommend an action movie under 2 hours.</button>
+        </div>
+        <div id="notice-slot"></div>
+        <form id="form" class="chat-form">
+          <label for="input" class="sr-only">Message</label>
+          <input id="input" autocomplete="off" maxlength="500" placeholder="Ask about movies…" />
+          <button id="send" class="btn btn-primary" type="submit">Send</button>
+        </form>
+      </main>
+
+      <section class="how">
+        <h2>How it works</h2>
+        <ul>
+          <li><strong>Embeddings in the browser.</strong> Each movie is turned into a vector by <code>all-MiniLM-L6-v2</code> running on Transformers.js (downloaded once, about 23 MB). No vector database needed.</li>
+          <li><strong>Retrieval.</strong> Your question is embedded the same way, and the closest movies by cosine similarity become the context.</li>
+          <li><strong>Conversation memory.</strong> Follow-ups like "is it scary?" are first rewritten into a standalone question, so retrieval still finds the right film.</li>
+          <li><strong>Generation.</strong> A free OpenRouter model answers using only that context, through AI Valley's serverless proxy.</li>
+        </ul>
+      </section>
+    </div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Market Pulse · AI Valley</title>
+    <meta name="description" content="Pick up to three stock tickers and get an AI-written report on their last week of prices." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="valley-bar">
+        <a href="/">← AI Valley</a>
+        <span id="account"></span>
+      </header>
+
+      <section class="app-hero">
+        <h1>Market Pulse</h1>
+        <p>
+          Add up to three tickers. Market Pulse pulls their last week of closing prices and has an AI analyst write a
+          short, opinionated report. For fun only, not financial advice.
+        </p>
+      </section>
+
+      <main class="card pulse">
+        <form id="add-form" class="add-form">
+          <label for="ticker" class="sr-only">Ticker symbol</label>
+          <input id="ticker" autocomplete="off" maxlength="6" placeholder="Ticker, e.g. AAPL" />
+          <button class="btn" type="submit">Add</button>
+        </form>
+        <div id="tickers" class="tickers"></div>
+        <p id="hint" class="hint">Try AAPL, NVDA or TSLA.</p>
+        <button id="report-btn" class="btn btn-primary" type="button" disabled>Generate report</button>
+        <div id="charts" class="charts"></div>
+        <article id="report" class="report" aria-live="polite"></article>
+        <div id="notice-slot"></div>
+      </main>
+
+      <section class="how">
+        <h2>How it works</h2>
+        <ul>
+          <li><strong>Keys stay on the server.</strong> A Netlify function fetches daily closes from Polygon.io with the site's free key and caches them for 15 minutes.</li>
+          <li><strong>AI analyst.</strong> The prices go to a free OpenRouter model with a few-shot style prompt, through AI Valley's proxy.</li>
+          <li><strong>Charts.</strong> The sparklines are hand-drawn SVG, with no chart library.</li>
+        </ul>
+      </section>
+    </div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

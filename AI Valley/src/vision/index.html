@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vision Lab · AI Valley</title>
+    <meta name="description" content="Detect objects in a photo or webcam frame in your browser, then ask a vision model about it." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="valley-bar">
+        <a href="/">← AI Valley</a>
+        <span id="account"></span>
+      </header>
+
+      <section class="app-hero">
+        <h1>Vision Lab</h1>
+        <p>
+          Pick a photo or snap one with your webcam. An object detector runs right in your browser and boxes what it
+          sees, then you can ask a vision model anything about the picture.
+        </p>
+      </section>
+
+      <main class="lab">
+        <section class="card stage-card">
+          <div class="source-row">
+            <label class="btn" for="file">Upload photo</label>
+            <input id="file" type="file" accept="image/*" hidden />
+            <button id="webcam" class="btn" type="button">Use webcam</button>
+            <button id="capture" class="btn btn-primary" type="button" hidden>Capture</button>
+            <button id="sample" class="btn" type="button">Sample photo</button>
+          </div>
+          <div id="stage" class="stage">
+            <img id="image" alt="Photo to analyse" />
+            <video id="video" playsinline muted hidden></video>
+            <div id="boxes" class="boxes"></div>
+          </div>
+          <div class="detect-row">
+            <button id="detect" class="btn btn-primary" type="button" disabled>Detect objects</button>
+            <span id="detect-status" class="hint" role="status">Loading the detector…</span>
+          </div>
+          <div id="objects" class="objects"></div>
+        </section>
+
+        <section class="card ask-card">
+          <h2>Ask about this image</h2>
+          <form id="ask-form" class="ask-form">
+            <label for="question" class="sr-only">Question about the image</label>
+            <input id="question" autocomplete="off" maxlength="500" placeholder="e.g. What's happening here? Is it safe to cross?" />
+            <button id="ask" class="btn btn-primary" type="submit">Ask</button>
+          </form>
+          <div class="quick">
+            <button type="button">Describe this image in detail.</button>
+            <button type="button">What objects might the detector have missed?</button>
+            <button type="button">Write a fun caption.</button>
+          </div>
+          <div id="answer" class="answer" aria-live="polite"></div>
+          <div id="notice-slot"></div>
+        </section>
+      </main>
+
+      <section class="how">
+        <h2>How it works</h2>
+        <ul>
+          <li><strong>On-device detection.</strong> <code>Xenova/yolos-tiny</code> runs on Transformers.js in your browser (WebGPU when available, otherwise WebAssembly). The photo is never uploaded for detection.</li>
+          <li><strong>Vision chat.</strong> For questions, the image is shrunk to 1024 px and sent with your question to a free multimodal model on OpenRouter through AI Valley's proxy.</li>
+        </ul>
+      </section>
+    </div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

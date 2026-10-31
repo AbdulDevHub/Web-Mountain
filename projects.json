@@ -350,15 +350,39 @@
     "image": "AI Valley/src/translator/Screenshot.png"
   },
   {
+    "name": "ReAct Agent",
+    "category": "ai",
+    "href": "AI Valley/apps/agent/index.html",
+    "image": "AI Valley/src/agent/Screenshot.png"
+  },
+  {
+    "name": "ReelRecs",
+    "category": "ai",
+    "href": "AI Valley/apps/movies/index.html",
+    "image": "AI Valley/src/movies/Screenshot.png"
+  },
+  {
+    "name": "Vision Lab",
+    "category": "ai",
+    "href": "AI Valley/apps/vision/index.html",
+    "image": "AI Valley/src/vision/Screenshot.png"
+  },
+  {
+    "name": "Market Pulse",
+    "category": "ai",
+    "href": "AI Valley/apps/stocks/index.html",
+    "image": "AI Valley/src/stocks/Screenshot.png"
+  },
+  {
+    "name": "Image Studio",
+    "category": "ai",
+    "href": "AI Valley/apps/images/index.html",
+    "image": "AI Valley/src/images/Screenshot.png"
+  },
+  {
     "name": "Face Emotion Detection",
     "category": "ai",
     "href": "AI Valley/Face-Detection/index.html",
     "image": "AI Valley/Face-Detection/images/Cover.png"
-  },
-  {
-    "name": "Vision AI App",
-    "category": "ai",
-    "href": "AI Valley/Vision AI App/index.html",
-    "image": "AI Valley/Vision AI App/Screenshot.png"
   }
 ]

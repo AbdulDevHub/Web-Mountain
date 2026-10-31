@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ReAct Agent · AI Valley</title>
+    <meta name="description" content="An AI agent that reasons, picks tools (weather, Wikipedia, time, math, units) and shows every step." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="valley-bar">
+        <a href="/">← AI Valley</a>
+        <span id="account"></span>
+      </header>
+
+      <section class="app-hero">
+        <h1>ReAct Agent</h1>
+        <p>
+          Ask anything that needs live facts. The agent thinks, decides which tools to call (weather, Wikipedia,
+          clock, calculator, unit converter), reads the results and answers. Every step is shown.
+        </p>
+      </section>
+
+      <main class="chat card">
+        <div id="log" class="chat-log" aria-live="polite"></div>
+        <div id="suggestions" class="suggestions">
+          <button type="button">What's the weather where I am?</button>
+          <button type="button">What time is it in Tokyo, and is it raining there?</button>
+          <button type="button">Who was Ada Lovelace, and how old would she be today?</button>
+          <button type="button">Convert 72°F to Celsius, then multiply it by 3.5</button>
+        </div>
+        <div id="notice-slot"></div>
+        <form id="form" class="chat-form">
+          <label for="input" class="sr-only">Message</label>
+          <input id="input" autocomplete="off" maxlength="1000" placeholder="Ask the agent something…" />
+          <button id="send" class="btn btn-primary" type="submit">Send</button>
+        </form>
+      </main>
+
+      <section class="how">
+        <h2>How it works</h2>
+        <ul>
+          <li><strong>ReAct loop.</strong> The model either calls tools or answers. Tool results go back into the conversation until it has enough to answer (up to 6 steps).</li>
+          <li><strong>Function calling.</strong> Tools are described with JSON Schema and run in your browser: Open-Meteo for weather, Wikipedia's API, <code>Intl</code> for time zones, and a hand-written expression parser (no <code>eval</code>).</li>
+          <li><strong>Free models.</strong> Calls go through AI Valley's serverless proxy to OpenRouter's free tool-calling models.</li>
+        </ul>
+      </section>
+    </div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

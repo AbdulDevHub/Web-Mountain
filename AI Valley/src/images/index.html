@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Studio · AI Valley</title>
+    <meta name="description" content="Generate images and movie posters from text, or remix and colorize your own photos, with free AI models." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="valley-bar">
+        <a href="/">← AI Valley</a>
+        <span id="account"></span>
+      </header>
+
+      <section class="app-hero">
+        <h1>Image Studio</h1>
+        <p>Turn words into pictures or movie posters, or remix a photo of your own into a new style, including colorizing old black-and-white shots.</p>
+      </section>
+
+      <main class="studio">
+        <section class="card controls">
+          <div class="tabs" role="tablist">
+            <button id="tab-generate" class="tab" role="tab" aria-selected="true" type="button">Generate</button>
+            <button id="tab-remix" class="tab" role="tab" aria-selected="false" type="button">Remix a photo</button>
+          </div>
+
+          <div id="panel-generate" class="panel">
+            <div class="mode-row">
+              <label><input type="radio" name="mode" value="prompt" checked /> Describe it</label>
+              <label><input type="radio" name="mode" value="poster" /> Movie poster</label>
+            </div>
+            <label class="field" id="prompt-field">
+              <span>Prompt</span>
+              <textarea id="prompt" rows="4" maxlength="800" placeholder="A cozy cabin in a snowy forest at dusk, warm light in the windows"></textarea>
+            </label>
+            <label class="field" id="title-field" hidden>
+              <span>Movie title</span>
+              <input id="title" maxlength="80" placeholder="e.g. The Last Lighthouse" />
+            </label>
+          </div>
+
+          <div id="panel-remix" class="panel" hidden>
+            <label class="field">
+              <span>Your photo</span>
+              <input id="remix-file" type="file" accept="image/*" />
+            </label>
+            <img id="remix-preview" class="remix-preview" alt="Photo to remix" hidden />
+            <p class="hint">A vision model describes your photo, then the image model repaints it in the style you pick.</p>
+          </div>
+
+          <div class="field">
+            <span>Style</span>
+            <div id="styles" class="chips"></div>
+          </div>
+          <div class="field">
+            <span>Shape</span>
+            <div id="aspects" class="chips">
+              <button type="button" data-aspect="square" aria-pressed="true">Square</button>
+              <button type="button" data-aspect="portrait" aria-pressed="false">Portrait</button>
+              <button type="button" data-aspect="landscape" aria-pressed="false">Landscape</button>
+            </div>
+          </div>
+          <button id="go" class="btn btn-primary go" type="button">Generate</button>
+          <p id="status" class="hint" role="status"></p>
+          <div id="notice-slot"></div>
+        </section>
+
+        <section class="card result">
+          <div id="canvas" class="canvas">
+            <p class="placeholder">Your image appears here.</p>
+          </div>
+          <p id="used-prompt" class="used-prompt"></p>
+          <a id="download" class="btn" download="image-studio.jpg" hidden>Download</a>
+        </section>
+      </main>
+
+      <section class="how">
+        <h2>How it works</h2>
+        <ul>
+          <li><strong>Free image model.</strong> Images come from the open Flux model on Pollinations, called through a Netlify function so any token stays on the server.</li>
+          <li><strong>Prompt building.</strong> Styles and the poster mode turn short inputs into detailed prompts (the poster mode is the old Film Fusion app).</li>
+          <li><strong>Remix and colorize.</strong> A free vision LLM writes a detailed description of your photo, including likely colors, and that description is repainted in the chosen style.</li>
+        </ul>
+      </section>
+    </div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

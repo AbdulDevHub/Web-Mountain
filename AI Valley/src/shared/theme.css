@@ -26,6 +26,11 @@
   box-sizing: border-box;
 }
 
+/* Component display rules (grid, inline-flex…) must not override the hidden attribute */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
