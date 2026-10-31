@@ -4,10 +4,11 @@
 // 3. When the proxy is out of free quota (or not set up), callers get SignInRequired
 //    and can offer "Sign in with OpenRouter" (OAuth PKCE, no key copy-pasting).
 
+// Keep in sync with DEFAULT_MODELS in netlify/functions/ai-chat.mts
 export const FREE_MODELS = [
   "openrouter/free",
   "google/gemma-4-31b-it:free",
-  "nvidia/nemotron-3.5-lightning:free",
+  "nvidia/nemotron-3.5-super-vl:free",
 ]
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -81,7 +82,9 @@ export async function chat(request: ChatRequest): Promise<ChatResult> {
   const userKey = getUserKey()
   // Signed-in visitors still default to free models so their credits aren't spent
   const body = JSON.stringify(
-    userKey ? { ...request, model: FREE_MODELS[0], models: FREE_MODELS } : request,
+    userKey
+      ? { ...request, model: FREE_MODELS[0], models: FREE_MODELS, reasoning: { effort: "low", exclude: true } }
+      : request,
   )
 
   const res = userKey
@@ -115,12 +118,17 @@ export async function chat(request: ChatRequest): Promise<ChatResult> {
   if (!userKey && [401, 404, 405, 501, 503].includes(res.status)) throw new SignInRequired("not-configured")
 
   const data = await res.json().catch(() => null)
-  if (!res.ok) {
-    const message = data?.error?.message ?? data?.error ?? `Request failed (${res.status})`
+  if (!data) throw new Error("The AI service sent an incomplete reply. Try again.")
+
+  // OpenRouter reports errors that happen mid-request inside a 200 response
+  const error = data.error ?? data.choices?.[0]?.error
+  if (!res.ok || error) {
+    if (Number(error?.code) === 429) throw new Error("The free models are busy right now. Wait a few seconds and try again.")
+    const message = error?.message ?? error ?? `Request failed (${res.status})`
     throw new Error(typeof message === "string" ? message : `Request failed (${res.status})`)
   }
 
-  const choice = data?.choices?.[0]
+  const choice = data.choices?.[0]
   if (!choice?.message) throw new Error("The model returned an empty response. Try again.")
   return { message: choice.message, model: data.model ?? "unknown", truncated: choice.finish_reason === "length" }
 }
