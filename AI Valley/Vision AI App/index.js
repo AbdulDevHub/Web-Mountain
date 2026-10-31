@@ -1,4 +1,7 @@
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.8.0'
+import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.8.0'
+
+// Load models straight from the Hugging Face CDN instead of probing /models first
+env.allowLocalModels = false
 
 // Reference the HTML elements that we will need
 const status = document.getElementById('status')
