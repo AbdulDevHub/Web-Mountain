@@ -4,7 +4,7 @@ import { env, pipeline, type ObjectDetectionPipeline } from "@huggingface/transf
 import sampleUrl from "./sample.jpeg"
 import { chat, SignInRequired } from "../shared/ai-client"
 import { hideSignInNotice, initAccess, showSignInNotice } from "../shared/access"
-import { $, el, errorMessage } from "../shared/dom"
+import { $, el, errorMessage, plainText } from "../shared/dom"
 
 env.allowLocalModels = false
 
@@ -197,7 +197,7 @@ async function ask(text: string) {
         },
       ],
     })
-    answer.textContent = message.content?.trim() || "The model didn't say anything. Try again."
+    answer.textContent = plainText(message.content ?? "") || "The model didn't say anything. Try again."
   } catch (err) {
     answer.textContent = ""
     if (err instanceof SignInRequired) showSignInNotice(noticeSlot, err.reason)

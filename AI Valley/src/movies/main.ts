@@ -5,7 +5,7 @@ import { env, pipeline, type FeatureExtractionPipeline } from "@huggingface/tran
 import moviesText from "./movies.txt?raw"
 import { chat, SignInRequired, type ChatMessage } from "../shared/ai-client"
 import { hideSignInNotice, initAccess, showSignInNotice } from "../shared/access"
-import { $, el, errorMessage, scrollToEnd } from "../shared/dom"
+import { $, el, errorMessage, plainText, scrollToEnd } from "../shared/dom"
 
 // Models come from the Hugging Face CDN and are cached by the browser after the first visit
 env.allowLocalModels = false
@@ -159,7 +159,7 @@ async function answer(question: string) {
       ],
     })
 
-    const reply = message.content?.trim() || "Sorry, I don't know that one."
+    const reply = plainText(message.content ?? "") || "Sorry, I don't know that one."
     history.push({ role: "user", content: question }, { role: "assistant", content: reply })
 
     const bubble = add(el("div", "msg msg-bot", reply))

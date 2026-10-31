@@ -2,7 +2,7 @@ import "../shared/theme.css"
 import "./style.css"
 import { chat, SignInRequired } from "../shared/ai-client"
 import { hideSignInNotice, initAccess, showSignInNotice } from "../shared/access"
-import { $, el, errorMessage } from "../shared/dom"
+import { $, el, errorMessage, plainText } from "../shared/dom"
 
 const MAX_TICKERS = 3
 const SVG_NS = "http://www.w3.org/2000/svg"
@@ -149,7 +149,7 @@ async function generate() {
         { role: "user", content: data },
       ],
     })
-    report.textContent = `${message.content?.trim() || "The analyst is speechless. Try again."}\n\nFor fun only, not financial advice.`
+    report.textContent = `${plainText(message.content ?? "") || "The analyst is speechless. Try again."}\n\nFor fun only, not financial advice.`
   } catch (err) {
     if (err instanceof SignInRequired) {
       report.textContent = ""

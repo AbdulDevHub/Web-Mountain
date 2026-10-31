@@ -3,7 +3,7 @@ import "../shared/chat.css"
 import "./style.css"
 import { chat, SignInRequired, type ChatMessage } from "../shared/ai-client"
 import { hideSignInNotice, initAccess, showSignInNotice } from "../shared/access"
-import { $, el, errorMessage, scrollToEnd } from "../shared/dom"
+import { $, el, errorMessage, plainText, scrollToEnd } from "../shared/dom"
 import { runTool, TOOL_DEFS } from "./tools"
 
 const MAX_STEPS = 6
@@ -95,7 +95,7 @@ async function runAgent(question: string) {
       continue
     }
 
-    const answer = content?.trim() || "(The model returned an empty answer.)"
+    const answer = plainText(content ?? "") || "(The model returned an empty answer.)"
     history.push({ role: "assistant", content: answer })
     const bubble = add(el("div", "msg msg-bot", answer))
     bubble.append(el("div", "msg-meta", `${step} tool step${step === 1 ? "" : "s"} · ${reply.model}`))
