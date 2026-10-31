@@ -182,7 +182,10 @@ const FUNCS: Record<string, (x: number) => number> = {
 const CONSTS: Record<string, number> = { pi: Math.PI, e: Math.E }
 
 export function evaluate(expression: string): number {
-  const tokens = expression.toLowerCase().match(/\d*\.?\d+(?:e[+-]?\d+)?|[a-z]+|[-+*/%^()]/g) ?? []
+  const source = expression.toLowerCase()
+  const tokens = source.match(/\d*\.?\d+(?:e[+-]?\d+)?|[a-z]+|[-+*/%^()]/g) ?? []
+  // match() skips characters it doesn't recognise; refuse instead of silently ignoring them
+  if (tokens.join("") !== source.replace(/\s+/g, "")) throw new Error("The expression contains unsupported characters")
   let i = 0
   const peek = () => tokens[i]
   const next = () => tokens[i++]
@@ -259,6 +262,7 @@ function normalizeUnit(unit: unknown): string {
 
 function convertUnits({ value, from, to }: Args): object {
   const v = Number(value)
+  if (!Number.isFinite(v)) throw new Error("value must be a number")
   const f = normalizeUnit(from)
   const t = normalizeUnit(to)
   const temps = ["c", "f", "k"]

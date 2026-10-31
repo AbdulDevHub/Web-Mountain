@@ -94,8 +94,15 @@ aspectsBox.addEventListener("click", (e) => {
 
 remixFile.addEventListener("change", () => {
   const file = remixFile.files?.[0]
+  remixDataUrl = null // never remix a previously chosen photo by mistake
+  remixPreview.hidden = true
+  statusLabel.textContent = ""
   if (!file) return
   const img = new Image()
+  img.onerror = () => {
+    URL.revokeObjectURL(img.src)
+    statusLabel.textContent = "Couldn't read that image. Try a JPG, PNG or WebP."
+  }
   img.onload = () => {
     // Shrink before sending to the vision model
     const scale = Math.min(1, 1024 / Math.max(img.width, img.height))
@@ -126,6 +133,8 @@ function textPrompt(): string {
   if (!prompt) throw new Error("Describe what you want to see.")
   return styleText() ? `${prompt}, ${styleText()}` : prompt
 }
+
+const MAX_PROMPT = 1500 // same cap as the image-gen function
 
 async function remixPrompt(): Promise<string> {
   if (!remixDataUrl) throw new Error("Choose a photo to remix first.")
@@ -163,7 +172,8 @@ const SIZES: Record<string, [number, number]> = { square: [1024, 1024], portrait
 // Server path first (uses the site's Pollinations token if one is set). If that
 // fails, e.g. the anonymous quota of Netlify's shared IPs is used up, the browser
 // asks Pollinations directly, which counts against the visitor's own anonymous quota.
-async function generateImage(prompt: string): Promise<string> {
+async function generateImage(fullPrompt: string): Promise<string> {
+  const prompt = fullPrompt.slice(0, MAX_PROMPT)
   try {
     const res = await fetch("/api/image-gen", {
       method: "POST",
@@ -171,8 +181,15 @@ async function generateImage(prompt: string): Promise<string> {
       body: JSON.stringify({ prompt, aspect }),
     })
     if (res.ok) return URL.createObjectURL(await res.blob())
-  } catch {
-    // Network error: try the direct route
+    // Only quota/availability problems justify the direct route; anything else is a real error
+    const fallback = [402, 404, 405, 429, 501].includes(res.status) || res.status >= 500
+    if (!fallback) {
+      const data = await res.json().catch(() => null)
+      throw new Error(data?.error ?? `Image generation failed (${res.status})`)
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message && !(err instanceof TypeError)) throw err
+    // TypeError = network error: try the direct route
   }
   const [width, height] = SIZES[aspect]
   const params = new URLSearchParams({

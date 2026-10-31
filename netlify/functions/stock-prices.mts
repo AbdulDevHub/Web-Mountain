@@ -5,10 +5,14 @@
 const LOOKBACK_DAYS = 10 // calendar days, enough for ~5 trading days
 const TICKER = /^[A-Z][A-Z.]{0,5}$/
 
+// Only successful price lookups are cached; errors must not outlive their cause
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=900" },
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": status === 200 ? "public, max-age=900" : "no-store",
+    },
   })
 
 const isoDate = (d: Date) => d.toISOString().slice(0, 10)
@@ -37,7 +41,12 @@ export default async (req: Request) => {
   if (res.status === 429) return json(429, { error: "Stock data rate limit hit (free tier: 5 per minute). Wait a minute." })
   if (!res.ok) return json(502, { error: `Stock data request failed (${res.status})` })
 
-  const data = (await res.json()) as { results?: { t: number; c: number }[] }
+  let data: { results?: { t: number; c: number }[] }
+  try {
+    data = await res.json()
+  } catch {
+    return json(502, { error: "The stock data service sent an unreadable reply. Try again." })
+  }
   const closes = (data.results ?? []).map((r) => ({ date: isoDate(new Date(r.t)), close: r.c }))
   if (closes.length === 0) return json(404, { error: `No recent prices found for ${ticker}` })
   return json(200, { ticker, closes })
