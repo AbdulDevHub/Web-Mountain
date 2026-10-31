@@ -1,0 +1,102 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+.banner {
+    position: relative;
+    width: 100vw;
+    background-image: url('assets/worldmap.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.infront {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    width: 80%;
+}
+
+.infront img {
+    height: 100px; /* adjust as needed */
+}
+
+.infront div {
+    margin-left: 30px;
+}
+
+.TranlateInputs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 4px solid black;
+    border-radius: 10px;
+    width: 90%;
+    margin: auto;
+    margin-top: 20px; /* adjust as needed */
+}
+
+.TranlateInputs > div {
+    margin: 10px 0; /* adjust as needed */
+}
+
+.UserTranslation {
+    display: none;
+}
+
+h1 {
+    color: #04AA6D;
+    margin-bottom: 5px;
+}
+
+h2 {
+    color: darkblue;
+    text-align: center;
+    margin: 20px 0;
+}
+
+p {
+    color: white;
+}
+
+textarea {
+    margin: 0px;
+    background: #d9d7d6;
+    border-radius: 10px;
+    font-size: 20px;
+    resize: none; /* Disables the ability to resize the textarea */
+    padding-top: 10px; /* Adds space at the top of the text */
+    padding-left: 10px; /* Adds space to the left of the text */
+    font-weight: bold;
+}
+
+button {
+  background-color: darkblue;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  font-size: 16px;
+  width: 90%;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+.flag {
+    height: 0.85em;
+    border: 1px black solid;
+}
+
+label {
+    font-weight: bold;
+    font-size: 20px;
+}
