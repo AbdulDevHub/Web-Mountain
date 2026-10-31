@@ -145,6 +145,7 @@ async function detectLanguage(text: string): Promise<string | null> {
 // ---------- Translation engines ----------
 
 const translators = new Map<string, Promise<TranslatorInstance>>()
+let packNeedsClick: string | null = null // e.g. "English → French", set when a download couldn't start
 
 async function translateOnDevice(text: string, source: string, target: string): Promise<string | null> {
   if (!hasOnDevice) return null
@@ -153,6 +154,12 @@ async function translateOnDevice(text: string, source: string, target: string): 
     if (!translators.has(pair)) {
       const availability = await Translator.availability({ sourceLanguage: source, targetLanguage: target })
       if (availability === "unavailable") return null
+      // Chrome only starts a pack download within a few seconds of a click. If the
+      // detector download used that window up, use the cloud now and offer a retry.
+      if (availability === "downloadable" && navigator.userActivation && !navigator.userActivation.isActive) {
+        packNeedsClick = `${nameOf(source)} → ${nameOf(target)}`
+        return null
+      }
       translators.set(
         pair,
         Translator.create({
@@ -233,16 +240,23 @@ async function translate() {
       return
     }
 
+    statusLabel.textContent = "Translating…" // replaces any finished download progress
+    packNeedsClick = null
     const local = source ? await translateOnDevice(text, source, target) : null
     if (local !== null) {
       setOutput(local)
       setEngine("local")
     } else {
+      statusLabel.textContent = "Translating with free cloud models…"
       const cloud = await translateInCloud(text, source, target)
       setOutput(cloud.text)
       setEngine("cloud")
       if (cloud.truncated) {
         statusLabel.textContent = "The translation was cut off. Try translating shorter parts."
+        return
+      }
+      if (packNeedsClick) {
+        statusLabel.textContent = `Click Translate again to download the ${packNeedsClick} pack and translate on-device.`
         return
       }
     }

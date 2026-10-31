@@ -9,10 +9,12 @@
 //   503 = no key configured
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+// Fast non-reasoning models first; openrouter/free (picks any free model, some
+// of them slow reasoning ones) is the catch-all
 const DEFAULT_MODELS = [
-  "openrouter/free",
-  "google/gemma-4-31b-it:free",
   "nvidia/nemotron-3.5-lightning:free",
+  "google/gemma-4-31b-it:free",
+  "openrouter/free",
 ]
 
 const MAX_MESSAGES = 40
@@ -21,7 +23,8 @@ const MAX_IMAGES = 2
 const MAX_IMAGE_URL_CHARS = 1_500_000 // one downscaled data: URL (Vision Lab)
 const MAX_TOOLS_CHARS = 12_000
 const MAX_TOKENS = 2048
-const UPSTREAM_TIMEOUT_MS = 25_000
+const UPSTREAM_TIMEOUT_MS = 24_000 // total budget, under Netlify's function time limit
+const RETRY_MIN_REMAINING_MS = 8_000
 
 const ROLES = new Set(["system", "user", "assistant", "tool"])
 
@@ -100,42 +103,96 @@ export default async (req: Request) => {
   const temperature =
     typeof input.temperature === "number" ? Math.min(Math.max(input.temperature, 0), 2) : undefined
 
-  let upstream: Response
+  const started = Date.now()
+  let lastError = "The AI service didn't respond in time. Try again."
+
+  // A free model can be slow, fail mid-request or return nothing. If there's
+  // time left, retry once with the model list rotated so another model goes first.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const remaining = UPSTREAM_TIMEOUT_MS - (Date.now() - started)
+    if (attempt > 0 && remaining < RETRY_MIN_REMAINING_MS) break
+    const order = [...models.slice(attempt), ...models.slice(0, attempt)]
+
+    let status: number
+    let text: string
+    try {
+      const upstream = await fetch(OPENROUTER_URL, {
+        method: "POST",
+        signal: AbortSignal.timeout(remaining),
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": new URL(req.url).origin,
+          "X-Title": "AI Valley",
+        },
+        body: JSON.stringify({
+          model: order[0],
+          models: order,
+          messages: input.messages,
+          ...(tools && { tools }),
+          ...(temperature !== undefined && { temperature }),
+          max_tokens: maxTokens,
+          // Keep reasoning models quick, and don't send their reasoning to the browser
+          reasoning: { effort: "low", exclude: true },
+        }),
+      })
+      status = upstream.status
+      // Buffer the whole reply: OpenRouter sends keep-alive whitespace first, so a
+      // streamed pass-through could reach the browser cut off if time runs out
+      text = await upstream.text()
+    } catch {
+      lastError = "The AI service didn't respond in time. Try again."
+      continue
+    }
+
+    const outcome = classify(status, text)
+    if (outcome.kind === "ok") return new Response(outcome.body, { headers: { "Content-Type": "application/json" } })
+    if (outcome.kind === "final") return json(outcome.status, outcome.body)
+    lastError = outcome.message
+  }
+
+  return json(502, { error: lastError })
+}
+
+type Outcome =
+  | { kind: "ok"; body: string }
+  | { kind: "final"; status: number; body: unknown } // pass to the client as-is
+  | { kind: "retry"; message: string }
+
+function quotaOrRateLimit(code: number, text: string): Outcome {
+  // OpenRouter uses 429 for both per-minute and per-day free limits; only the
+  // daily one (or a 402 credit problem) should push visitors to sign in
+  const daily = code === 402 || /per-day|per day|daily/i.test(text)
+  return daily
+    ? { kind: "final", status: 402, body: { error: "quota" } }
+    : { kind: "final", status: 429, body: { error: "rate_limited" } }
+}
+
+function classify(status: number, text: string): Outcome {
+  if (status === 429 || status === 402) return quotaOrRateLimit(status, text)
+
+  let data: any
   try {
-    upstream = await fetch(OPENROUTER_URL, {
-      method: "POST",
-      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": new URL(req.url).origin,
-        "X-Title": "AI Valley",
-      },
-      body: JSON.stringify({
-        model: models[0],
-        models,
-        messages: input.messages,
-        ...(tools && { tools }),
-        ...(temperature !== undefined && { temperature }),
-        max_tokens: maxTokens,
-      }),
-    })
+    data = JSON.parse(text)
   } catch {
-    return json(502, { error: "The AI service didn't respond in time. Try again." })
+    return { kind: "retry", message: "The AI service sent an incomplete reply. Try again." }
   }
 
-  if (upstream.status === 429 || upstream.status === 402) {
-    // OpenRouter uses 429 for both per-minute and per-day free limits; only the
-    // daily one (or a 402 credit problem) should push visitors to sign in
-    const text = await upstream.text()
-    const daily = upstream.status === 402 || /per-day|per day|daily/i.test(text)
-    return daily ? json(402, { error: "quota" }) : json(429, { error: "rate_limited" })
+  // Errors that happen after OpenRouter has started replying arrive with status 200
+  const error = data?.error ?? data?.choices?.[0]?.error
+  if (error) {
+    const code = Number(error.code)
+    if (code === 429 || code === 402) return quotaOrRateLimit(code, JSON.stringify(error))
+    if (status >= 400 && status < 500) return { kind: "final", status, body: data }
+    return { kind: "retry", message: typeof error.message === "string" ? error.message : "The AI service failed. Try again." }
   }
+  if (status >= 400) return { kind: "final", status, body: data }
 
-  return new Response(upstream.body, {
-    status: upstream.status,
-    headers: { "Content-Type": upstream.headers.get("content-type") ?? "application/json" },
-  })
+  const message = data?.choices?.[0]?.message
+  if (!message?.tool_calls?.length && !message?.content?.trim()) {
+    return { kind: "retry", message: "The model returned an empty response. Try again." }
+  }
+  return { kind: "ok", body: text.trim() }
 }
 
 export const config = {
