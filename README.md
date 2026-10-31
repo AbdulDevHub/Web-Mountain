@@ -84,11 +84,15 @@ Browser extensions that enhance functionality and user experience.
 
 ### AI Valley
 
-AI web apps: LLM chat, RAG, agents, image generation and in-browser computer vision. Merged in with full history from the former AI-Mountain repo. Being rebuilt as 7 apps that run free (in-browser models, plus a serverless OpenRouter proxy with "Sign in with OpenRouter" as the fallback). See the [AI Valley README](./AI%20Valley) for status.
+Seven AI web apps that anyone can try for free: in-browser models where possible, plus a serverless OpenRouter proxy with "Sign in with OpenRouter" as the fallback. Rebuilt from the former AI-Mountain repo (merged in with full history). See the [AI Valley README](./AI%20Valley).
 
 - **[Lingua](./AI%20Valley/src/translator)** - Translator for 20 languages: on-device with Chrome's built-in Translator API, free cloud models elsewhere, and read-aloud
+- **[ReAct Agent](./AI%20Valley/src/agent)** - Tool-calling agent (weather, Wikipedia, time zones, math, units) that shows every reasoning step
+- **[ReelRecs](./AI%20Valley/src/movies)** - RAG movie chatbot with in-browser embeddings and conversation memory
+- **[Vision Lab](./AI%20Valley/src/vision)** - In-browser object detection on photos or webcam frames, plus Q&A with a vision model
+- **[Market Pulse](./AI%20Valley/src/stocks)** - AI-written stock reports with SVG sparklines; API keys stay in a Netlify function
+- **[Image Studio](./AI%20Valley/src/images)** - Text-to-image, movie posters, and photo remix/colorize with free models
 - **[Face Emotion Detection](./AI%20Valley/Face-Detection)** - Real-time face, landmark and emotion detection from your webcam with face-api.js, fully in the browser
-- **[Vision AI App](./AI%20Valley/Vision%20AI%20App)** - In-browser object detection with Transformers.js, no API key needed
 
 ## Setup
 

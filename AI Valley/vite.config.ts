@@ -65,9 +65,15 @@ export default defineConfig(({ mode }) => {
       outDir: resolve(import.meta.dirname, "apps"),
       emptyOutDir: true,
       rollupOptions: { input: pages },
+      chunkSizeWarningLimit: 600, // Transformers.js runtime (~540 kB), only loaded by ReelRecs and Vision Lab
     },
     server: {
       fs: { allow: [import.meta.dirname, functionsDir] },
     },
+    // Transformers.js (ReelRecs, Vision Lab) ships its own WASM workers; keep Vite's
+    // pre-bundler away from it and make sure only one copy ends up in the bundle
+    optimizeDeps: { exclude: ["@huggingface/transformers"] },
+    resolve: { dedupe: ["@huggingface/transformers"] },
+    worker: { format: "es" as const },
   }
 })

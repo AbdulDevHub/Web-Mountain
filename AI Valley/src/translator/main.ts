@@ -30,7 +30,7 @@ const AUTO = "auto"
 const STORAGE_KEY = "lingua:languages"
 const MIN_DETECT_CONFIDENCE = 0.5
 const DETECT_TIMEOUT_MS = 10_000
-const PACK_DOWNLOAD_TIMEOUT_MS = 90_000
+const PACK_DOWNLOAD_TIMEOUT_MS = 300_000 // background download, never blocks a translation
 const TRANSLATE_TIMEOUT_MS = 30_000
 
 /** Rejects if `promise` takes longer than `ms`, so a stuck model download can't freeze the UI */
@@ -144,41 +144,57 @@ async function detectLanguage(text: string): Promise<string | null> {
 
 // ---------- Translation engines ----------
 
-const translators = new Map<string, Promise<TranslatorInstance>>()
-let packNeedsClick: string | null = null // e.g. "English → French", set when a download couldn't start
+const readyTranslators = new Map<string, TranslatorInstance>()
+const downloadingPairs = new Set<string>()
+let packNote: string | null = null // shown after a cloud translation, e.g. "pack downloading"
 
+// Returns null whenever on-device can't answer right now, so the caller uses the
+// cloud. A language pack that still needs downloading never blocks a translation:
+// it downloads in the background and the next translation of that pair is local.
 async function translateOnDevice(text: string, source: string, target: string): Promise<string | null> {
   if (!hasOnDevice) return null
   const pair = `${source}>${target}`
+  const label = `${nameOf(source)} → ${nameOf(target)}`
   try {
-    if (!translators.has(pair)) {
-      const availability = await Translator.availability({ sourceLanguage: source, targetLanguage: target })
-      if (availability === "unavailable") return null
-      // Chrome only starts a pack download within a few seconds of a click. If the
-      // detector download used that window up, use the cloud now and offer a retry.
-      if (availability === "downloadable" && navigator.userActivation && !navigator.userActivation.isActive) {
-        packNeedsClick = `${nameOf(source)} → ${nameOf(target)}`
+    if (!readyTranslators.has(pair)) {
+      if (downloadingPairs.has(pair)) {
+        packNote = `The ${label} pack is still downloading; this one used the cloud.`
         return null
       }
-      translators.set(
-        pair,
-        Translator.create({
-          sourceLanguage: source,
-          targetLanguage: target,
-          signal: AbortSignal.timeout(PACK_DOWNLOAD_TIMEOUT_MS),
-          monitor: (m) =>
-            m.addEventListener("downloadprogress", (e) => {
-              statusLabel.textContent = `Downloading ${nameOf(source)} → ${nameOf(target)} pack… ${Math.round(e.loaded * 100)}%`
-            }),
-        }),
+      const availability = await withTimeout(
+        Translator.availability({ sourceLanguage: source, targetLanguage: target }),
+        DETECT_TIMEOUT_MS,
       )
+      if (availability === "unavailable") return null
+      const needsDownload = availability !== "available"
+      // Chrome only starts a pack download within a few seconds of a click
+      if (needsDownload && navigator.userActivation && !navigator.userActivation.isActive) {
+        packNote = `Click Translate again to download the ${label} pack for on-device translation.`
+        return null
+      }
+      const creating = Translator.create({
+        sourceLanguage: source,
+        targetLanguage: target,
+        signal: AbortSignal.timeout(PACK_DOWNLOAD_TIMEOUT_MS),
+      })
+      if (needsDownload) {
+        downloadingPairs.add(pair)
+        packNote = `Downloading the ${label} pack in the background, so next time runs on-device.`
+        creating
+          .then((t) => {
+            readyTranslators.set(pair, t)
+            if (!busy) statusLabel.textContent = `${label} pack ready: translations now run on-device.`
+          })
+          .catch(() => {})
+          .finally(() => downloadingPairs.delete(pair))
+        return null
+      }
+      readyTranslators.set(pair, await withTimeout(creating, DETECT_TIMEOUT_MS))
     }
-    const translator = await translators.get(pair)!
-    return await withTimeout(translator.translate(text), TRANSLATE_TIMEOUT_MS)
+    return await withTimeout(readyTranslators.get(pair)!.translate(text), TRANSLATE_TIMEOUT_MS)
   } catch {
-    // Download failed/timed out, pair unsupported, or the click's user activation
-    // expired before a download could start: forget it and use the cloud instead
-    translators.delete(pair)
+    // Pair unsupported, creation failed or translate timed out: use the cloud
+    readyTranslators.delete(pair)
     return null
   }
 }
@@ -248,7 +264,7 @@ async function translate() {
     }
 
     statusLabel.textContent = "Translating…" // replaces any finished download progress
-    packNeedsClick = null
+    packNote = null
     const local = source ? await translateOnDevice(text, source, target) : null
     if (local !== null) {
       setOutput(local)
@@ -262,8 +278,8 @@ async function translate() {
         statusLabel.textContent = "The translation was cut off. Try translating shorter parts."
         return
       }
-      if (packNeedsClick) {
-        statusLabel.textContent = `Click Translate again to download the ${packNeedsClick} pack and translate on-device.`
+      if (packNote) {
+        statusLabel.textContent = packNote
         return
       }
     }
