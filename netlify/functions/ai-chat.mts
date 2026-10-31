@@ -24,6 +24,7 @@ const MAX_IMAGE_URL_CHARS = 1_500_000 // one downscaled data: URL (Vision Lab)
 const MAX_TOOLS_CHARS = 12_000
 const MAX_TOKENS = 2048
 const UPSTREAM_TIMEOUT_MS = 24_000 // total budget, under Netlify's function time limit
+const FIRST_ATTEMPT_TIMEOUT_MS = 11_000 // a slow free model gets dropped, leaving time to retry
 const RETRY_MIN_REMAINING_MS = 8_000
 
 const ROLES = new Set(["system", "user", "assistant", "tool"])
@@ -118,7 +119,7 @@ export default async (req: Request) => {
     try {
       const upstream = await fetch(OPENROUTER_URL, {
         method: "POST",
-        signal: AbortSignal.timeout(remaining),
+        signal: AbortSignal.timeout(attempt === 0 ? Math.min(remaining, FIRST_ATTEMPT_TIMEOUT_MS) : remaining),
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
