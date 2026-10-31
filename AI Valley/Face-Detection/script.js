@@ -6,10 +6,10 @@ const video = document.getElementById("video")
  * @return {void} This function does not return a value.
  */
 Promise.all([
-  faceapi.nets.tinyFaceDetector.loadFromUri("/models"),
-  faceapi.nets.faceLandmark68Net.loadFromUri("/models"),
-  faceapi.nets.faceRecognitionNet.loadFromUri("/models"),
-  faceapi.nets.faceExpressionNet.loadFromUri("/models"),
+  faceapi.nets.tinyFaceDetector.loadFromUri("models"),
+  faceapi.nets.faceLandmark68Net.loadFromUri("models"),
+  faceapi.nets.faceRecognitionNet.loadFromUri("models"),
+  faceapi.nets.faceExpressionNet.loadFromUri("models"),
 ]).then(startVideo)
 
 /**
@@ -18,11 +18,10 @@ Promise.all([
  * @return {void} This function does not return a value.
  */
 function startVideo() {
-  navigator.getUserMedia(
-    { video: {} },
-    (stream) => (video.srcObject = stream),
-    (err) => console.error(err)
-  )
+  navigator.mediaDevices
+    .getUserMedia({ video: {} })
+    .then((stream) => (video.srcObject = stream))
+    .catch((err) => console.error(err))
 }
 
 /**

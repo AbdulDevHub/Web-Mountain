@@ -342,5 +342,17 @@
     "category": "extensions",
     "href": "https://github.com/AbdulDevHub/Web-Mountain/tree/main/Chrome%20Extensions/Gallery%20Bookmark%20Viewer",
     "image": "Chrome Extensions/Gallery Bookmark Viewer/images/Screenshot%201.png"
+  },
+  {
+    "name": "Face Emotion Detection",
+    "category": "ai",
+    "href": "AI Valley/Face-Detection/index.html",
+    "image": "AI Valley/Face-Detection/images/Cover.png"
+  },
+  {
+    "name": "Vision AI App",
+    "category": "ai",
+    "href": "AI Valley/Vision AI App/index.html",
+    "image": "AI Valley/Vision AI App/Screenshot.png"
   }
 ]
