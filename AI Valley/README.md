@@ -2,48 +2,58 @@
 
 <img src="./Screenshot.jpg" alt="AI Valley projects" width="1000">
 
-AI web apps covering LLM chat, retrieval-augmented generation, agents, image generation, and in-browser computer vision. Most started from Scrimba's AI Engineer path and are being reworked so anyone can try them on the live site without an API key.
+AI web apps covering LLM chat, retrieval-augmented generation, agents, image generation, and in-browser computer vision. Most started from Scrimba's AI Engineer path and are being rebuilt as a suite of 7 apps that anyone can try on the [live site](https://modern-web-mountain.netlify.app/) without an API key.
 
 This folder used to be the standalone `AI-Mountain` repo. Its full commit history (from January 2024) was merged in here.
 
 ## Try it now (no key needed)
 
-| Project | What it does | Stack |
+| App | What it does | Stack |
 | --- | --- | --- |
+| [Lingua](./src/translator) | Translates between 20 languages, on-device in Chrome or with free cloud models, and reads results aloud | Chrome Translator + Language Detector APIs, OpenRouter free models, Web Speech API |
 | [Face-Detection](./Face-Detection) | Real-time face, landmark and emotion detection from your webcam | face-api.js (TensorFlow.js) |
 | [Vision AI App](./Vision%20AI%20App) | Object detection on an image, running fully in the browser | Transformers.js (`Xenova/yolos-tiny`) |
 
-## Being upgraded
+## How free AI access works
 
-These currently call OpenAI, Hugging Face or Supabase straight from the browser and need keys you don't have. The plan:
+- **In-browser first.** Anything small enough runs on the visitor's device (Chrome's built-in AI, Transformers.js, face-api.js).
+- **Free shared proxy.** LLM calls go to [`netlify/functions/ai-chat.mts`](../netlify/functions/ai-chat.mts), which forwards them to OpenRouter's free models with the site's key. The key never reaches the browser. The model list is fixed on the server, inputs are size-capped, and Netlify rate-limits each IP.
+- **Sign in with OpenRouter.** When the shared free quota runs out, apps offer OpenRouter's OAuth (PKCE) sign-in, and calls then run on the visitor's own account (still on free models). The key is kept in that browser's `localStorage` until "Sign out". Setting a credit limit on it in OpenRouter's settings is a good idea. See [`src/shared/ai-client.ts`](./src/shared/ai-client.ts).
 
-- Models small enough to run in the browser (translation, speech, colorizing) move to Transformers.js.
-- LLM apps go through a free shared proxy, falling back to "Sign in with OpenRouter" once the daily cap is hit.
+## Being rebuilt
 
-| Project | What it does | Stack | Needs |
-| --- | --- | --- | --- |
-| [AI Stock App](./AI%20Stock%20App) | GPT-written stock trend report from recent prices | OpenAI, Polygon.io | OpenAI + Polygon keys |
-| [Dodgy Dave Stocks (Cloudflare)](./Dodgy%20Dave%20Stocks%20(Cloudflare)) | Same app with keys hidden behind Cloudflare Workers | OpenAI, Cloudflare Workers | Broken (course Workers offline) |
-| [AI Translator](./AI%20Translator) | Translates text into French, Spanish or Japanese | OpenAI | OpenAI key |
-| [Colorize Image AI App](./Colorize%20Image%20AI%20App) | Colorizes black-and-white photos | Hugging Face Inference | HF token |
-| [Text To Speech](./Text%20To%20Speech) | Turns text into speech | Hugging Face Inference | HF token |
-| [ReAct AI Agent With Chat UI](./ReAct%20AI%20Agent%20With%20Chat%20UI) | Agent that picks and calls tools (location, weather) on its own | OpenAI function calling | OpenAI key |
-| [Movie Focus Chatbot](./Movie%20Focus%20Chatbot) | Movie Q&A over a vector store | OpenAI embeddings, Supabase | OpenAI + Supabase |
-| [ReelRecs](./ReelRecs) | Movie recommendations with embeddings | OpenAI embeddings, Supabase | OpenAI + Supabase |
-| [Reel Recs (Assistants API)](./Reel%20Recs%20(Open%20AI%20Assistant%20API)) | Movie recommendations from a file with file search | OpenAI Assistants API | OpenAI key |
-| [Scrimba Chatbot](./Scrimba%20Chatbot) | RAG chatbot with conversation memory | LangChain, Supabase | OpenAI + Supabase |
-| [AI Art Generator](./AI%20Art%20Generator) | Generates art from a prompt | DALL·E | OpenAI key |
-| [Film Fusion](./Film%20Fusion) | Movie poster from a title and art style | DALL·E 3 | OpenAI key |
-| [DALL·E Image Editor](./Dalle%20Image%20Editor) | Repaints a masked area of an image | DALL·E edits | OpenAI key |
-| [Image Variations](./Image%20Variations) | Variations of an uploaded image | DALL·E variations | OpenAI key |
-| [Vision AI](./Vision%20AI) | Compares two images with GPT-4 Vision | OpenAI vision | OpenAI key |
+| Planned app | Built from (original folders) |
+| --- | --- |
+| ReelRecs: movie RAG chatbot | [Movie Focus Chatbot](./Movie%20Focus%20Chatbot), [ReelRecs](./ReelRecs), [Reel Recs (Assistants API)](./Reel%20Recs%20(Open%20AI%20Assistant%20API)), [Scrimba Chatbot](./Scrimba%20Chatbot) |
+| Stock report app | [AI Stock App](./AI%20Stock%20App), [Dodgy Dave Stocks (Cloudflare)](./Dodgy%20Dave%20Stocks%20(Cloudflare)) |
+| Image Studio | [AI Art Generator](./AI%20Art%20Generator), [Film Fusion](./Film%20Fusion), [DALL·E Image Editor](./Dalle%20Image%20Editor), [Image Variations](./Image%20Variations), [Colorize Image AI App](./Colorize%20Image%20AI%20App) |
+| Vision Lab | [Vision AI App](./Vision%20AI%20App), [Vision AI](./Vision%20AI) |
+| ReAct Agent with visible reasoning | [ReAct AI Agent With Chat UI](./ReAct%20AI%20Agent%20With%20Chat%20UI) |
+
+The originals still call OpenAI, Hugging Face or Supabase straight from the browser with keys that aren't included, so they don't run as-is.
+
+## Course originals
+
+Folders get removed once their replacement ships. Everything stays in git history:
+
+- [Snapshot of all 18 originals](https://github.com/AbdulDevHub/Web-Mountain/tree/72f5b9ef51b1b83fd1eaa8ef20a93f51cdc9c879/AI%20Valley), taken right after the merge
+- Replaced by Lingua: `AI Translator` (the "PollyGlot" solo project) and `Text To Speech`
 
 ## Run locally
 
-The two keyless apps are plain static pages. Serve the folder and open them:
+The rebuilt apps are one multi-page Vite + TypeScript project:
 
 ```bash
-npx serve "AI Valley/Face-Detection"
+cd "AI Valley"
+npm install
+npm run dev        # http://localhost:5173/translator/
+npm run build      # type-check + build into apps/
 ```
 
-The key-based apps read `process.env.*`, which the Scrimba environment used to fill in, so they won't run locally as-is. They'll be rewired to the shared proxy as they're upgraded.
+`npm run dev` also serves the Netlify functions at `/api/*`. To test the free proxy locally, put a free [OpenRouter key](https://openrouter.ai/keys) in `AI Valley/.env.local`:
+
+```bash
+OPENROUTER_API_KEY=sk-or-v1-...
+```
+
+Without it, the apps fall back to "Sign in with OpenRouter", which works on localhost too.

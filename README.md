@@ -84,8 +84,9 @@ Browser extensions that enhance functionality and user experience.
 
 ### AI Valley
 
-AI web apps: LLM chat, RAG, agents, image generation and in-browser computer vision. Merged in with full history from the former AI-Mountain repo. See the [AI Valley README](./AI%20Valley) for all 18 projects and their status.
+AI web apps: LLM chat, RAG, agents, image generation and in-browser computer vision. Merged in with full history from the former AI-Mountain repo. Being rebuilt as 7 apps that run free (in-browser models, plus a serverless OpenRouter proxy with "Sign in with OpenRouter" as the fallback). See the [AI Valley README](./AI%20Valley) for status.
 
+- **[Lingua](./AI%20Valley/src/translator)** - Translator for 20 languages: on-device with Chrome's built-in Translator API, free cloud models elsewhere, and read-aloud
 - **[Face Emotion Detection](./AI%20Valley/Face-Detection)** - Real-time face, landmark and emotion detection from your webcam with face-api.js, fully in the browser
 - **[Vision AI App](./AI%20Valley/Vision%20AI%20App)** - In-browser object detection with Transformers.js, no API key needed
 

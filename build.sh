@@ -19,4 +19,10 @@ pnpm i
 pnpm run build
 cd ../..
 
+echo "Building AI Valley..."
+cd "AI Valley"
+npm ci
+npm run build
+cd ..
+
 echo "All builds finished successfully!"
